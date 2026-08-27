@@ -1,0 +1,23 @@
+STAYUX-STE-LINTER — Trademark and Copyright Notice
+==================================================
+
+This project is UNOFFICIAL. It is not affiliated with, endorsed by, or
+sponsored by ASD (the AeroSpace and Defence Industries Association of Europe)
+or the ASD Simplified Technical English Maintenance Group (STEMG).
+
+"Simplified Technical English" and "ASD-STE100" are trademarks of ASD,
+Brussels, Belgium (European Union Trade Mark No. 017966390). The ASD-STE100
+specification and its dictionary are Copyright ASD. All rights reserved.
+
+This tool does NOT include, redistribute, download, or embed the official
+ASD-STE100 dictionary or specification. The substitution list bundled here
+(scripts/ste_dictionary.py) is a small, original, hand-authored set of common
+plain-English word swaps. It is not the official approved-word list.
+
+To check text against the official dictionary, obtain your own free copy
+directly from ASD (https://www.asd-ste100.org/). Supply that copy locally.
+The tool parses your local file into a local cache. That cache is never
+committed to this repository. See .gitignore.
+
+References to "ASD-STE100" in this project are nominative only, to state
+compatibility. No claim of ownership over the marks is made.

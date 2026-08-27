@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# macOS
+.DS_Store
+
+# Never commit the official ASD-STE100 dictionary or any parsed cache of it.
+# It is copyrighted (all rights reserved). Users supply their own local copy.
+cache/
+*.official.*
+official-dictionary*
+ste_dictionary_official*
+*.pdf
