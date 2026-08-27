@@ -4,9 +4,10 @@ A fast, deterministic linter for **Simplified Technical English (STE)**, the
 terse, unambiguous controlled-English style based on the ASD-STE100 standard.
 
 It ships as two things in one:
-1. A **Claude Code skill** that makes an AI assistant write its replies in STE.
-2. A **zero-dependency Python linter**: the pass/fail gate the skill writes
-   against, plus a curated substitution dictionary.
+1. A **Claude Code plugin** with a suite of `ste-*` commands (dialogue mode plus
+   file check, rewrite, and repo init), and a separate Desktop/API skill build.
+2. A **zero-dependency Python linter**: the pass/fail gate they write against,
+   plus a curated substitution dictionary.
 
 > **Unofficial.** Not affiliated with or endorsed by ASD. See [NOTICE](NOTICE).
 > "Simplified Technical English" and "ASD-STE100" are trademarks of ASD
@@ -36,7 +37,7 @@ public, so treat them as approximate, not exact.
 
 | Item | Tokens | In model context? |
 |---|---:|---|
-| `SKILL.md`, loaded on `/ste on` | ~745 | yes (once, sticky) |
+| `ste-write` skill, loaded on `/ste-on` | ~745 | yes (once, sticky) |
 | Lint round-trip, clean pass | ~50 | yes (per check) |
 | Lint round-trip, many violations | ~270 | yes (per failing check) |
 | Rule engine + dictionary + rules reference | ~3,455 | **no** (read by Python) |
@@ -57,12 +58,70 @@ Advisory (warnings that never fail the gate):
 - Unapproved words, with a suggested plain-English swap (curated seed map)
 - Words removed from the ASD-STE100 word list (Issue 9)
 
-## As a Claude Code skill
+## As a Claude Code plugin
 
-This is the primary use. Copy or symlink this folder into
-`~/.claude/skills/ste/`, then toggle it with `/ste on` and `/ste off`. While the
-mode is on, the assistant drafts each reply, runs it through the linter as an
-objective gate, and rewrites until it passes. See [SKILL.md](SKILL.md).
+This is the primary use. The repo doubles as a plugin marketplace, so install it
+with:
+
+```
+/plugin marketplace add stayukasabov/Stayux-STE-linter
+/plugin install stayux-ste@stayux
+```
+
+Then use the commands:
+
+- `/ste-on`, `/ste-off`: turn STE dialogue mode on or off. While on, the
+  assistant drafts each reply, gates it through the linter, and rewrites until it
+  passes.
+- `/ste-mode off|prose|strict`: set strictness (prose uses the chat profile,
+  strict uses the full profile).
+- `/ste-check`: check a file or text and report the violations.
+- `/ste-rewrite`: rewrite text into STE with a before and after.
+- `/ste-init`: add STE rules to the project's CLAUDE.md.
+
+The plugin also loads automatically when you mention STE. See the skill at
+[`skills/ste-write/SKILL.md`](skills/ste-write/SKILL.md).
+
+## Before and after
+
+The same question, answered with the skill off (Claude's normal prose) and on.
+
+**You:** The API returns 502 sometimes right after a deploy. What should I check?
+
+**STE off (default):**
+
+> Intermittent 502s just after a deploy usually mean traffic reaches new
+> instances before they are ready to serve it, so the first thing I would look
+> at is your readiness checks and whether they genuinely reflect when the app
+> can handle requests. Beyond that, it is worth confirming that the load
+> balancer drains connections from the old instances gracefully during the
+> rollout, and it can also help to review the logs from the first few seconds
+> after each deploy, since that window is where this kind of race condition
+> tends to show up.
+
+**STE on:**
+
+> Check three things.
+> 1. Readiness probes. Confirm they pass only when the app can serve requests.
+> 2. Connection draining. Make sure the load balancer removes old pods before it stops them.
+> 3. Deploy timing. Look at the logs from the first 30 seconds after each rollout.
+
+Same information. The STE reply is shorter, scannable, and faster to act on.
+
+## Claude Desktop and the API
+
+The skill is not only for developers. The whole technical-documentation process
+benefits, including technical writers, designers, and project managers, and
+those roles usually work in Claude Desktop. A Desktop and API build lives in
+[`desktop/`](desktop/README.md): the same linter, packaged as an uploaded skill
+that runs in the code-execution container. Build the upload bundle with:
+
+```bash
+bash build-desktop-skill.sh   # writes dist/stayux-ste.zip
+```
+
+In Desktop you turn STE on by asking for it (for example "reply in STE"), rather
+than the Claude Code `/ste-on` command. See [`desktop/README.md`](desktop/README.md).
 
 ## The linter directly
 

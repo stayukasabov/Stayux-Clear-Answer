@@ -7,6 +7,9 @@ __pycache__/
 # macOS
 .DS_Store
 
+# Desktop skill build output
+dist/
+
 # Private context-engineering data. Never publish (behaviours-kit, memory, logs).
 behaviours-kit/
 Linkedin-post-ste-skill.md

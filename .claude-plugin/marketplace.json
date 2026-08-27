@@ -1,0 +1,16 @@
+{
+  "name": "stayux",
+  "description": "STAYUX tools for Claude Code. Includes the Stayux STE plugin for Simplified Technical English (ASD-STE100).",
+  "owner": { "name": "STAYUX - STAYU KASABOV" },
+  "plugins": [
+    {
+      "name": "stayux-ste",
+      "source": ".",
+      "description": "Simplified Technical English (ASD-STE100) for Claude Code: dialogue mode plus ste-check, ste-rewrite, ste-init, and ste-mode. Zero-dependency Python linter and curated dictionary.",
+      "version": "0.1.0",
+      "license": "MIT",
+      "keywords": ["ste", "asd-ste100", "technical-writing"],
+      "category": "productivity"
+    }
+  ]
+}
