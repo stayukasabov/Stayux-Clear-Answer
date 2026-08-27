@@ -15,12 +15,34 @@ It ships as two things in one:
 
 ## Why
 
-Most STE helpers are LLM-only: they load the rules into context and rely on the
-model's judgment every turn. This project puts the deterministic rules in
-**Python**, so the checks are exact, testable, offline, and cost **no
-model-context tokens** — the model calls the linter instead of reasoning about
-rules. That token economy is the whole point: the AI layer only handles the
-judgment rules on top.
+Most STE helpers are LLM-only: they load the rule set (and often a dictionary
+reference) into the model's context and reason over it every turn. This project
+moves the deterministic rules **and the substitution dictionary into Python**.
+The model never holds them in context — it calls the linter as a subprocess and
+reads back a small pass/fail result. So the rules and the dictionary cost **no
+model-context tokens**, and the dictionary can grow toward the full standard
+without adding any context cost. The AI layer only handles the judgment rules on
+top.
+
+To be precise about what *does* cost tokens: turning the skill on loads
+`SKILL.md` once, and each draft-check adds a small lint round-trip. Those are
+fixed and small. The part that scales — the rules and the ~900-word-scale
+dictionary — stays out of context.
+
+### Token economy (measured)
+
+Counts use the `o200k_base` BPE tokenizer as a proxy for Claude's, which is not
+public — treat them as approximate, not exact.
+
+| Item | Tokens | In model context? |
+|---|---:|---|
+| `SKILL.md`, loaded on `/ste on` | ~745 | yes — once, sticky |
+| Lint round-trip, clean pass | ~50 | yes — per check |
+| Lint round-trip, many violations | ~270 | yes — per failing check |
+| Rule engine + dictionary + rules reference | ~3,455 | **no** — read by Python |
+
+The last row is the point: that material never enters the context window. An
+LLM-only skill would load and reason over the equivalent every turn.
 
 ## What it checks
 
