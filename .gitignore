@@ -7,6 +7,16 @@ __pycache__/
 # macOS
 .DS_Store
 
+# Private context-engineering data — never publish (behaviours-kit, memory, logs).
+behaviours-kit/
+CLAUDE.md
+.claude/
+Research/
+docs/plans/
+docs/decisions/
+*.log
+*.swp
+
 # Never commit the official ASD-STE100 dictionary or any parsed cache of it.
 # It is copyrighted (all rights reserved). Users supply their own local copy.
 cache/
