@@ -9,7 +9,7 @@ description = "Deterministic Simplified Technical English (STE / ASD-STE100) lin
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
-authors = [{ name = "STAYUX" }]
+authors = [{ name = "STAYUX - Stayu Kasabov" }]
 keywords = ["ste", "asd-ste100", "simplified-technical-english", "linter", "technical-writing"]
 dependencies = []
 
