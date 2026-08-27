@@ -14,7 +14,7 @@ keywords = ["ste", "asd-ste100", "simplified-technical-english", "linter", "tech
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/stayukasabov/STAYUX-STE-LINTER"
+Homepage = "https://github.com/stayukasabov/Stayux-STE-linter"
 
 [tool.setuptools]
 py-modules = ["ste_lint", "ste_dictionary"]
