@@ -1,4 +1,4 @@
-"""STE substitution dictionary — non-approved term -> approved replacement.
+"""STE substitution dictionary: non-approved term -> approved replacement.
 
 This is a *curated seed set* of well-known Simplified Technical English swaps,
 NOT the full copyrighted ~900-word ASD-STE100 dictionary. The linter reads this
@@ -54,7 +54,7 @@ WORD_SUBSTITUTIONS = {
     "abandon": "go",             # abandon (v) -> GO (v) / STOP (v)
     "assistance": "help",        # assistance (n) -> AID (n) / HELP (v)
     "blank": "seal",             # blank (v) -> SEAL (v)
-    # NOTE: "subsequently" is an APPROVED word in Issue 9 — do not add it here.
+    # NOTE: "subsequently" is an APPROVED word in Issue 9. Do not add it here.
 }
 
 PHRASE_SUBSTITUTIONS = {

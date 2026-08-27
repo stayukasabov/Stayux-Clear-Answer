@@ -1,4 +1,4 @@
-# STE rules — condensed (v1 machine-checkable subset)
+# STE rules: condensed (v1 machine-checkable subset)
 
 Source: ASD-STE100 Simplified Technical English (2025 edition, 53 rules +
 ~900-word dictionary). This file lists only the rules the v1 linter enforces.

@@ -10,15 +10,15 @@ description: >
 # Simplified Technical English (STE) mode
 
 This skill makes your replies short, direct, and unambiguous, based on the
-ASD-STE100 standard. It is a **rewrite-only style guard on your own output** —
-it does not report findings to the user; it just makes you write in STE.
+ASD-STE100 standard. It is a **rewrite-only style guard on your own output**.
+It does not report findings to the user. It just makes you write in STE.
 
 ## Toggle and profile
 
-- **`/ste on`** — enter STE mode with the **chat** profile (default).
-- **`/ste full`** — enter/stay in STE mode with the **full** profile.
-- **`/ste chat`** — switch back to the **chat** profile (stays on).
-- **`/ste off`** — leave STE mode. Return to normal prose immediately.
+- **`/ste on`**: enter STE mode with the **chat** profile (default).
+- **`/ste full`**: enter/stay in STE mode with the **full** profile.
+- **`/ste chat`**: switch back to the **chat** profile (stays on).
+- **`/ste off`**: leave STE mode. Return to normal prose immediately.
 - When the user wants a verbose answer, they simply do not turn STE on.
 
 Treat the mode AND the active profile as sticky across turns until changed. If
@@ -46,7 +46,7 @@ Lint every draft with the matching `--profile` (chat is the default flag).
    or the list of violations (rewrite-only).
 
 Warnings (passive-voice, phrasal-verb, unapproved-word) do not fail the gate,
-but prefer to fix them too — they usually make the text clearer. The
+but prefer to fix them too, because they usually make the text clearer. The
 `unapproved-word` warning suggests an approved replacement; apply it.
 
 ## The rules you write by

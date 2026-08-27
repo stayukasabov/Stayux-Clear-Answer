@@ -7,7 +7,7 @@ __pycache__/
 # macOS
 .DS_Store
 
-# Private context-engineering data — never publish (behaviours-kit, memory, logs).
+# Private context-engineering data. Never publish (behaviours-kit, memory, logs).
 behaviours-kit/
 Linkedin-post-ste-skill.md
 X-thread-ste-skill.md

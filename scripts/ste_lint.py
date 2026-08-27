@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""STE linter — deterministic ASD-STE100 checks (v1, dictionary deferred).
+"""STE linter: deterministic ASD-STE100 checks (v1, dictionary deferred).
 
 Usage:
     echo "text" | python3 ste_lint.py [--profile chat|full] [--pretty]
