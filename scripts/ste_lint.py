@@ -17,7 +17,9 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from ste_dictionary import WORD_SUBSTITUTIONS, PHRASE_SUBSTITUTIONS  # noqa: E402
+from ste_dictionary import (  # noqa: E402
+    WORD_SUBSTITUTIONS, PHRASE_SUBSTITUTIONS, REMOVED_TERMS,
+)
 
 PROFILES = {
     # STE distinguishes procedures (<=20 words) from descriptions (<=25).
@@ -154,6 +156,11 @@ def _check_sentence(sentence, cfg, violations, line):
             violations.append(_make(
                 "unapproved-word", "warning",
                 f"use '{sub}' instead of '{phrase}'", sentence[:60], line))
+    for term in REMOVED_TERMS:
+        if re.search(r"\b" + re.escape(term) + r"\b", low):
+            violations.append(_make(
+                "removed-word", "warning",
+                f"'{term}' was removed from the ASD-STE100 word list", sentence[:60], line))
 
 
 def lint(text, profile="chat"):
@@ -181,72 +188,17 @@ def lint(text, profile="chat"):
     return {"passed": passed, "profile": profile, "violations": violations}
 
 
-def _format_text(path, result):
-    lines = []
-    for v in result["violations"]:
-        loc = v.get("line") or "?"
-        lines.append(f"{path}:{loc}: {v['severity']}: {v['rule']} — {v['detail']}")
-    return "\n".join(lines)
-
-
-def _expand_paths(paths):
-    import glob
-    out = []
-    for p in paths:
-        if os.path.isdir(p):
-            for root, _dirs, files in os.walk(p):
-                out.extend(os.path.join(root, f) for f in files
-                           if f.endswith((".md", ".txt")))
-        elif any(ch in p for ch in "*?["):
-            out.extend(glob.glob(p, recursive=True))
-        else:
-            out.append(p)
-    return out
-
-
 def main(argv=None):
     ap = argparse.ArgumentParser(description="STE deterministic linter")
-    ap.add_argument("paths", nargs="*", help="files, globs, or directories to lint")
     ap.add_argument("--profile", choices=sorted(PROFILES), default="chat")
-    ap.add_argument("--format", choices=("json", "text"), default="json")
     ap.add_argument("--pretty", action="store_true")
-    ap.add_argument("--text", help="lint this string instead of stdin/paths")
+    ap.add_argument("--text", help="lint this string instead of stdin")
     args = ap.parse_args(argv)
 
-    # stdin / --text mode: a single source, single result.
-    if not args.paths:
-        text = args.text if args.text is not None else sys.stdin.read()
-        result = lint(text, profile=args.profile)
-        if args.format == "text":
-            out = _format_text("<stdin>", result)
-            if out:
-                print(out)
-        else:
-            print(json.dumps(result, indent=2 if args.pretty else None))
-        return 0 if result["passed"] else 1
-
-    # file mode: lint each path; exit reflects the worst file.
-    worst_ok = True
-    results = []
-    for path in _expand_paths(args.paths):
-        try:
-            with open(path, encoding="utf-8") as f:
-                text = f.read()
-        except OSError as e:
-            print(f"{path}: error: {e}", file=sys.stderr)
-            worst_ok = False
-            continue
-        result = lint(text, profile=args.profile)
-        worst_ok = worst_ok and result["passed"]
-        if args.format == "text":
-            out = _format_text(path, result)
-            if out:
-                print(out)
-        else:
-            results.append({"file": path, **result})
-    if args.format == "json":
-        print(json.dumps(results, indent=2 if args.pretty else None))
-    return 0 if worst_ok else 1
+    text = args.text if args.text is not None else sys.stdin.read()
+    result = lint(text, profile=args.profile)
+    print(json.dumps(result, indent=2 if args.pretty else None))
+    return 0 if result["passed"] else 1
 
 
 if __name__ == "__main__":
