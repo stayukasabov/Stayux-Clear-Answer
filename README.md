@@ -51,10 +51,12 @@ Deterministic rules (errors fail the gate):
 - Sentence length (chat ≤ 25 words, full ≤ 20)
 - Paragraph length (≤ 6 sentences; lists parsed separately)
 - Semicolons (banned)
+- Contractions (`don't` becomes `do not`)
 - Progressive tense (`is running`) and perfect tense (`has done`)
 
 Advisory (warnings that never fail the gate):
 - Passive voice, phrasal verbs
+- Joined imperatives (one instruction per sentence: no `and`/`then`)
 - Unapproved words, with a suggested plain-English swap (curated seed map)
 - Words removed from the ASD-STE100 word list (Issue 9)
 
@@ -153,6 +155,12 @@ ways:
 - Point the tool at **your own** official ASD-STE100 copy and paste the approved
   words / substitutions into the maps. The official data is never shipped or
   committed.
+
+## Tutorials
+
+Step-by-step guides with worked examples are in
+[`docs/tutorials/`](docs/tutorials/README.md): install, dialogue mode, checking a
+document, rewriting a draft, and repo or Desktop setup.
 
 ## Roadmap
 

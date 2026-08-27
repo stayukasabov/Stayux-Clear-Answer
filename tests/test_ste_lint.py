@@ -1,6 +1,6 @@
 """TDD spec for the STE linter (stdlib unittest, no external deps).
 
-Run: python3 -m unittest discover -s ~/.claude/skills/ste/tests
+Run: python3 -m unittest discover -s tests
 """
 import json
 import os
@@ -196,6 +196,50 @@ class RemovedTermTests(unittest.TestCase):
         r = ste_lint.lint("Increase the brightness.")
         self.assertNotIn("removed-word", errors(r))
         self.assertTrue(r["passed"])
+
+
+class ContractionTests(unittest.TestCase):
+    def _detail(self, result, rule):
+        return next(v["detail"] for v in result["violations"] if v["rule"] == rule)
+
+    def test_contraction_flagged_as_error(self):
+        r = ste_lint.lint("Don't open the valve.")
+        self.assertIn("contraction", errors(r))
+        self.assertFalse(r["passed"])
+
+    def test_contraction_suggests_expansion(self):
+        r = ste_lint.lint("Don't open the valve.")
+        self.assertIn("do not", self._detail(r, "contraction"))
+
+    def test_curly_apostrophe_contraction_flagged(self):
+        r = ste_lint.lint("Don’t open the valve.")
+        self.assertIn("contraction", rules(r))
+
+    def test_possessive_not_flagged_as_contraction(self):
+        r = ste_lint.lint("Set the valve's cover.")
+        self.assertNotIn("contraction", rules(r))
+
+
+class OneInstructionTests(unittest.TestCase):
+    def test_and_joined_imperatives_flagged(self):
+        r = ste_lint.lint("Open the valve and close the door.")
+        self.assertIn("one-instruction", rules(r))
+
+    def test_then_joined_imperatives_flagged(self):
+        r = ste_lint.lint("Open the valve then close it.")
+        self.assertIn("one-instruction", rules(r))
+
+    def test_and_between_nouns_not_flagged(self):
+        r = ste_lint.lint("Remove the valve and the pump.")
+        self.assertNotIn("one-instruction", rules(r))
+
+    def test_non_imperative_and_not_flagged(self):
+        r = ste_lint.lint("The valve and the pump are clean.")
+        self.assertNotIn("one-instruction", rules(r))
+
+    def test_one_instruction_is_warning(self):
+        r = ste_lint.lint("Open the valve and close the door.")
+        self.assertNotIn("one-instruction", errors(r))
 
 
 class CliTests(unittest.TestCase):

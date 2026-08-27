@@ -18,7 +18,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ste_dictionary import (  # noqa: E402
-    WORD_SUBSTITUTIONS, PHRASE_SUBSTITUTIONS, REMOVED_TERMS,
+    WORD_SUBSTITUTIONS, PHRASE_SUBSTITUTIONS, REMOVED_TERMS, CONTRACTIONS,
 )
 
 PROFILES = {
@@ -50,6 +50,17 @@ PHRASAL_VERBS = {
     ("look", "up"), ("fill", "in"), ("pick", "up"), ("hook", "up"),
     ("plug", "in"), ("switch", "off"), ("switch", "on"), ("break", "down"),
     ("check", "out"), ("find", "out"), ("go", "through"), ("hold", "on"),
+}
+
+# Common technical imperative verbs. Used only to detect two instructions
+# joined by "and"/"then" in one sentence (the one-instruction rule).
+ACTION_VERBS = {
+    "open", "close", "remove", "install", "set", "turn", "push", "pull",
+    "connect", "disconnect", "check", "do", "make", "start", "stop", "apply",
+    "tighten", "loosen", "examine", "replace", "put", "get", "hold", "release",
+    "press", "lift", "lower", "attach", "detach", "clean", "measure", "adjust",
+    "align", "fill", "drain", "add", "keep", "move", "read", "record", "send",
+    "wait", "test", "use", "give", "cut", "seal", "go", "find", "select",
 }
 
 WORD_RE = re.compile(r"[A-Za-z][A-Za-z'\-]*")
@@ -149,6 +160,25 @@ def _check_sentence(sentence, cfg, violations, line):
             violations.append(_make(
                 "unapproved-word", "warning",
                 f"use '{WORD_SUBSTITUTIONS[w]}' instead of '{w}'", sentence[:60], line))
+        if w in CONTRACTIONS:
+            violations.append(_make(
+                "contraction", "error",
+                f"use '{CONTRACTIONS[w]}' instead of '{w}'", sentence[:60], line))
+
+    # One instruction per sentence: flag an imperative sentence that joins a
+    # second action verb with "and" or "then" (for example "Open X and close Y").
+    if lower and lower[0] in ACTION_VERBS:
+        for i, w in enumerate(lower):
+            if w in ("and", "then"):
+                j = i + 1
+                while j < len(lower) and lower[j] in ("the", "a", "an", "then"):
+                    j += 1
+                if j < len(lower) and lower[j] in ACTION_VERBS:
+                    violations.append(_make(
+                        "one-instruction", "warning",
+                        "one instruction per sentence: split the joined steps",
+                        sentence[:60], line))
+                    break
 
     low = sentence.lower()
     for phrase, sub in PHRASE_SUBSTITUTIONS.items():
@@ -166,6 +196,9 @@ def _check_sentence(sentence, cfg, violations, line):
 def lint(text, profile="chat"):
     cfg = PROFILES.get(profile, PROFILES["chat"])
     violations = []
+
+    # Normalize curly apostrophes so contractions match regardless of source.
+    text = text.replace("’", "'")
 
     if ";" in text:
         semi_line = text[:text.index(";")].count("\n") + 1

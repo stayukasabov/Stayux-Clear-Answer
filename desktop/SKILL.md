@@ -56,6 +56,7 @@ The unapproved-word warning suggests an approved replacement. Apply it.
 - Use simple tenses only: present, past, future, imperative, infinitive.
 - Do NOT use: perfect tenses ("have done"), progressive ("is running"), passive
   voice in instructions, or semicolons.
+- Do NOT use contractions. Write "do not", not "don't".
 - Do NOT stack more than three nouns in a row.
 - Prefer single verbs over phrasal verbs ("remove" not "take off").
 - Keep paragraphs to six sentences or fewer, one topic each.

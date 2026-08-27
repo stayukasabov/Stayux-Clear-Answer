@@ -8,11 +8,14 @@ Source: ASD-STE100 Simplified Technical English (2025 edition, 53 rules +
 | sentence-length | ≤ 25 words | ≤ 20 words | error | STE: procedures ≤20, descriptions ≤25 |
 | paragraph-length | ≤ 6 sentences | ≤ 6 sentences | error | one topic per paragraph |
 | semicolon | banned | banned | error | use separate sentences |
+| contraction | banned | banned | error | expand ("don't" to "do not") |
 | progressive-tense | banned | banned | error | be + -ing (e.g. "is running") |
 | perfect-tense | banned | banned | error | have/has/had + participle |
 | passive-voice | discouraged | discouraged | warning | be + participle; banned in procedures |
 | phrasal-verb | discouraged | discouraged | warning | prefer one verb ("remove" not "take off") |
+| one-instruction | discouraged | discouraged | warning | do not join imperatives with "and"/"then" |
 | unapproved-word | suggest swap | suggest swap | warning | curated seed map in `scripts/ste_dictionary.py` |
+| removed-word | flag | flag | warning | term removed from the Issue 9 word list |
 
 `passed` is true when there are zero **error** violations. Warnings do not fail
 the gate but should still be fixed when practical.
