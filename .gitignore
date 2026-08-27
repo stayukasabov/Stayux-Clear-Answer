@@ -9,6 +9,7 @@ __pycache__/
 
 # Private context-engineering data — never publish (behaviours-kit, memory, logs).
 behaviours-kit/
+Linkedin-post-ste-skill.md
 CLAUDE.md
 .claude/
 Research/
