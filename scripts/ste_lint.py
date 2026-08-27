@@ -55,28 +55,35 @@ SENTENCE_RE = re.compile(r"[^.!?]+[.!?]*", re.DOTALL)
 LIST_RE = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+(.*)$")
 
 
-def _split_blocks(text):
-    return [b for b in re.split(r"\n\s*\n", text) if b.strip()]
+def _iter_segments(text):
+    """Yield (kind, chunk, line_no) for prose runs and individual list items.
 
-
-def _segment_block(block):
-    """Yield (kind, text) tuples: prose runs and individual list items.
-
-    List items are separated so a bullet/numbered list is not mistaken for one
-    over-long paragraph. Consecutive non-list lines join into one prose chunk.
+    line_no is the 1-based line where the segment starts. Blank lines split
+    blocks. List items are separated so a bullet/numbered list is not mistaken
+    for one over-long paragraph. Consecutive non-list lines join into a prose
+    chunk that keeps the first line's number.
     """
-    prose = []
-    for line in block.splitlines():
-        m = LIST_RE.match(line)
-        if m:
-            if prose:
-                yield ("prose", " ".join(prose))
-                prose = []
-            yield ("list", m.group(1))
-        elif line.strip():
-            prose.append(line.strip())
-    if prose:
-        yield ("prose", " ".join(prose))
+    lines = text.split("\n")
+    i, n = 0, len(lines)
+    while i < n:
+        if not lines[i].strip():
+            i += 1
+            continue
+        prose, prose_line = [], None
+        while i < n and lines[i].strip():
+            m = LIST_RE.match(lines[i])
+            if m:
+                if prose:
+                    yield ("prose", " ".join(prose), prose_line)
+                    prose, prose_line = [], None
+                yield ("list", m.group(1), i + 1)
+            else:
+                if prose_line is None:
+                    prose_line = i + 1
+                prose.append(lines[i].strip())
+            i += 1
+        if prose:
+            yield ("prose", " ".join(prose), prose_line)
 
 
 def _split_sentences(chunk):
@@ -100,16 +107,17 @@ def _next_content(tokens, i):
     return j if j < len(tokens) else None
 
 
-def _make(rule, severity, detail, text):
-    return {"rule": rule, "severity": severity, "detail": detail, "text": text}
+def _make(rule, severity, detail, text, line=None):
+    return {"rule": rule, "severity": severity, "detail": detail,
+            "text": text, "line": line}
 
 
-def _check_sentence(sentence, cfg, violations):
+def _check_sentence(sentence, cfg, violations, line):
     words = _words(sentence)
     if len(words) > cfg["max_sentence_words"]:
         violations.append(_make(
             "sentence-length", "error",
-            f"{len(words)} words (max {cfg['max_sentence_words']})", sentence[:60]))
+            f"{len(words)} words (max {cfg['max_sentence_words']})", sentence[:60], line))
 
     lower = [w.lower() for w in words]
     for i, w in enumerate(lower):
@@ -120,32 +128,32 @@ def _check_sentence(sentence, cfg, violations):
                 if nxt.endswith("ing") and len(nxt) > 4:
                     violations.append(_make(
                         "progressive-tense", "error",
-                        f"'{w} {nxt}' is a compound tense", sentence[:60]))
+                        f"'{w} {nxt}' is a compound tense", sentence[:60], line))
                 elif _is_participle(nxt):
                     violations.append(_make(
                         "passive-voice", "warning",
-                        f"'{w} {nxt}' is passive voice", sentence[:60]))
+                        f"'{w} {nxt}' is passive voice", sentence[:60], line))
         if w in HAVE_VERBS:
             j = _next_content(lower, i)
             if j is not None and _is_participle(lower[j]):
                 violations.append(_make(
                     "perfect-tense", "error",
-                    f"'{w} {lower[j]}' is a perfect tense", sentence[:60]))
+                    f"'{w} {lower[j]}' is a perfect tense", sentence[:60], line))
         if i + 1 < len(lower) and (w, lower[i + 1]) in PHRASAL_VERBS:
             violations.append(_make(
                 "phrasal-verb", "warning",
-                f"'{w} {lower[i + 1]}' is a phrasal verb", sentence[:60]))
+                f"'{w} {lower[i + 1]}' is a phrasal verb", sentence[:60], line))
         if w in WORD_SUBSTITUTIONS:
             violations.append(_make(
                 "unapproved-word", "warning",
-                f"use '{WORD_SUBSTITUTIONS[w]}' instead of '{w}'", sentence[:60]))
+                f"use '{WORD_SUBSTITUTIONS[w]}' instead of '{w}'", sentence[:60], line))
 
     low = sentence.lower()
     for phrase, sub in PHRASE_SUBSTITUTIONS.items():
         if re.search(r"\b" + re.escape(phrase) + r"\b", low):
             violations.append(_make(
                 "unapproved-word", "warning",
-                f"use '{sub}' instead of '{phrase}'", sentence[:60]))
+                f"use '{sub}' instead of '{phrase}'", sentence[:60], line))
 
 
 def lint(text, profile="chat"):
@@ -153,36 +161,92 @@ def lint(text, profile="chat"):
     violations = []
 
     if ";" in text:
+        semi_line = text[:text.index(";")].count("\n") + 1
         violations.append(_make("semicolon", "error",
-                                 "semicolons are not allowed; use separate sentences", ";"))
+                                 "semicolons are not allowed; use separate sentences",
+                                 ";", semi_line))
 
-    for block in _split_blocks(text):
-        for kind, chunk in _segment_block(block):
-            sentences = _split_sentences(chunk)
-            # paragraph-length applies to prose only; list items are separate.
-            if kind == "prose" and len(sentences) > cfg["max_paragraph_sentences"]:
-                violations.append(_make(
-                    "paragraph-length", "error",
-                    f"{len(sentences)} sentences (max {cfg['max_paragraph_sentences']})",
-                    chunk[:60]))
-            for sentence in sentences:
-                _check_sentence(sentence, cfg, violations)
+    for kind, chunk, line in _iter_segments(text):
+        sentences = _split_sentences(chunk)
+        # paragraph-length applies to prose only; list items are separate.
+        if kind == "prose" and len(sentences) > cfg["max_paragraph_sentences"]:
+            violations.append(_make(
+                "paragraph-length", "error",
+                f"{len(sentences)} sentences (max {cfg['max_paragraph_sentences']})",
+                chunk[:60], line))
+        for sentence in sentences:
+            _check_sentence(sentence, cfg, violations, line)
 
     passed = not any(v["severity"] == "error" for v in violations)
     return {"passed": passed, "profile": profile, "violations": violations}
 
 
+def _format_text(path, result):
+    lines = []
+    for v in result["violations"]:
+        loc = v.get("line") or "?"
+        lines.append(f"{path}:{loc}: {v['severity']}: {v['rule']} — {v['detail']}")
+    return "\n".join(lines)
+
+
+def _expand_paths(paths):
+    import glob
+    out = []
+    for p in paths:
+        if os.path.isdir(p):
+            for root, _dirs, files in os.walk(p):
+                out.extend(os.path.join(root, f) for f in files
+                           if f.endswith((".md", ".txt")))
+        elif any(ch in p for ch in "*?["):
+            out.extend(glob.glob(p, recursive=True))
+        else:
+            out.append(p)
+    return out
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="STE deterministic linter")
+    ap.add_argument("paths", nargs="*", help="files, globs, or directories to lint")
     ap.add_argument("--profile", choices=sorted(PROFILES), default="chat")
+    ap.add_argument("--format", choices=("json", "text"), default="json")
     ap.add_argument("--pretty", action="store_true")
-    ap.add_argument("--text", help="lint this string instead of stdin")
+    ap.add_argument("--text", help="lint this string instead of stdin/paths")
     args = ap.parse_args(argv)
 
-    text = args.text if args.text is not None else sys.stdin.read()
-    result = lint(text, profile=args.profile)
-    print(json.dumps(result, indent=2 if args.pretty else None))
-    return 0 if result["passed"] else 1
+    # stdin / --text mode: a single source, single result.
+    if not args.paths:
+        text = args.text if args.text is not None else sys.stdin.read()
+        result = lint(text, profile=args.profile)
+        if args.format == "text":
+            out = _format_text("<stdin>", result)
+            if out:
+                print(out)
+        else:
+            print(json.dumps(result, indent=2 if args.pretty else None))
+        return 0 if result["passed"] else 1
+
+    # file mode: lint each path; exit reflects the worst file.
+    worst_ok = True
+    results = []
+    for path in _expand_paths(args.paths):
+        try:
+            with open(path, encoding="utf-8") as f:
+                text = f.read()
+        except OSError as e:
+            print(f"{path}: error: {e}", file=sys.stderr)
+            worst_ok = False
+            continue
+        result = lint(text, profile=args.profile)
+        worst_ok = worst_ok and result["passed"]
+        if args.format == "text":
+            out = _format_text(path, result)
+            if out:
+                print(out)
+        else:
+            results.append({"file": path, **result})
+    if args.format == "json":
+        print(json.dumps(results, indent=2 if args.pretty else None))
+    return 0 if worst_ok else 1
 
 
 if __name__ == "__main__":

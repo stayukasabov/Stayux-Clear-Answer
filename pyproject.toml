@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stayux-ste-linter"
+version = "0.1.0"
+description = "Deterministic Simplified Technical English (STE / ASD-STE100) linter + Claude Code skill. Unofficial."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "STAYUX" }]
+keywords = ["ste", "asd-ste100", "simplified-technical-english", "linter", "technical-writing"]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/stayukasabov/STAYUX-STE-LINTER"
+
+[project.scripts]
+ste = "ste_lint:main"
+
+[tool.setuptools]
+py-modules = ["ste_lint", "ste_dictionary"]
+
+[tool.setuptools.package-dir]
+"" = "scripts"

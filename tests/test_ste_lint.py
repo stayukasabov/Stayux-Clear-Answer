@@ -188,5 +188,54 @@ class CliTests(unittest.TestCase):
         self.assertFalse(json.loads(p.stdout)["passed"])
 
 
+class LineNumberTests(unittest.TestCase):
+    def _line(self, result, rule):
+        return next(v["line"] for v in result["violations"] if v["rule"] == rule)
+
+    def test_violation_reports_line(self):
+        r = ste_lint.lint("Open the valve.\n\nThe pump is running.")
+        self.assertEqual(self._line(r, "progressive-tense"), 3)
+
+    def test_semicolon_reports_line(self):
+        r = ste_lint.lint("Open it.\n\nDo this; do that.")
+        self.assertEqual(self._line(r, "semicolon"), 3)
+
+
+class CliFileTests(unittest.TestCase):
+    SCRIPT = os.path.join(SKILL_ROOT, "scripts", "ste_lint.py")
+
+    def _run(self, *args):
+        return subprocess.run(
+            [sys.executable, self.SCRIPT, *args], capture_output=True, text=True)
+
+    def _tmp(self, text):
+        import tempfile
+        fd, path = tempfile.mkstemp(suffix=".md", text=True)
+        with os.fdopen(fd, "w") as f:
+            f.write(text)
+        self.addCleanup(os.remove, path)
+        return path
+
+    def test_clean_file_exit_zero(self):
+        p = self._run(self._tmp("Open the valve. Close the door."))
+        self.assertEqual(p.returncode, 0)
+
+    def test_bad_file_exit_one(self):
+        p = self._run(self._tmp("Do this; do that."))
+        self.assertEqual(p.returncode, 1)
+
+    def test_text_format_reports_path_and_rule(self):
+        path = self._tmp("Do this; do that.")
+        p = self._run("--format", "text", path)
+        self.assertIn(path, p.stdout)
+        self.assertIn("semicolon", p.stdout)
+        self.assertIn(":1:", p.stdout)
+
+    def test_multiple_paths_worst_exit(self):
+        good = self._tmp("Open the valve.")
+        bad = self._tmp("Do this; do that.")
+        self.assertEqual(self._run(good, bad).returncode, 1)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -38,8 +38,18 @@ Advisory (warnings):
 # lint text on stdin; exit 1 if any error-severity violation
 echo "Commence the repair prior to the test." | python3 scripts/ste_lint.py --pretty
 
+# lint files, globs, or directories (.md / .txt); human output with line numbers
+python3 scripts/ste_lint.py --format text docs/ "notes/*.md"
+#   docs/intro.md:12: error: sentence-length — 27 words (max 25)
+
 # stricter document profile
 python3 scripts/ste_lint.py --profile full --text "Your sentence here."
+```
+
+Installed as a console command (`pip install .`):
+
+```bash
+ste --format text README.md        # exit 1 if any file has an error violation
 ```
 
 Run the tests:
