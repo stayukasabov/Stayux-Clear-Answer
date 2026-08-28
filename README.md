@@ -24,6 +24,19 @@ objective pass/fail gate.
 > (EUTM 017966390). This tool does not include or download ASD's copyrighted
 > dictionary.
 
+## Contents
+
+- [Two ways to use it](#two-ways-to-use-it)
+- [Why](#why), and the [token economy](#token-economy-measured)
+- [What it checks](#what-it-checks)
+- [Install](#install): [Claude Code](#claude-code-plugin), [Claude Desktop](#claude-desktop-download-the-skill)
+- [Before and after](#before-and-after)
+- [The linter directly](#the-linter-directly)
+- [The dictionary](#the-dictionary)
+- [Documentation](#documentation)
+- [Roadmap](#roadmap)
+- [License](#license)
+
 ## Why
 
 Most STE helpers are LLM-only: they load the rule set (and often a dictionary
