@@ -168,11 +168,20 @@ ways:
   words / substitutions into the maps. The official data is never shipped or
   committed.
 
-## Tutorials
+## Documentation
 
-Step-by-step guides with worked examples are in
-[`docs/tutorials/`](docs/tutorials/README.md): install, dialogue mode, checking a
-document, rewriting a draft, and repo or Desktop setup.
+- **Tutorials** ([`docs/tutorials/`](docs/tutorials/README.md)), with worked,
+  run-verified examples:
+  1. [Install the plugin](docs/tutorials/01-install.md)
+  2. [Write in STE in the dialogue](docs/tutorials/02-dialogue-mode.md)
+  3. [Check a document](docs/tutorials/03-check-a-document.md)
+  4. [Rewrite a document](docs/tutorials/04-rewrite-a-document.md)
+  5. [Repo and Desktop setup](docs/tutorials/05-init-and-desktop.md)
+- **Claude Desktop guide**: [`desktop/README.md`](desktop/README.md)
+- **STE rule reference**: [`references/writing-rules.md`](references/writing-rules.md)
+- **The skill**: [`skills/ste-write/SKILL.md`](skills/ste-write/SKILL.md)
+- **Downloads**: [latest release](https://github.com/stayukasabov/Stayux-STE-linter/releases/latest)
+- **Legal**: [LICENSE](LICENSE), [NOTICE](NOTICE)
 
 ## Roadmap
 
