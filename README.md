@@ -1,9 +1,11 @@
 # Stayux-STE-linter
 
-A Claude Code plugin (with a Claude Desktop build) that makes Claude write in
+A Claude Code plugin, and a Claude Desktop skill, that makes Claude write in
 **Simplified Technical English (STE)**, the terse, unambiguous controlled-English
-style based on the ASD-STE100 standard. A fast, deterministic, zero-dependency
-Python linter sits at its core as the pass/fail gate.
+style based on the ASD-STE100 standard. On Claude Code it is a bundle of `ste-*`
+commands plus an auto-loading skill; on Desktop it is a single uploaded skill. A
+fast, deterministic, zero-dependency Python linter sits at its core as the
+pass/fail gate.
 
 ## Two ways to use it
 
