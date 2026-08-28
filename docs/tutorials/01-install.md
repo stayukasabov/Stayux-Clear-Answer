@@ -27,6 +27,17 @@ folder:
 /plugin install stayux-ste@stayux
 ```
 
+## Update later
+
+When a new version ships, refresh the plugin:
+
+```
+/plugin update stayux-ste
+```
+
+Restart Claude Code to apply the update. From a terminal you can also run
+`claude plugin update stayux-ste`.
+
 ## Check your Python
 
 The checker runs with the code execution tool and needs Python 3.9 or later. From

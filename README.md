@@ -97,6 +97,8 @@ The repo doubles as a plugin marketplace:
 /plugin install stayux-ste@stayux
 ```
 
+Update later with `/plugin update stayux-ste`, then restart Claude Code to apply.
+
 Commands:
 
 - `/ste-on`, `/ste-off`: turn STE dialogue mode on or off. While on, the
