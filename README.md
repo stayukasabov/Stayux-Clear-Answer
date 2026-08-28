@@ -60,13 +60,21 @@ public, so treat them as approximate, not exact.
 
 | Item | Tokens | In model context? |
 |---|---:|---|
-| `ste-write` skill, loaded on `/ste-on` | ~745 | yes (once, sticky) |
+| `ste-write` skill body, when it loads | ~680 | yes |
 | Lint round-trip, clean pass | ~50 | yes (per check) |
 | Lint round-trip, many violations | ~270 | yes (per failing check) |
 | Rule engine + dictionary + rules reference | ~3,455 | **no** (read by Python) |
 
 The last row is the point: that material never enters the context window. An
 LLM-only skill would load and reason over the equivalent every turn.
+
+Claude Code reports its own projection. Run `claude plugin details stayux-ste`: it
+shows about 429 tokens always-on for the whole plugin (every command and skill
+description, so Claude knows when to use each), plus an on-invoke cost each time a
+command fires (for example `/ste-on` about 400, `/ste-check` about 320). Those are
+estimates too. They measure a different thing from the table above: the always-on
+figure is all seven descriptions loaded up front, while the table is one flow, a
+skill body plus its lint round-trips.
 
 ## What it checks
 
