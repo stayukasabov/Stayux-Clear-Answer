@@ -188,8 +188,20 @@ replacements, and lists terms removed from the standard. Entries marked
 "Issue 9" were checked against the ASD-STE100 Issue 9 dictionary; the rest are
 uncontroversial plain-English swaps.
 
-It is **not** the official ~900-word list, which is copyrighted. Extend it two
+It is **not** the official ~900-word list, which is copyrighted. Extend it three
 ways:
+- Drop a **`.ste-dict.txt`** in your project. It is a plain word list the linter
+  reads automatically, no code edit and no dependency:
+
+  ```
+  # Acme project terms
+  bolt = fastener      # flag "bolt", suggest "fastener"
+  as per = by          # multiword left side is a phrase swap
+  widget               # a bare word is approved: never flag it
+  ```
+
+  Custom entries win over the seed and the official cache, so this is where
+  company technical names and verbs go.
 - Add your own entries (including company technical terms) to
   `scripts/ste_dictionary.py`.
 - Point the importer at **your own** official ASD-STE100 copy:
@@ -214,6 +226,7 @@ ways:
   3. [Check a document](docs/tutorials/03-check-a-document.md)
   4. [Rewrite a document](docs/tutorials/04-rewrite-a-document.md)
   5. [Repo and Desktop setup](docs/tutorials/05-init-and-desktop.md)
+  6. [Add your own words with a project dictionary](docs/tutorials/06-custom-dictionary.md)
 - **Claude Desktop guide**: [`desktop/README.md`](desktop/README.md)
 - **STE rule reference**: [`references/writing-rules.md`](references/writing-rules.md)
 - **The skill**: [`skills/ste-write/SKILL.md`](skills/ste-write/SKILL.md)
@@ -222,9 +235,9 @@ ways:
 
 ## Roadmap
 
+- [x] Custom / project dictionary loading (a `.ste-dict.txt` merged over the seed)
 - [x] Local official-dictionary parsing (bring your own copy) via
   `scripts/ste_import.py` into a git-ignored cache
-- [ ] Custom / project dictionary loading (merge a user file over the seed)
 - [ ] Noun-cluster rule (needs part-of-speech tagging)
 
 ## License

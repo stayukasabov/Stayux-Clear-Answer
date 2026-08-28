@@ -14,7 +14,7 @@ Source: ASD-STE100 Simplified Technical English (2025 edition, 53 rules +
 | passive-voice | discouraged | discouraged | warning | be + participle; banned in procedures |
 | phrasal-verb | discouraged | discouraged | warning | prefer one verb ("remove" not "take off") |
 | one-instruction | discouraged | discouraged | warning | do not join imperatives with "and"/"then" |
-| unapproved-word | suggest swap | suggest swap | warning | curated seed map in `scripts/ste_dictionary.py` |
+| unapproved-word | suggest swap | suggest swap | warning | seed map in `scripts/ste_dictionary.py`, plus any `.ste-dict.txt` and official cache |
 | removed-word | flag | flag | warning | term removed from the Issue 9 word list |
 
 `passed` is true when there are zero **error** violations. Warnings do not fail
@@ -33,7 +33,8 @@ so `paragraph-length` applies to prose paragraphs only.
   on your own official copy: it parses the approved words and substitutions into
   a git-ignored `cache/official.json` that the linter then uses. Matching is
   still token-level (no meaning or part-of-speech resolution), so this remains a
-  warning layer, not full conformance.
+  warning layer, not full conformance. For project-specific terms, a
+  `.ste-dict.txt` in the working directory is merged over the seed and the cache.
 - Procedure-vs-description auto-detection (v1 uses profile choice instead).
 - One-topic-per-paragraph semantic check (LLM judgment, not deterministic).
 

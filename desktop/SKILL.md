@@ -69,4 +69,6 @@ what the gate enforces.
 
 The linter enforces the deterministic rules plus a curated substitution
 dictionary (`ste_dictionary.py`). This is a seed set, not the full ~900-word
-official dictionary. Do not claim full dictionary conformance yet.
+official dictionary. Do not claim full dictionary conformance yet. A user can
+add project terms with a `.ste-dict.txt` word list, which the linter merges
+over the seed automatically.

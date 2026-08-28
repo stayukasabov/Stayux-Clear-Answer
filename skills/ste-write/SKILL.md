@@ -64,4 +64,6 @@ enforces.
 The linter enforces the deterministic rules plus a curated substitution
 dictionary (`scripts/ste_dictionary.py`), verified in part against ASD-STE100
 Issue 9. This is a seed set, not the full ~900-word official dictionary. Do not
-claim full dictionary conformance yet.
+claim full dictionary conformance yet. A user can extend it with a
+`.ste-dict.txt` in the project (word list) or an imported official cache; the
+linter merges both automatically.

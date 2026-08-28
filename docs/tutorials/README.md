@@ -15,6 +15,7 @@ example you can run.
 3. [Check a document](03-check-a-document.md)
 4. [Rewrite a document](04-rewrite-a-document.md)
 5. [Set up a repo, and use STE on Desktop](05-init-and-desktop.md)
+6. [Add your own words with a project dictionary](06-custom-dictionary.md)
 
 ## Example file
 

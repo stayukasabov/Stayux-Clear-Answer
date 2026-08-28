@@ -38,17 +38,63 @@ def load_cache(path=DEFAULT_CACHE_PATH):
 
 _DEFAULT_CACHE = load_cache()
 
+# Optional per-project word list. A plain, hand-authored file that adds company
+# terms and swaps on top of the seed and the official cache. See parse_custom_dict.
+DEFAULT_CUSTOM_PATH = os.path.join(os.getcwd(), ".ste-dict.txt")
 
-def _effective_maps(cache):
-    """Merge the seed with the cache: cache substitutions win, and any word the
-    cache marks approved is dropped from the word map (false-positive suppression).
+
+def parse_custom_dict(text):
+    """Parse a `.ste-dict.txt` word list into approved words and substitutions.
+
+    - `term = replacement` -> a substitution (word, or phrase if multiword).
+    - a bare `word` (optional leading `+`) -> an approved word, never flagged.
+    - `#` starts a comment (whole-line or inline); blank lines are ignored.
+    Keys are lowercased.
+    """
+    approved = set()
+    words = {}
+    phrases = {}
+    for raw in text.splitlines():
+        line = raw.split("#", 1)[0].strip()
+        if not line:
+            continue
+        if "=" in line:
+            term, _, repl = line.partition("=")
+            term, repl = term.strip().lower(), repl.strip()
+            if not term or not repl:
+                continue
+            (phrases if " " in term else words)[term] = repl
+        else:
+            approved.add(line.lstrip("+").strip().lower())
+    return {"approved": sorted(approved),
+            "word_substitutions": words, "phrase_substitutions": phrases}
+
+
+def load_custom_dict(path=DEFAULT_CUSTOM_PATH):
+    """Return the parsed custom dictionary, or None if it is absent/unreadable."""
+    try:
+        with open(path) as f:
+            return parse_custom_dict(f.read())
+    except OSError:
+        return None
+
+
+_DEFAULT_CUSTOM = load_custom_dict()
+
+
+def _effective_maps(cache, custom=None):
+    """Merge the seed with the official cache and the custom list, in that order
+    of precedence (custom wins). Any word marked approved by the cache or the
+    custom list is dropped from the word map (false-positive suppression).
     """
     words = dict(WORD_SUBSTITUTIONS)
     phrases = dict(PHRASE_SUBSTITUTIONS)
-    if cache:
-        words.update(cache.get("word_substitutions", {}))
-        phrases.update(cache.get("phrase_substitutions", {}))
-        for w in cache.get("approved", ()):
+    for layer in (cache, custom):
+        if not layer:
+            continue
+        words.update(layer.get("word_substitutions", {}))
+        phrases.update(layer.get("phrase_substitutions", {}))
+        for w in layer.get("approved", ()):
             words.pop(w, None)
     return words, phrases
 
@@ -225,11 +271,13 @@ def _check_sentence(sentence, cfg, violations, line,
                 f"'{term}' was removed from the ASD-STE100 word list", sentence[:60], line))
 
 
-def lint(text, profile="chat", cache=None):
+def lint(text, profile="chat", cache=None, custom=None):
     cfg = PROFILES.get(profile, PROFILES["chat"])
     if cache is None:
         cache = _DEFAULT_CACHE
-    word_subs, phrase_subs = _effective_maps(cache)
+    if custom is None:
+        custom = _DEFAULT_CUSTOM
+    word_subs, phrase_subs = _effective_maps(cache, custom)
     violations = []
 
     # Normalize curly apostrophes so contractions match regardless of source.
