@@ -3,11 +3,21 @@
 A fast, deterministic linter for **Simplified Technical English (STE)**, the
 terse, unambiguous controlled-English style based on the ASD-STE100 standard.
 
-It ships as two things in one:
-1. A **Claude Code plugin** with a suite of `ste-*` commands (dialogue mode plus
-   file check, rewrite, and repo init), and a separate Desktop/API skill build.
-2. A **zero-dependency Python linter**: the pass/fail gate they write against,
-   plus a curated substitution dictionary.
+## Two ways to use it
+
+**1. Optimize the model's output, in the dialogue.**
+For product managers, designers, and anyone who wants less verbose answers. Turn
+STE mode on and Claude writes its replies in short, clear, controlled English.
+One install, then `/ste-on`.
+
+**2. Produce clearer documentation, on your own content.**
+For developers and technical writers. Check, rewrite, and standardize technical
+docs with `/ste-check`, `/ste-rewrite`, and `/ste-init`. A Desktop and API build
+brings the same to non-developers.
+
+Both share one core: a **Claude Code plugin** (the `ste-*` commands) and a
+**zero-dependency Python linter** with a curated dictionary that act as the
+objective pass/fail gate.
 
 > **Unofficial.** Not affiliated with or endorsed by ASD. See [NOTICE](NOTICE).
 > "Simplified Technical English" and "ASD-STE100" are trademarks of ASD
