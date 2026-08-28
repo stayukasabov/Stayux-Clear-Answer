@@ -22,10 +22,8 @@ WORD_SUBSTITUTIONS = {
     "assist": "help",
     "attempt": "try",
     "obtain": "get",
-    "require": "need",
-    "sufficient": "enough",
+    "require": "necessary",      # require (v) -> NECESSARY (adj) [Issue 9]
     "additional": "more",
-    "approximately": "about",
     "indicate": "show",
     "demonstrate": "show",
     "purchase": "buy",
@@ -55,6 +53,40 @@ WORD_SUBSTITUTIONS = {
     "assistance": "help",        # assistance (n) -> AID (n) / HELP (v)
     "blank": "seal",             # blank (v) -> SEAL (v)
     # NOTE: "subsequently" is an APPROVED word in Issue 9. Do not add it here.
+
+    # --- Common plain-English swaps (not from the copyrighted list) ---
+    # Well-established formal/wordy -> plain substitutions. Advisory warnings
+    # only. NOT claimed as Issue 9-verified; add here, not to the block above.
+    "accordingly": "so",
+    "aforementioned": "this",
+    "apparent": "clear",
+    "cease": "stop",
+    "comprehend": "understand",
+    "comprise": "include",
+    "deem": "think",
+    "designate": "name",
+    "discontinue": "stop",
+    "eliminate": "remove",
+    "excessive": "too much",
+    "expedite": "speed up",
+    "fabricate": "make",
+    "finalize": "finish",
+    "finalise": "finish",
+    "illustrate": "show",
+    "locate": "find",
+    "modify": "change",
+    "notify": "tell",
+    "objective": "goal",
+    "optimal": "best",
+    "provide": "give",
+    "rectify": "correct",
+    "relocate": "move",
+    "undertake": "do",
+    "verify": "check",
+    "whilst": "while",
+    # NOTE: the following are APPROVED words in Issue 9 -> do NOT flag them:
+    # approximately, sufficient, equivalent, previous, transmit.
+    # And do NOT suggest these banned words as replacements: need, expect, ask, now.
 }
 
 PHRASE_SUBSTITUTIONS = {
@@ -66,6 +98,16 @@ PHRASE_SUBSTITUTIONS = {
     "a number of": "some",
     "with regard to": "about",
     "in the process of": "during",
+    "as a result of": "because of",
+    "at this point in time": "at this time",
+    "at the present time": "at this time",
+    "for the purpose of": "to",
+    "in accordance with": "by",
+    "in close proximity to": "near",
+    "in conjunction with": "with",
+    "in spite of the fact that": "although",
+    "on a regular basis": "regularly",
+    "the majority of": "most",
 }
 
 # Terms removed from the ASD-STE100 word list in Issue 9. No approved
