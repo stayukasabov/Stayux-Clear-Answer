@@ -1,7 +1,9 @@
 # Stayux-STE-linter
 
-A fast, deterministic linter for **Simplified Technical English (STE)**, the
-terse, unambiguous controlled-English style based on the ASD-STE100 standard.
+A Claude Code plugin (with a Claude Desktop build) that makes Claude write in
+**Simplified Technical English (STE)**, the terse, unambiguous controlled-English
+style based on the ASD-STE100 standard. A fast, deterministic, zero-dependency
+Python linter sits at its core as the pass/fail gate.
 
 ## Two ways to use it
 
