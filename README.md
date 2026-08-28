@@ -190,10 +190,20 @@ uncontroversial plain-English swaps.
 
 It is **not** the official ~900-word list, which is copyrighted. Extend it two
 ways:
-- Add your own entries (including company technical terms).
-- Point the tool at **your own** official ASD-STE100 copy and paste the approved
-  words / substitutions into the maps. The official data is never shipped or
-  committed.
+- Add your own entries (including company technical terms) to
+  `scripts/ste_dictionary.py`.
+- Point the importer at **your own** official ASD-STE100 copy:
+
+  ```
+  python3 scripts/ste_import.py path/to/your-ste.pdf
+  ```
+
+  This parses your copy into a git-ignored `cache/official.json` (approved words
+  and substitutions). When that cache is present, the linter uses it: it adds the
+  official substitutions and stops flagging any word the standard actually
+  approves. The official data is read from disk, never shipped or committed, and
+  costs no model-context tokens. Needs `pdftotext` for a PDF, or pass an already
+  extracted `.txt`.
 
 ## Documentation
 

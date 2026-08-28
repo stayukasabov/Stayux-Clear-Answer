@@ -21,6 +21,37 @@ from ste_dictionary import (  # noqa: E402
     WORD_SUBSTITUTIONS, PHRASE_SUBSTITUTIONS, REMOVED_TERMS, CONTRACTIONS,
 )
 
+# Optional local cache built from the user's own official copy (never shipped).
+# See ste_import.py. Read from disk, so it costs no model-context tokens.
+DEFAULT_CACHE_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), os.pardir, "cache", "official.json")
+
+
+def load_cache(path=DEFAULT_CACHE_PATH):
+    """Return the parsed official cache, or None if it is absent/unreadable."""
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return None
+
+
+_DEFAULT_CACHE = load_cache()
+
+
+def _effective_maps(cache):
+    """Merge the seed with the cache: cache substitutions win, and any word the
+    cache marks approved is dropped from the word map (false-positive suppression).
+    """
+    words = dict(WORD_SUBSTITUTIONS)
+    phrases = dict(PHRASE_SUBSTITUTIONS)
+    if cache:
+        words.update(cache.get("word_substitutions", {}))
+        phrases.update(cache.get("phrase_substitutions", {}))
+        for w in cache.get("approved", ()):
+            words.pop(w, None)
+    return words, phrases
+
 PROFILES = {
     # STE distinguishes procedures (<=20 words) from descriptions (<=25).
     # "chat" is a pragmatic conversational subset; "full" is document-strict.
@@ -125,7 +156,8 @@ def _make(rule, severity, detail, text, line=None):
             "text": text, "line": line}
 
 
-def _check_sentence(sentence, cfg, violations, line):
+def _check_sentence(sentence, cfg, violations, line,
+                    word_subs=WORD_SUBSTITUTIONS, phrase_subs=PHRASE_SUBSTITUTIONS):
     words = _words(sentence)
     if len(words) > cfg["max_sentence_words"]:
         violations.append(_make(
@@ -156,10 +188,10 @@ def _check_sentence(sentence, cfg, violations, line):
             violations.append(_make(
                 "phrasal-verb", "warning",
                 f"'{w} {lower[i + 1]}' is a phrasal verb", sentence[:60], line))
-        if w in WORD_SUBSTITUTIONS:
+        if w in word_subs:
             violations.append(_make(
                 "unapproved-word", "warning",
-                f"use '{WORD_SUBSTITUTIONS[w]}' instead of '{w}'", sentence[:60], line))
+                f"use '{word_subs[w]}' instead of '{w}'", sentence[:60], line))
         if w in CONTRACTIONS:
             violations.append(_make(
                 "contraction", "error",
@@ -181,7 +213,7 @@ def _check_sentence(sentence, cfg, violations, line):
                     break
 
     low = sentence.lower()
-    for phrase, sub in PHRASE_SUBSTITUTIONS.items():
+    for phrase, sub in phrase_subs.items():
         if re.search(r"\b" + re.escape(phrase) + r"\b", low):
             violations.append(_make(
                 "unapproved-word", "warning",
@@ -193,8 +225,11 @@ def _check_sentence(sentence, cfg, violations, line):
                 f"'{term}' was removed from the ASD-STE100 word list", sentence[:60], line))
 
 
-def lint(text, profile="chat"):
+def lint(text, profile="chat", cache=None):
     cfg = PROFILES.get(profile, PROFILES["chat"])
+    if cache is None:
+        cache = _DEFAULT_CACHE
+    word_subs, phrase_subs = _effective_maps(cache)
     violations = []
 
     # Normalize curly apostrophes so contractions match regardless of source.
@@ -215,7 +250,7 @@ def lint(text, profile="chat"):
                 f"{len(sentences)} sentences (max {cfg['max_paragraph_sentences']})",
                 chunk[:60], line))
         for sentence in sentences:
-            _check_sentence(sentence, cfg, violations, line)
+            _check_sentence(sentence, cfg, violations, line, word_subs, phrase_subs)
 
     passed = not any(v["severity"] == "error" for v in violations)
     return {"passed": passed, "profile": profile, "violations": violations}
