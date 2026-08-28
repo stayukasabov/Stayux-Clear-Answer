@@ -222,8 +222,9 @@ ways:
 
 ## Roadmap
 
+- [x] Local official-dictionary parsing (bring your own copy) via
+  `scripts/ste_import.py` into a git-ignored cache
 - [ ] Custom / project dictionary loading (merge a user file over the seed)
-- [ ] Local official-dictionary parsing (bring your own copy)
 - [ ] Noun-cluster rule (needs part-of-speech tagging)
 
 ## License

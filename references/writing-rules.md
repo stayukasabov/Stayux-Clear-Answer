@@ -28,8 +28,12 @@ so `paragraph-length` applies to prose paragraphs only.
   adjectives. The v1 content-word heuristic produced false positives on normal
   prose, so the rule is removed until the dictionary/POS layer exists.
 - Full approved-word / meaning / part-of-speech conformance against the ~900-word
-  official dictionary. v1 ships a curated substitution seed only (see
-  `scripts/ste_dictionary.py`); extend it by pasting the official list.
+  official dictionary. The repo ships a curated substitution seed only (see
+  `scripts/ste_dictionary.py`). To widen coverage, run `scripts/ste_import.py`
+  on your own official copy: it parses the approved words and substitutions into
+  a git-ignored `cache/official.json` that the linter then uses. Matching is
+  still token-level (no meaning or part-of-speech resolution), so this remains a
+  warning layer, not full conformance.
 - Procedure-vs-description auto-detection (v1 uses profile choice instead).
 - One-topic-per-paragraph semantic check (LLM judgment, not deterministic).
 
