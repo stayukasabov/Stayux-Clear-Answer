@@ -70,17 +70,21 @@ Advisory (warnings that never fail the gate):
 - Unapproved words, with a suggested plain-English swap (curated seed map)
 - Words removed from the ASD-STE100 word list (Issue 9)
 
-## As a Claude Code plugin
+## Install
 
-This is the primary use. The repo doubles as a plugin marketplace, so install it
-with:
+Pick your client. Claude Code installs the plugin; Claude Desktop downloads the
+skill.
+
+### Claude Code (plugin)
+
+The repo doubles as a plugin marketplace:
 
 ```
 /plugin marketplace add stayukasabov/Stayux-STE-linter
 /plugin install stayux-ste@stayux
 ```
 
-Then use the commands:
+Commands:
 
 - `/ste-on`, `/ste-off`: turn STE dialogue mode on or off. While on, the
   assistant drafts each reply, gates it through the linter, and rewrites until it
@@ -93,6 +97,19 @@ Then use the commands:
 
 The plugin also loads automatically when you mention STE. See the skill at
 [`skills/ste-write/SKILL.md`](skills/ste-write/SKILL.md).
+
+### Claude Desktop (download the skill)
+
+No build needed. You download the ready skill and upload it once:
+
+1. Download `stayux-ste.zip` from the
+   [latest release](https://github.com/stayukasabov/Stayux-STE-linter/releases/latest).
+2. In Claude Desktop or claude.ai, open **Settings > Capabilities > Skills** and
+   upload the zip, then enable it.
+3. Ask Claude to reply in STE, for example "reply in STE".
+
+Custom skills need code execution, on the Pro, Max, Team, or Enterprise plans.
+Full notes are in [`desktop/README.md`](desktop/README.md).
 
 ## Before and after
 
@@ -119,21 +136,6 @@ The same question, answered with the skill off (Claude's normal prose) and on.
 > 3. Deploy timing. Look at the logs from the first 30 seconds after each rollout.
 
 Same information. The STE reply is shorter, scannable, and faster to act on.
-
-## Claude Desktop and the API
-
-The skill is not only for developers. The whole technical-documentation process
-benefits, including technical writers, designers, and project managers, and
-those roles usually work in Claude Desktop. A Desktop and API build lives in
-[`desktop/`](desktop/README.md): the same linter, packaged as an uploaded skill
-that runs in the code-execution container. Build the upload bundle with:
-
-```bash
-bash build-desktop-skill.sh   # writes dist/stayux-ste.zip
-```
-
-In Desktop you turn STE on by asking for it (for example "reply in STE"), rather
-than the Claude Code `/ste-on` command. See [`desktop/README.md`](desktop/README.md).
 
 ## The linter directly
 

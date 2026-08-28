@@ -24,18 +24,27 @@ set.
 - **No install on the machine.** The linter is zero-dependency stdlib Python, so
   the sandbox runs it with no setup.
 
-## Use it (end users)
+## Install it (end users, no build)
 
-1. Add the skill to your workspace (see "Build and upload" below, or use a
-   prepared `stayux-ste.zip`).
-2. In a chat, ask Claude to reply in STE. Ask for the "full" profile when you
+You do not build anything. You only need the finished `stayux-ste.zip`.
+
+1. Download `stayux-ste.zip` from the repository
+   [Releases](https://github.com/stayukasabov/Stayux-STE-linter/releases).
+2. In Claude Desktop or claude.ai, open **Settings > Capabilities > Skills**
+   (also shown as Settings > Features).
+3. **Upload** the zip, then enable the skill.
+4. In a chat, ask Claude to reply in STE. Ask for the "full" profile when you
    want strict document style (sentences of 20 words or fewer).
-3. Continue as normal. Claude keeps replies in STE until you ask for normal
+5. Continue as normal. Claude keeps replies in STE until you ask for normal
    prose again.
 
-## Build and upload (maintainers)
+Custom skills need code execution enabled. They are available on the Pro, Max,
+Team, and Enterprise plans.
 
-From the repository root, assemble the flat upload bundle:
+## Build the zip (maintainers)
+
+End users do not need this. It rebuilds the release asset. From the repository
+root:
 
 ```bash
 bash build-desktop-skill.sh
@@ -52,8 +61,8 @@ stayux-ste/
 └── writing-rules.md
 ```
 
-Upload `dist/stayux-ste.zip` as a custom skill (via the API `/v1/skills` endpoint or
-your workspace skill settings), then attach it to the model as documented in the
+Upload `dist/stayux-ste.zip` as a custom skill (via the API `/v1/skills` endpoint,
+or attach it to a GitHub Release for end users), as documented in the
 [Skills guide](https://platform.claude.com/docs/en/build-with-claude/skills-guide).
 Skills require the code execution tool.
 
