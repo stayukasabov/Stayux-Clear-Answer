@@ -1,7 +1,7 @@
 {
   "name": "stayux",
-  "description": "STAYUX tools for Claude Code. Includes the Stayux STE plugin for Simplified Technical English (ASD-STE100).",
-  "owner": { "name": "STAYUX - STAYU KASABOV" },
+  "description": "Stayux tools for Claude Code. Includes the Stayux STE plugin for Simplified Technical English (ASD-STE100).",
+  "owner": { "name": "Stayux (Stayu Kasabov)", "url": "https://github.com/stayukasabov" },
   "plugins": [
     {
       "name": "stayux-ste",
