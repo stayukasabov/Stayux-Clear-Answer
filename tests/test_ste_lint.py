@@ -242,6 +242,32 @@ class OneInstructionTests(unittest.TestCase):
         self.assertNotIn("one-instruction", errors(r))
 
 
+class WordinessTests(unittest.TestCase):
+    def _detail(self, result, rule):
+        return next(v["detail"] for v in result["violations"] if v["rule"] == rule)
+
+    def test_filler_phrase_flagged(self):
+        r = ste_lint.lint("It is important to note that the valve is open.")
+        self.assertIn("wordiness", rules(r))
+
+    def test_wordiness_is_warning_not_error(self):
+        r = ste_lint.lint("It is important to note that the valve is open.")
+        self.assertNotIn("wordiness", errors(r))
+        self.assertTrue(r["passed"])
+
+    def test_wordiness_detail_names_the_phrase(self):
+        r = ste_lint.lint("It is important to note that the valve is open.")
+        self.assertIn("it is important to note that", self._detail(r, "wordiness").lower())
+
+    def test_the_fact_that_flagged(self):
+        r = ste_lint.lint("The fact that it failed is clear.")
+        self.assertIn("wordiness", rules(r))
+
+    def test_clean_sentence_has_no_wordiness(self):
+        r = ste_lint.lint("Open the valve.")
+        self.assertNotIn("wordiness", rules(r))
+
+
 class CliTests(unittest.TestCase):
     def _run(self, text, *args):
         return subprocess.run(
