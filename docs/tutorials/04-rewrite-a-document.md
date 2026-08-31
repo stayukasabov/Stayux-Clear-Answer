@@ -1,13 +1,13 @@
 # 4. Rewrite a document
 
-`/ste-rewrite` turns text into STE and shows a before and after. Use it to fix a
-draft, not just to find problems.
+`/clear-rewrite` turns text into short, plain English and shows a before and
+after. Use it to fix a draft, not just to find problems.
 
 ## Steps
 
 1. Point at the sample file, or paste your own text:
    ```
-   /ste-rewrite docs/tutorials/examples/sample-procedure.md
+   /clear-rewrite docs/tutorials/examples/sample-procedure.md
    ```
 2. Claude rewrites the text, checks the result with the linter, and shows both
    versions.
@@ -25,7 +25,7 @@ Before:
 >
 > Open the access panel and remove the four bolts.
 
-After (STE, strict profile):
+After (Clear Answer, strict profile):
 
 > Use the diagnostic tool to check the primary hydraulic pump. Do this check
 > before each flight.

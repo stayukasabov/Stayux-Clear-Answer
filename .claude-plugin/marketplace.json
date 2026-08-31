@@ -1,15 +1,15 @@
 {
   "name": "stayux",
-  "description": "Stayux tools for Claude Code. Includes the Stayux STE plugin for Simplified Technical English (ASD-STE100).",
+  "description": "Stayux tools for Claude Code. Includes Stayux Clear Answer, which makes Claude reply in short, plain English (compatible with ASD-STE100).",
   "owner": { "name": "Stayux (Stayu Kasabov)", "url": "https://github.com/stayukasabov" },
   "plugins": [
     {
       "name": "stayux-ste",
       "source": ".",
-      "description": "Simplified Technical English (ASD-STE100) for Claude Code: dialogue mode plus ste-check, ste-rewrite, ste-init, and ste-mode. Zero-dependency Python linter and curated dictionary.",
+      "description": "Clear Answer: make Claude reply in short, plain English. Dialogue mode plus clear-check, clear-rewrite, clear-init, and clear-mode (with /ste-* aliases). Zero-dependency Python linter. Compatible with ASD-STE100.",
       "version": "0.1.0",
       "license": "MIT",
-      "keywords": ["ste", "asd-ste100", "technical-writing"],
+      "keywords": ["clear-answer", "plain-english", "ste", "asd-ste100", "technical-writing"],
       "category": "productivity"
     }
   ]

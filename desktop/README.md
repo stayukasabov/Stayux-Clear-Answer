@@ -1,23 +1,23 @@
-# Stayux-STE-linter for Claude Desktop and the API
+# Stayux Clear Answer for Claude Desktop and the API
 
-The same STE writing guard as the Claude Code skill, packaged so it runs in
-Claude Desktop and through the API. It suits the whole technical-documentation
-process, not only engineers: technical writers, designers, and project managers
-who want compact, clear output from Claude.
+The same writing guard as the Claude Code plugin, packaged so it runs in Claude
+Desktop and through the API. It suits the whole technical-documentation process,
+not only engineers: technical writers, designers, and project managers who want
+compact, clear output from Claude.
 
 ## What it does
 
-It makes Claude write in Simplified Technical English (STE), a controlled-English
-standard for short, exact, unambiguous text. Claude drafts a reply, checks it
-against a bundled Python linter (the pass/fail gate), and rewrites until it
-passes. See the [main README](../README.md) for the token economy and the rule
-set.
+It makes Claude write in short, plain English, based on Simplified Technical
+English (STE), a controlled-English standard for exact, unambiguous text. Claude
+drafts a reply, checks it against a bundled Python linter (the pass/fail gate),
+and rewrites until it passes. See the [main README](../README.md) for the token
+economy and the rule set.
 
 ## How it differs from the Claude Code version
 
-- **Activation.** Claude Code uses the plugin commands (`/ste-on`, `/ste-off`, `/ste-check`, `/ste-rewrite`, `/ste-init`, `/ste-mode`).
-  Here you turn it on by asking: "reply in STE", "use Simplified Technical
-  English", or "STE on". It is off until you ask.
+- **Activation.** Claude Code uses the plugin commands (`/clear-on`, `/clear-off`, `/clear-check`, `/clear-rewrite`, `/clear-init`, `/clear-mode`, with `/ste-*` aliases).
+  Here you turn it on by asking: "reply in plain English", "reply in STE", or
+  "clear answer on". It is off until you ask.
 - **Packaging.** Claude Code loads the skill from a local folder. Desktop and the
   API load an uploaded skill that runs in a code-execution container, so the
   files are bundled flat and the linter runs inside that sandbox.
@@ -33,10 +33,10 @@ You do not build anything. You only need the finished `stayux-ste.zip`.
 2. In Claude Desktop or claude.ai, open **Settings > Capabilities > Skills**
    (also shown as Settings > Features).
 3. **Upload** the zip, then enable the skill.
-4. In a chat, ask Claude to reply in STE. Ask for the "full" profile when you
+4. In a chat, ask Claude for a clear answer. Ask for the "full" profile when you
    want strict document style (sentences of 20 words or fewer).
-5. Continue as normal. Claude keeps replies in STE until you ask for normal
-   prose again.
+5. Continue as normal. Claude keeps replies short and plain until you ask for
+   normal prose again.
 
 Custom skills need code execution enabled. They are available on the Pro, Max,
 Team, and Enterprise plans.
@@ -72,7 +72,7 @@ The same question, answered with the skill off (normal prose) and on.
 
 **You:** The API returns 502 sometimes right after a deploy. What should I check?
 
-**STE off (default):**
+**Clear Answer off (default):**
 
 > Intermittent 502s just after a deploy usually mean traffic reaches new
 > instances before they are ready to serve it, so the first thing I would look
@@ -80,14 +80,14 @@ The same question, answered with the skill off (normal prose) and on.
 > can handle requests. Beyond that, it is worth confirming that the load balancer
 > drains connections from the old instances gracefully during the rollout.
 
-**STE on:**
+**Clear Answer on:**
 
 > Check three things.
 > 1. Readiness probes. Confirm they pass only when the app can serve requests.
 > 2. Connection draining. Make sure the load balancer removes old pods before it stops them.
 > 3. Deploy timing. Look at the logs from the first 30 seconds after each rollout.
 
-Same information. The STE reply is shorter, scannable, and faster to act on.
+Same information. The Clear Answer reply is shorter, scannable, and faster to act on.
 
 ## License
 

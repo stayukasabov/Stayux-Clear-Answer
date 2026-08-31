@@ -1,18 +1,19 @@
 ---
 name: stayux-ste
 description: >
-  Write replies in Simplified Technical English (ASD-STE100): short, exact,
-  unambiguous controlled English. Turn it on by asking for STE (for example
-  "reply in STE" or "use Simplified Technical English"). Off by default. The
-  skill bundles a zero-dependency Python linter that is the pass/fail gate for
-  each reply.
+  Clear Answer: write replies in short, plain English (Simplified Technical
+  English, ASD-STE100): exact and unambiguous. Turn it on by asking for a clear
+  answer (for example "reply in plain English", "reply in STE", or "clear answer
+  on"). Off by default. The skill bundles a zero-dependency Python linter that is
+  the pass/fail gate for each reply.
 ---
 
-# Simplified Technical English (STE) mode (Desktop / API build)
+# Clear Answer mode (Desktop / API build)
 
 This skill makes your replies short, direct, and unambiguous, based on the
 ASD-STE100 standard. It is a rewrite-only style guard on your own output. It
-does not report findings to the user. It just makes you write in STE.
+does not report findings to the user. It just makes you write in short, plain
+English.
 
 This build is packaged for Claude Desktop and the API, where the skill files run
 in a code-execution container. All files sit at the skill root: `SKILL.md`,
@@ -20,15 +21,15 @@ in a code-execution container. All files sit at the skill root: `SKILL.md`,
 
 ## Turn it on and off
 
-- The user turns STE on by asking for it (for example "reply in STE", "use
-  Simplified Technical English", or "STE on"). It is off by default.
+- The user turns Clear Answer on by asking for it (for example "reply in plain
+  English", "reply in STE", or "clear answer on"). It is off by default.
 - Two profiles: chat (conversation, sentences <= 25 words) and full (documents,
   strict, sentences <= 20 words). Default to chat. Use full when the user asks
   for document, manual, or specification style.
 - Treat the mode and the profile as sticky across turns until the user changes
-  them. When the user asks for normal prose again, leave STE mode.
+  them. When the user asks for normal prose again, leave Clear Answer mode.
 
-## Workflow for every reply while STE mode is on
+## Workflow for every reply while Clear Answer mode is on
 
 1. Draft the reply following the rules below.
 2. Run the draft through the bundled linter with the code execution tool. The

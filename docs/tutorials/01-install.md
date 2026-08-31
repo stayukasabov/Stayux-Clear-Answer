@@ -1,6 +1,6 @@
 # 1. Install the plugin
 
-Stayux-STE-linter installs as a Claude Code plugin. The repo is also its own
+Stayux Clear Answer installs as a Claude Code plugin. The repo is also its own
 plugin marketplace.
 
 ## Steps
@@ -14,8 +14,9 @@ plugin marketplace.
    ```
    /plugin install stayux-ste@stayux
    ```
-4. Confirm the commands are available. Type `/ste-` and look for `ste-on`,
-   `ste-off`, `ste-mode`, `ste-check`, `ste-rewrite`, and `ste-init`.
+4. Confirm the commands are available. Type `/clear-` and look for `clear-on`,
+   `clear-off`, `clear-mode`, `clear-check`, `clear-rewrite`, and `clear-init`.
+   The legacy `ste-*` names still work as aliases.
 
 ## Local install (for development)
 
