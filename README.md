@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Stayux-Clear-Answer.png" alt="Stayux Clear Answer — make Claude reply in short, plain English, in the dialogue and on your documents" width="820">
+</p>
+
 # Stayux Clear Answer
 
 **Clear Answer** makes Claude reply in short, plain English, both in the dialogue
