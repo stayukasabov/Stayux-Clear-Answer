@@ -1,13 +1,12 @@
 ---
-name: clear-rewrite
-description: Rewrite the given text or file into short, plain English, then show a before/after comparison. Alias of /ste-rewrite.
+name: rewrite
+description: Rewrite the given text or file into short, plain English, then show a before/after comparison.
 ---
 
 # Rewrite into plain English
 
 Take the user's text (the command argument, a pasted block, or a named file) and
-rewrite it into short, plain English (Simplified Technical English). This is the
-same as `/ste-rewrite`.
+rewrite it into short, plain English (Simplified Technical English).
 
 1. Rewrite the text using the rules in
    `${CLAUDE_PLUGIN_ROOT}/references/writing-rules.md`.

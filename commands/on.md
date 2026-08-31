@@ -1,14 +1,14 @@
 ---
-name: clear-on
-description: Turn on Clear Answer mode. Every following reply is written in short, plain English and gated by the linter until you run /clear-off. Alias of /ste-on.
+name: on
+description: Turn on Clear Answer mode. Every following reply is written in short, plain English and gated by the linter until you run /clear-answer:off.
 ---
 
 # Turn on Clear Answer mode
 
-Enter Clear Answer mode with the chat profile. This is the same mode as `/ste-on`.
-From now until the user runs `/clear-off` (or `/clear-mode off`), write every reply
-in short, direct, plain English (Simplified Technical English, ASD-STE100). This is
-a rewrite-only guard on your own output. Do not report findings to the user.
+Enter Clear Answer mode with the chat profile. From now until the user runs
+`/clear-answer:off` (or `/clear-answer:mode off`), write every reply in short,
+direct, plain English (Simplified Technical English, ASD-STE100). This is a
+rewrite-only guard on your own output. Do not report findings to the user.
 
 Treat the mode as sticky across turns until the user changes it.
 
@@ -27,5 +27,5 @@ Treat the mode as sticky across turns until the user changes it.
    until `passed` is true.
 4. Send only the final compliant text. Do not show the linter output.
 
-Use `/clear-mode strict` for document-strict checking (sentences of 20 words or
-fewer).
+Use `/clear-answer:mode strict` for document-strict checking (sentences of 20
+words or fewer).

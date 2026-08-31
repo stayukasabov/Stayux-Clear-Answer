@@ -1,6 +1,6 @@
 # 3. Check a document
 
-`/clear-check` runs the linter on a file or pasted text and reports the problems. It
+`/clear-answer:check` runs the linter on a file or pasted text and reports the problems. It
 does not rewrite. Use it to audit documentation.
 
 ## Steps
@@ -10,7 +10,7 @@ does not rewrite. Use it to audit documentation.
    your own `.md` or `.txt`.
 2. Run the check:
    ```
-   /clear-check docs/tutorials/examples/sample-procedure.md
+   /clear-answer:check docs/tutorials/examples/sample-procedure.md
    ```
 3. Read the report. Each line is `line: severity: rule, detail`. Errors fail the
    gate; warnings are advisory.

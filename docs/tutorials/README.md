@@ -24,10 +24,10 @@ draft. Tutorials 3 and 4 use it.
 
 ## The commands, at a glance
 
-Each command has a legacy `/ste-*` alias that does the same thing.
+All commands live under the `/clear-answer:` namespace.
 
-- `/clear-on`, `/clear-off`: turn Clear Answer dialogue mode on or off.
-- `/clear-mode off|prose|strict`: set the strictness.
-- `/clear-check`: check a file or text and report the violations.
-- `/clear-rewrite`: rewrite text into plain English with a before and after.
-- `/clear-init`: add the rules to the project's CLAUDE.md.
+- `/clear-answer:on`, `/clear-answer:off`: turn Clear Answer dialogue mode on or off.
+- `/clear-answer:mode off|prose|strict`: set the strictness.
+- `/clear-answer:check`: check a file or text and report the violations.
+- `/clear-answer:rewrite`: rewrite text into plain English with a before and after.
+- `/clear-answer:init`: add the rules to the project's CLAUDE.md.

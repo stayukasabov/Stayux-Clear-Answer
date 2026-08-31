@@ -1,13 +1,13 @@
 # 4. Rewrite a document
 
-`/clear-rewrite` turns text into short, plain English and shows a before and
+`/clear-answer:rewrite` turns text into short, plain English and shows a before and
 after. Use it to fix a draft, not just to find problems.
 
 ## Steps
 
 1. Point at the sample file, or paste your own text:
    ```
-   /clear-rewrite docs/tutorials/examples/sample-procedure.md
+   /clear-answer:rewrite docs/tutorials/examples/sample-procedure.md
    ```
 2. Claude rewrites the text, checks the result with the linter, and shows both
    versions.

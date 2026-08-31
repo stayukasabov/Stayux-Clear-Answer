@@ -7,18 +7,18 @@ Claude drafts each reply, checks it with the linter, and rewrites until it passe
 
 1. Turn the mode on:
    ```
-   /clear-on
+   /clear-answer:on
    ```
 2. Ask a normal question, for example: "How do I restart the service after a
    config change?"
 3. Claude replies with short sentences, active voice, and one instruction each.
 4. For strict, document-style output (sentences of 20 words or fewer), use:
    ```
-   /clear-mode strict
+   /clear-answer:mode strict
    ```
 5. Turn the mode off to return to normal prose:
    ```
-   /clear-off
+   /clear-answer:off
    ```
 
 ## Before and after
@@ -41,8 +41,8 @@ On (Clear Answer):
 
 ## Notes
 
-- The mode is sticky. It stays on across turns until you run `/clear-off` or
-  `/clear-mode off`.
+- The mode is sticky. It stays on across turns until you run `/clear-answer:off` or
+  `/clear-answer:mode off`.
 - `prose` uses the chat profile (25 words). `strict` uses the full profile (20
   words).
 - Clear Answer mode is a rewrite-only guard. Claude does not show you the linter

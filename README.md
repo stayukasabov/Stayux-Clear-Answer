@@ -5,26 +5,24 @@ and on your documents. It is a **plain-English and technical-clarity linter**,
 **compatible with Simplified Technical English (ASD-STE100)**. The shipped rules
 and word list are original, aligned with the Google (CC BY 4.0) and Microsoft
 style guides; **bring your own** official ASD-STE100 copy for full conformance. On
-Claude Code it is a bundle of `clear-*` commands (with `ste-*` aliases) plus an
-auto-loading skill; on Desktop it is a single uploaded skill. A fast,
+Claude Code it is a bundle of `/clear-answer:` commands plus an auto-loading
+skill; on Desktop it is a single uploaded skill. A fast,
 deterministic, zero-dependency Python linter sits at its core as the pass/fail
 gate.
 
 ## Usage
 
-**On Claude Code** (slash commands; each has a `/ste-*` alias that does the same):
+**On Claude Code** (slash commands, all under the `/clear-answer:` namespace):
 
-- `/clear-on` — turn Clear Answer mode on; every reply comes back in short, plain
-  English, gated by the linter (alias `/ste-on`).
-- `/clear-off` — turn it off and return to normal prose (alias `/ste-off`).
-- `/clear-mode off|prose|strict` — set strictness: `prose` uses the chat profile,
-  `strict` the full document profile (alias `/ste-mode`).
-- `/clear-check` — check a file or pasted text and report the violations; no
-  rewrite (alias `/ste-check`).
-- `/clear-rewrite` — rewrite text into plain English with a before/after (alias
-  `/ste-rewrite`).
-- `/clear-init` — add the Clear Answer rules to the project's CLAUDE.md (alias
-  `/ste-init`).
+- `/clear-answer:on` — turn Clear Answer mode on; every reply comes back in short,
+  plain English, gated by the linter.
+- `/clear-answer:off` — turn it off and return to normal prose.
+- `/clear-answer:mode off|prose|strict` — set strictness: `prose` uses the chat
+  profile, `strict` the full document profile.
+- `/clear-answer:check` — check a file or pasted text and report the violations; no
+  rewrite.
+- `/clear-answer:rewrite` — rewrite text into plain English with a before/after.
+- `/clear-answer:init` — add the Clear Answer rules to the project's CLAUDE.md.
 
 It also loads automatically when you ask for a clear answer, plain English, or STE.
 
@@ -42,11 +40,11 @@ It also loads automatically when you ask for a clear answer, plain English, or S
 **1. Optimize the model's output, in the dialogue.**
 For product managers, designers, and anyone who wants less verbose answers. Turn
 Clear Answer mode on and Claude writes its replies in short, clear, controlled
-English. One install, then `/clear-on`.
+English. One install, then `/clear-answer:on`.
 
 **2. Produce clearer documentation, on your own content.**
 For developers and technical writers. Check, rewrite, and standardize technical
-docs with `/clear-check`, `/clear-rewrite`, and `/clear-init`. A Desktop and API build
+docs with `/clear-answer:check`, `/clear-answer:rewrite`, and `/clear-answer:init`. A Desktop and API build
 brings the same to non-developers.
 
 Both share one core: a **Claude Code plugin** (the `clear-*` commands) and a
@@ -103,10 +101,10 @@ public, so treat them as approximate, not exact.
 The last row is the point: that material never enters the context window. An
 LLM-only skill would load and reason over the equivalent every turn.
 
-Claude Code reports its own projection. Run `claude plugin details stayux-clear-answer`: it
+Claude Code reports its own projection. Run `claude plugin details clear-answer`: it
 shows about 429 tokens always-on for the whole plugin (every command and skill
 description, so Claude knows when to use each), plus an on-invoke cost each time a
-command fires (for example `/clear-on` about 400, `/clear-check` about 320). Those are
+command fires (for example `/clear-answer:on` about 400, `/clear-answer:check` about 320). Those are
 estimates too. They measure a different thing from the table above: the always-on
 figure is all seven descriptions loaded up front, while the table is one flow, a
 skill body plus its lint round-trips.
@@ -139,23 +137,21 @@ The repo doubles as a plugin marketplace:
 
 ```
 /plugin marketplace add stayukasabov/Stayux-Clear-Answer
-/plugin install stayux-clear-answer@stayux
+/plugin install clear-answer@stayux
 ```
 
-Update later with `/plugin update stayux-clear-answer`, then restart Claude Code to apply.
+Update later with `/plugin update clear-answer`, then restart Claude Code to apply.
 
-Commands. Each has a Clear Answer name and a legacy `/ste-*` alias; both do the
-same thing.
+Commands, all under the `/clear-answer:` namespace:
 
-- `/clear-on`, `/clear-off` (aliases `/ste-on`, `/ste-off`): turn Clear Answer
-  dialogue mode on or off. While on, the assistant drafts each reply, gates it
-  through the linter, and rewrites until it passes.
-- `/clear-mode off|prose|strict` (alias `/ste-mode`): set strictness (prose uses
-  the chat profile, strict uses the full profile).
-- `/clear-check` (alias `/ste-check`): check a file or text and report the
-  violations.
-- `/clear-rewrite` (alias `/ste-rewrite`): rewrite text with a before and after.
-- `/clear-init` (alias `/ste-init`): add the rules to the project's CLAUDE.md.
+- `/clear-answer:on`, `/clear-answer:off`: turn Clear Answer dialogue mode on or
+  off. While on, the assistant drafts each reply, gates it through the linter, and
+  rewrites until it passes.
+- `/clear-answer:mode off|prose|strict`: set strictness (prose uses the chat
+  profile, strict uses the full profile).
+- `/clear-answer:check`: check a file or text and report the violations.
+- `/clear-answer:rewrite`: rewrite text with a before and after.
+- `/clear-answer:init`: add the rules to the project's CLAUDE.md.
 
 The plugin also loads automatically when you ask for a clear answer, plain
 English, or STE. See the skill at

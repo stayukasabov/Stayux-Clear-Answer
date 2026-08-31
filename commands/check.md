@@ -1,12 +1,12 @@
 ---
-name: clear-check
-description: Check a file, files, or pasted text against the Clear Answer rules and report the violations. Does not rewrite. Alias of /ste-check.
+name: check
+description: Check a file, files, or pasted text against the Clear Answer rules and report the violations. Does not rewrite.
 ---
 
 # Check text against the Clear Answer rules
 
 Lint the target and report the findings to the user. This command is a checker,
-not a rewriter. It is the same as `/ste-check`.
+not a rewriter.
 
 Find the target from the argument:
 
@@ -21,4 +21,5 @@ Find the target from the argument:
 
 Summarize the result for the user: the pass or fail status, then each violation
 as its line, severity, rule, and detail. Errors fail the gate; warnings do not.
-Do not rewrite unless the user asks. For a rewrite, point them to `/clear-rewrite`.
+Do not rewrite unless the user asks. For a rewrite, point them to
+`/clear-answer:rewrite`.

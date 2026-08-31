@@ -2,13 +2,13 @@
 
 ## Add the Clear Answer rules to a repo
 
-`/clear-init` writes a short rules section into the project's CLAUDE.md, so every
+`/clear-answer:init` writes a short rules section into the project's CLAUDE.md, so every
 session in that repo writes to the standard.
 
 1. Open Claude Code in the repo.
 2. Run:
    ```
-   /clear-init
+   /clear-answer:init
    ```
 3. Claude adds or updates a "Clear Answer (plain-English rules)" section in
    `CLAUDE.md`, then shows you what it added.

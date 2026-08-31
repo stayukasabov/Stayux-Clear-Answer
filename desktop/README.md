@@ -15,7 +15,7 @@ economy and the rule set.
 
 ## How it differs from the Claude Code version
 
-- **Activation.** Claude Code uses the plugin commands (`/clear-on`, `/clear-off`, `/clear-check`, `/clear-rewrite`, `/clear-init`, `/clear-mode`, with `/ste-*` aliases).
+- **Activation.** Claude Code uses the plugin commands (`/clear-answer:on`, `/clear-answer:off`, `/clear-answer:check`, `/clear-answer:rewrite`, `/clear-answer:init`, `/clear-answer:mode`).
   Here you turn it on by asking: "reply in plain English", "reply in STE", or
   "clear answer on". It is off until you ask.
 - **Packaging.** Claude Code loads the skill from a local folder. Desktop and the
