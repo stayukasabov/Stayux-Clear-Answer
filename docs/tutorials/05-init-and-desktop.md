@@ -29,6 +29,9 @@ and project managers, who usually work in Desktop.
    [`desktop/README.md`](../../desktop/README.md) for the upload flow.
 3. In a chat, ask Claude for a clear answer, for example "reply in plain English"
    or "rewrite this in Simplified Technical English".
+4. Turn it off with words when you are done, for example "clear answer off" or
+   "reply in normal prose". Desktop has no slash commands, so you turn the mode
+   on and off by asking.
 
 See [`desktop/README.md`](../../desktop/README.md) for the full Desktop and API
 notes.

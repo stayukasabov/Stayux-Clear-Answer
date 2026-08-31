@@ -35,8 +35,10 @@ You do not build anything. You only need the finished `stayux-ste.zip`.
 3. **Upload** the zip, then enable the skill.
 4. In a chat, ask Claude for a clear answer. Ask for the "full" profile when you
    want strict document style (sentences of 20 words or fewer).
-5. Continue as normal. Claude keeps replies short and plain until you ask for
-   normal prose again.
+5. Continue as normal. Claude keeps replies short and plain until you turn it off.
+6. Turn it off with words, the same way you turned it on. Say "clear answer off",
+   "reply in normal prose", or "stop the plain English". Claude then returns to
+   its normal voice.
 
 Custom skills need code execution enabled. They are available on the Pro, Max,
 Team, and Enterprise plans.
