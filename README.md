@@ -203,6 +203,33 @@ The same question, answered with the skill off (Claude's normal prose) and on.
 
 Same information. The Clear Answer reply is shorter, scannable, and faster to act on.
 
+**You:** When should I use a modal instead of a full page for a form?
+
+**Clear Answer off (default):**
+
+> It depends on the length and importance of the task, but the rule of thumb is
+> that modals are best for short, focused interactions where you don't want to
+> lose the context behind them, whereas full pages are better when there's more
+> going on. If the form is only a few fields and the user can finish quickly, a
+> modal keeps them in flow and avoids a jarring navigation. If the form is long,
+> has multiple steps, needs scrolling, or holds work the user could lose, a full
+> page is usually safer, since modals aren't great for anything the user might
+> want to save or come back to. You should also think about mobile, where modals
+> feel cramped, and accessibility, where full pages are more forgiving.
+
+**Clear Answer on:**
+
+> Use a modal for a short task. Use a full page for a long task.
+> 1. Fields. Use a modal for five fields or fewer.
+> 2. Focus. Use a modal when the user does one small task.
+> 3. Context. Use a modal when the user must see the page behind it.
+> 4. Length. Use a full page when the page needs a scroll.
+> 5. Steps. Use a full page when the task has more than one step.
+> 6. Loss. Do not put work the user can lose in a modal.
+> 7. Phone. Use a full page on a small screen.
+
+Same decision, laid out as rules you can check one by one.
+
 ## The linter directly
 
 The gate reads text on stdin (or `--text`) and prints a JSON result, exiting 1
