@@ -10,6 +10,33 @@ auto-loading skill; on Desktop it is a single uploaded skill. A fast,
 deterministic, zero-dependency Python linter sits at its core as the pass/fail
 gate.
 
+## Usage
+
+**On Claude Code** (slash commands; each has a `/ste-*` alias that does the same):
+
+- `/clear-on` — turn Clear Answer mode on; every reply comes back in short, plain
+  English, gated by the linter (alias `/ste-on`).
+- `/clear-off` — turn it off and return to normal prose (alias `/ste-off`).
+- `/clear-mode off|prose|strict` — set strictness: `prose` uses the chat profile,
+  `strict` the full document profile (alias `/ste-mode`).
+- `/clear-check` — check a file or pasted text and report the violations; no
+  rewrite (alias `/ste-check`).
+- `/clear-rewrite` — rewrite text into plain English with a before/after (alias
+  `/ste-rewrite`).
+- `/clear-init` — add the Clear Answer rules to the project's CLAUDE.md (alias
+  `/ste-init`).
+
+It also loads automatically when you ask for a clear answer, plain English, or STE.
+
+**On Claude Desktop** (no slash commands; you turn it on and off with words):
+
+- Turn on — say "reply in plain English", "reply in STE", or "clear answer on".
+  Off by default until you ask.
+- Strict document style — ask for the "full" profile (sentences of 20 words or
+  fewer).
+- Turn off — say "clear answer off", "reply in normal prose", or "stop the plain
+  English".
+
 ## Two ways to use it
 
 **1. Optimize the model's output, in the dialogue.**
@@ -33,6 +60,7 @@ objective pass/fail gate.
 
 ## Contents
 
+- [Usage](#usage): [Claude Code](#usage) commands and [Claude Desktop](#usage)
 - [Two ways to use it](#two-ways-to-use-it)
 - [Why](#why), and the [token economy](#token-economy-measured)
 - [What it checks](#what-it-checks)
