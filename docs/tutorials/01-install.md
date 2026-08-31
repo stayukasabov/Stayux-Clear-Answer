@@ -12,7 +12,7 @@ plugin marketplace.
    ```
 3. Install the plugin:
    ```
-   /plugin install stayux-ste@stayux
+   /plugin install stayux-clear-answer@stayux
    ```
 4. Confirm the commands are available. Type `/clear-` and look for `clear-on`,
    `clear-off`, `clear-mode`, `clear-check`, `clear-rewrite`, and `clear-init`.
@@ -25,7 +25,7 @@ folder:
 
 ```
 /plugin marketplace add /path/to/Stayux-Clear-Answer
-/plugin install stayux-ste@stayux
+/plugin install stayux-clear-answer@stayux
 ```
 
 ## Update later
@@ -33,11 +33,11 @@ folder:
 When a new version ships, refresh the plugin:
 
 ```
-/plugin update stayux-ste
+/plugin update stayux-clear-answer
 ```
 
 Restart Claude Code to apply the update. From a terminal you can also run
-`claude plugin update stayux-ste`.
+`claude plugin update stayux-clear-answer`.
 
 ## Check your Python
 

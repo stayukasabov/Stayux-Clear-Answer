@@ -4,7 +4,7 @@
   "owner": { "name": "Stayux (Stayu Kasabov)", "url": "https://github.com/stayukasabov" },
   "plugins": [
     {
-      "name": "stayux-ste",
+      "name": "stayux-clear-answer",
       "source": ".",
       "description": "Clear Answer: make Claude reply in short, plain English. Dialogue mode plus clear-check, clear-rewrite, clear-init, and clear-mode (with /ste-* aliases). Zero-dependency Python linter. Compatible with ASD-STE100.",
       "version": "0.1.0",

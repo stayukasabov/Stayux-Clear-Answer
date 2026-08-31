@@ -26,9 +26,9 @@ economy and the rule set.
 
 ## Install it (end users, no build)
 
-You do not build anything. You only need the finished `stayux-ste.zip`.
+You do not build anything. You only need the finished `stayux-clear-answer.zip`.
 
-1. Download `stayux-ste.zip` from the repository
+1. Download `stayux-clear-answer.zip` from the repository
    [Releases](https://github.com/stayukasabov/Stayux-Clear-Answer/releases).
 2. In Claude Desktop or claude.ai, open **Settings > Capabilities > Skills**
    (also shown as Settings > Features).
@@ -50,20 +50,20 @@ root:
 
 ```bash
 bash build-desktop-skill.sh
-# writes dist/stayux-ste/ and dist/stayux-ste.zip
+# writes dist/stayux-clear-answer/ and dist/stayux-clear-answer.zip
 ```
 
 The bundle is flat, as the container expects:
 
 ```
-stayux-ste/
+stayux-clear-answer/
 ├── SKILL.md
 ├── ste_lint.py
 ├── ste_dictionary.py
 └── writing-rules.md
 ```
 
-Upload `dist/stayux-ste.zip` as a custom skill (via the API `/v1/skills` endpoint,
+Upload `dist/stayux-clear-answer.zip` as a custom skill (via the API `/v1/skills` endpoint,
 or attach it to a GitHub Release for end users), as documented in the
 [Skills guide](https://platform.claude.com/docs/en/build-with-claude/skills-guide).
 Skills require the code execution tool.

@@ -8,12 +8,12 @@
 # Usage:
 #   bash build-desktop-skill.sh
 # Output:
-#   dist/stayux-ste/       the unpacked bundle
-#   dist/stayux-ste.zip    the archive to upload as a custom skill
+#   dist/stayux-clear-answer/       the unpacked bundle
+#   dist/stayux-clear-answer.zip    the archive to upload as a custom skill
 
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-OUT="$ROOT/dist/stayux-ste"
+OUT="$ROOT/dist/stayux-clear-answer"
 
 rm -rf "$OUT"
 mkdir -p "$OUT"
@@ -23,8 +23,8 @@ cp "$ROOT/scripts/ste_lint.py"        "$OUT/ste_lint.py"
 cp "$ROOT/scripts/ste_dictionary.py"  "$OUT/ste_dictionary.py"
 cp "$ROOT/references/writing-rules.md" "$OUT/writing-rules.md"
 
-( cd "$ROOT/dist" && rm -f stayux-ste.zip && zip -r -q stayux-ste.zip stayux-ste )
+( cd "$ROOT/dist" && rm -f stayux-clear-answer.zip && zip -r -q stayux-clear-answer.zip stayux-clear-answer )
 
 echo "Built:"
 echo "  $OUT"
-echo "  $ROOT/dist/stayux-ste.zip"
+echo "  $ROOT/dist/stayux-clear-answer.zip"

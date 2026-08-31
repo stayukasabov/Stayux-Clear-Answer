@@ -1,5 +1,5 @@
 ---
-name: stayux-ste
+name: stayux-clear-answer
 description: >
   Clear Answer: write replies in short, plain English (Simplified Technical
   English, ASD-STE100): exact and unambiguous. Turn it on by asking for a clear

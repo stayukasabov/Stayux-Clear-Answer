@@ -24,8 +24,8 @@ and project managers, who usually work in Desktop.
    ```bash
    bash build-desktop-skill.sh
    ```
-   This writes `dist/stayux-ste.zip`.
-2. Upload `dist/stayux-ste.zip` as a custom skill. See
+   This writes `dist/stayux-clear-answer.zip`.
+2. Upload `dist/stayux-clear-answer.zip` as a custom skill. See
    [`desktop/README.md`](../../desktop/README.md) for the upload flow.
 3. In a chat, ask Claude for a clear answer, for example "reply in plain English"
    or "rewrite this in Simplified Technical English".

@@ -10,9 +10,6 @@ auto-loading skill; on Desktop it is a single uploaded skill. A fast,
 deterministic, zero-dependency Python linter sits at its core as the pass/fail
 gate.
 
-> The repo and plugin id stay `stayux-ste` for install stability. The product
-> name is Stayux Clear Answer.
-
 ## Two ways to use it
 
 **1. Optimize the model's output, in the dialogue.**
@@ -78,7 +75,7 @@ public, so treat them as approximate, not exact.
 The last row is the point: that material never enters the context window. An
 LLM-only skill would load and reason over the equivalent every turn.
 
-Claude Code reports its own projection. Run `claude plugin details stayux-ste`: it
+Claude Code reports its own projection. Run `claude plugin details stayux-clear-answer`: it
 shows about 429 tokens always-on for the whole plugin (every command and skill
 description, so Claude knows when to use each), plus an on-invoke cost each time a
 command fires (for example `/clear-on` about 400, `/clear-check` about 320). Those are
@@ -114,10 +111,10 @@ The repo doubles as a plugin marketplace:
 
 ```
 /plugin marketplace add stayukasabov/Stayux-Clear-Answer
-/plugin install stayux-ste@stayux
+/plugin install stayux-clear-answer@stayux
 ```
 
-Update later with `/plugin update stayux-ste`, then restart Claude Code to apply.
+Update later with `/plugin update stayux-clear-answer`, then restart Claude Code to apply.
 
 Commands. Each has a Clear Answer name and a legacy `/ste-*` alias; both do the
 same thing.
@@ -140,7 +137,7 @@ English, or STE. See the skill at
 
 No build needed. You download the ready skill and upload it once:
 
-1. Download `stayux-ste.zip` from the
+1. Download `stayux-clear-answer.zip` from the
    [latest release](https://github.com/stayukasabov/Stayux-Clear-Answer/releases/latest).
 2. In Claude Desktop or claude.ai, open **Settings > Capabilities > Skills** and
    upload the zip, then enable it.
