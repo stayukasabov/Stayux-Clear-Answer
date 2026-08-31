@@ -15,7 +15,7 @@ Treat the mode as sticky across turns until the user changes it.
 ## For every reply while STE mode is on
 
 1. Draft the reply using the rules in
-   `${CLAUDE_PLUGIN_ROOT}/skills/ste-write/SKILL.md` and
+   `${CLAUDE_PLUGIN_ROOT}/skills/clear-write/SKILL.md` and
    `${CLAUDE_PLUGIN_ROOT}/references/writing-rules.md`.
 2. Lint the draft. It is the objective gate:
    ```bash

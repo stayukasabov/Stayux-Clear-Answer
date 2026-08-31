@@ -1,5 +1,5 @@
 ---
-name: ste-write
+name: clear-write
 description: >
   Clear Answer: write, rewrite, and check text in short, plain English
   (Simplified Technical English, ASD-STE100). Load this when the user asks for a

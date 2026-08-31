@@ -49,7 +49,7 @@ For developers and technical writers. Check, rewrite, and standardize technical
 docs with `/clear-check`, `/clear-rewrite`, and `/clear-init`. A Desktop and API build
 brings the same to non-developers.
 
-Both share one core: a **Claude Code plugin** (the `ste-*` commands) and a
+Both share one core: a **Claude Code plugin** (the `clear-*` commands) and a
 **zero-dependency Python linter** with a curated dictionary that act as the
 objective pass/fail gate.
 
@@ -95,7 +95,7 @@ public, so treat them as approximate, not exact.
 
 | Item | Tokens | In model context? |
 |---|---:|---|
-| `ste-write` skill body, when it loads | ~680 | yes |
+| `clear-write` skill body, when it loads | ~680 | yes |
 | Lint round-trip, clean pass | ~50 | yes (per check) |
 | Lint round-trip, many violations | ~270 | yes (per failing check) |
 | Rule engine + dictionary + rules reference | ~3,455 | **no** (read by Python) |
@@ -159,7 +159,7 @@ same thing.
 
 The plugin also loads automatically when you ask for a clear answer, plain
 English, or STE. See the skill at
-[`skills/ste-write/SKILL.md`](skills/ste-write/SKILL.md).
+[`skills/clear-write/SKILL.md`](skills/clear-write/SKILL.md).
 
 ### Claude Desktop (download the skill)
 
@@ -270,7 +270,7 @@ ways:
   6. [Add your own words with a project dictionary](docs/tutorials/06-custom-dictionary.md)
 - **Claude Desktop guide**: [`desktop/README.md`](desktop/README.md)
 - **STE rule reference**: [`references/writing-rules.md`](references/writing-rules.md)
-- **The skill**: [`skills/ste-write/SKILL.md`](skills/ste-write/SKILL.md)
+- **The skill**: [`skills/clear-write/SKILL.md`](skills/clear-write/SKILL.md)
 - **Downloads**: [latest release](https://github.com/stayukasabov/Stayux-Clear-Answer/releases/latest)
 - **Legal**: [LICENSE](LICENSE), [NOTICE](NOTICE)
 
