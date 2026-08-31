@@ -30,7 +30,7 @@ It also loads automatically when you ask for a clear answer, plain English, or S
 
 **On Claude Desktop** (no slash commands; you turn it on and off with words):
 
-- Turn on — say "reply in plain English", "reply in STE", or "clear answer on".
+- Turn on — say "clear answer on", "reply in STE", or "reply in plain English".
   Off by default until you ask.
 - Strict document style — ask for the "full" profile (sentences of 20 words or
   fewer).
