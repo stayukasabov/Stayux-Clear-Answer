@@ -3,9 +3,9 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "stayux-ste-linter"
+name = "stayux-clear-answer"
 version = "0.1.0"
-description = "Deterministic Simplified Technical English (STE / ASD-STE100) linter + Claude Code skill. Unofficial."
+description = "Stayux Clear Answer: make Claude reply in short, plain English. Deterministic linter plus Claude Code plugin and Desktop skill. Compatible with Simplified Technical English (ASD-STE100). Unofficial."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
@@ -14,7 +14,7 @@ keywords = ["ste", "asd-ste100", "simplified-technical-english", "linter", "tech
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/stayukasabov/Stayux-STE-linter"
+Homepage = "https://github.com/stayukasabov/Stayux-Clear-Answer"
 
 [tool.setuptools]
 py-modules = ["ste_lint", "ste_dictionary"]

@@ -29,7 +29,7 @@ economy and the rule set.
 You do not build anything. You only need the finished `stayux-ste.zip`.
 
 1. Download `stayux-ste.zip` from the repository
-   [Releases](https://github.com/stayukasabov/Stayux-STE-linter/releases).
+   [Releases](https://github.com/stayukasabov/Stayux-Clear-Answer/releases).
 2. In Claude Desktop or claude.ai, open **Settings > Capabilities > Skills**
    (also shown as Settings > Features).
 3. **Upload** the zip, then enable the skill.

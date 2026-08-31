@@ -8,7 +8,7 @@ plugin marketplace.
 1. Open Claude Code.
 2. Add the marketplace:
    ```
-   /plugin marketplace add stayukasabov/Stayux-STE-linter
+   /plugin marketplace add stayukasabov/Stayux-Clear-Answer
    ```
 3. Install the plugin:
    ```
@@ -24,7 +24,7 @@ To test a local checkout instead of the GitHub copy, point the marketplace at th
 folder:
 
 ```
-/plugin marketplace add /path/to/Stayux-STE-linter
+/plugin marketplace add /path/to/Stayux-Clear-Answer
 /plugin install stayux-ste@stayux
 ```
 
