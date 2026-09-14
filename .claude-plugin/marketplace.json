@@ -1,5 +1,5 @@
 {
-  "name": "stayux",
+  "name": "stayux-clear",
   "description": "Stayux tools for Claude Code. Includes Stayux Clear Answer, which makes Claude reply in short, plain English (compatible with ASD-STE100).",
   "owner": { "name": "Stayux (Stayu Kasabov)", "url": "https://github.com/stayukasabov" },
   "plugins": [
