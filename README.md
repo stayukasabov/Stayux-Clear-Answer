@@ -117,7 +117,7 @@ skill body plus its lint round-trips.
 
 Deterministic rules (errors fail the gate):
 - Sentence length (chat ≤ 25 words, full ≤ 20)
-- Paragraph length (≤ 6 sentences; lists parsed separately)
+- Paragraph length (≤ 6 sentences; lists and table cells parsed separately)
 - Semicolons (banned)
 - Contractions (`don't` becomes `do not`)
 - Progressive tense (`is running`) and perfect tense (`has done`)
@@ -129,6 +129,25 @@ Advisory (warnings that never fail the gate):
 - Wordiness and filler phrases (for example "it is important to note that"),
   seeded from the FOSS prose linters write-good and proselint
 - Words removed from the ASD-STE100 word list (Issue 9)
+- Noun-only words used as verbs (`Test the software` becomes `Do a test of the
+  software`, Issue 9)
+
+Text inside code fences and inline code is skipped.
+
+Chat format warnings (prose mode only). These are not STE rules. Each one has a
+style-guide source:
+
+| Rule | Check | Source |
+|---|---|---|
+| bold-overuse | More than 2 bold spans in a reply | GOV.UK style guide, Google developer style guide. The limit of 2 is our own number. |
+| header-in-short-reply | A header in a reply under 150 words | Microsoft Style Guide, Headings. The 150-word threshold is our own number. |
+| bullet-overuse | A bullet list of 1 item or more than 7 items | Microsoft Style Guide, Lists. Google developer style guide, Lists. |
+| filler-opener | The reply opens with filler ("Great question") | Microsoft Style Guide, "Get to the point fast" |
+| filler-closer | The reply ends with filler ("I hope this helps") | Microsoft Style Guide, "Prune every excess word" |
+
+Prose mode is the "80% STE" that Andrej Karpathy describes: the core STE rules,
+with sentences of up to 25 words. Strict mode is the document standard. Neither
+mode is a score.
 
 ## Install
 
@@ -301,12 +320,29 @@ ways:
 - **Downloads**: [latest release](https://github.com/stayukasabov/Stayux-Clear-Answer/releases/latest)
 - **Legal**: [LICENSE](LICENSE), [NOTICE](NOTICE)
 
+## Why a gate beats a prompt
+
+A prompt asks the model to remember the rules. A gate checks the output against
+them. The STE cheat sheet shared with Karpathy's post shows the risk. An
+[analysis by Max Nardit](https://max.nardit.com/articles/karpathy-understanding-llm-outputs)
+found errors in it, and a model that follows the cheat sheet repeats them.
+
+| Cheat sheet | ASD-STE100 Issue 9 | Clear Answer linter |
+|---|---|---|
+| "approximately" is not approved | APPROXIMATELY (adv) is approved | No warning |
+| TEST is an approved verb | TEST is a noun only. Write "Do a functional test of the software." | Warns on "Test the software" |
+| "in order to" is a dictionary entry | No such entry | Wordiness advice only, not a dictionary finding |
+| Use the passive "only when it is necessary" | Use the passive only when the agent is unknown | Warns on every passive, and you decide |
+
+The first three rows have tests in `tests/test_cheat_sheet.py`. The article also lists
+outdated Issue 8 terms in the cheat sheet. Clear Answer uses the Issue 9 terms.
+
 ## Roadmap
 
 - [x] Custom / project dictionary loading (a `.ste-dict.txt` merged over the seed)
 - [x] Local official-dictionary parsing (bring your own copy) via
   `scripts/ste_import.py` into a git-ignored cache
-- [ ] Noun-cluster rule (needs part-of-speech tagging)
+- [ ] Multi-word noun rule (needs part-of-speech tagging)
 
 ## License
 
