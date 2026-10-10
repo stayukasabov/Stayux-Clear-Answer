@@ -196,3 +196,35 @@ CONTRACTIONS = {
     "you're": "you are",
     "you've": "you have",
 }
+
+# Chat filler at the start or the end of a reply. [plain-English] original
+# curation, based on the Microsoft Style Guide "Top 10 tips" ("Get to the point
+# fast", "Prune every excess word"). Used by the chat profile only. Advisory
+# warnings only; they never fail the gate.
+# Openers match only at the start of the first sentence.
+FILLER_OPENERS = (
+    "great question",
+    "good question",
+    "sure",
+    "certainly",
+    "absolutely",
+    "of course",
+    "happy to help",
+    "i'd be happy to",
+    "you asked about",
+    "to answer your question",
+)
+
+# Closers match anywhere in the last sentence.
+FILLER_CLOSERS = (
+    "i hope this helps",
+    "hope this helps",
+    "let me know if",
+    "feel free to",
+    "happy to help",
+    "don't hesitate to",
+    "hope that helps",
+    "any other questions",
+    "good luck",
+    "happy coding",
+)

@@ -358,5 +358,88 @@ class TableTests(unittest.TestCase):
         self.assertEqual(line, 5)
 
 
+class FormatRuleTests(unittest.TestCase):
+    SHORT = "Open the valve. Close the door."
+    LONG = " ".join(["Open the valve."] * 55)  # 165 words
+
+    def test_two_bold_spans_pass(self):
+        r = ste_lint.lint("Open the **valve** and the **door**.")
+        self.assertNotIn("bold-overuse", rules(r))
+
+    def test_three_bold_spans_flagged(self):
+        r = ste_lint.lint("Open the **valve**, the **door**, and the **lid**.")
+        self.assertIn("bold-overuse", rules(r))
+
+    def test_header_in_short_reply_flagged(self):
+        r = ste_lint.lint("## Steps\n\n" + self.SHORT)
+        self.assertIn("header-in-short-reply", rules(r))
+
+    def test_header_in_long_reply_passes(self):
+        r = ste_lint.lint("## Steps\n\n" + self.LONG)
+        self.assertNotIn("header-in-short-reply", rules(r))
+
+    def test_one_bullet_flagged(self):
+        r = ste_lint.lint(self.SHORT + "\n\n- Open the valve.")
+        self.assertIn("bullet-overuse", rules(r))
+
+    def test_three_bullets_pass(self):
+        r = ste_lint.lint("- Open the valve.\n- Close the door.\n- Stop the pump.")
+        self.assertNotIn("bullet-overuse", rules(r))
+
+    def test_eight_bullets_flagged(self):
+        r = ste_lint.lint("\n".join("- Open the valve." for _ in range(8)))
+        self.assertIn("bullet-overuse", rules(r))
+
+    def test_eight_numbered_items_pass(self):
+        r = ste_lint.lint("\n".join(f"{i}. Open the valve." for i in range(1, 9)))
+        self.assertNotIn("bullet-overuse", rules(r))
+
+    def test_two_lists_of_four_pass(self):
+        four = "\n".join("- Open the valve." for _ in range(4))
+        r = ste_lint.lint(four + "\n\nClose the door.\n\n" + four)
+        self.assertNotIn("bullet-overuse", rules(r))
+
+    def test_filler_opener_flagged(self):
+        r = ste_lint.lint("Great question! Open the valve.")
+        self.assertIn("filler-opener", rules(r))
+
+    def test_restating_opener_flagged(self):
+        r = ste_lint.lint("To answer your question, open the valve.")
+        self.assertIn("filler-opener", rules(r))
+
+    def test_sure_inside_sentence_not_opener(self):
+        r = ste_lint.lint("Make sure that the valve is open.")
+        self.assertNotIn("filler-opener", rules(r))
+
+    def test_direct_opener_passes(self):
+        r = ste_lint.lint("Open the valve.")
+        self.assertNotIn("filler-opener", rules(r))
+
+    def test_filler_closer_flagged(self):
+        r = ste_lint.lint("Open the valve. I hope this helps.")
+        self.assertIn("filler-closer", rules(r))
+
+    def test_closer_phrase_not_in_last_sentence_passes(self):
+        r = ste_lint.lint("Let me know if the valve leaks. Close the door.")
+        self.assertNotIn("filler-closer", rules(r))
+
+    def test_format_rules_off_in_full(self):
+        text = "Great question! **A** **B** **C**.\n\n## Note\n\n- One item.\n\nI hope this helps."
+        r = ste_lint.lint(text, profile="full")
+        for rule in ("bold-overuse", "header-in-short-reply", "bullet-overuse",
+                     "filler-opener", "filler-closer"):
+            self.assertNotIn(rule, rules(r))
+
+    def test_format_rules_are_warnings(self):
+        text = "Great question! **A** **B** **C**.\n\n## Note\n\n- One item.\n\nI hope this helps."
+        r = ste_lint.lint(text, profile="chat")
+        self.assertIn("filler-opener", rules(r))
+        self.assertTrue(r["passed"])
+
+    def test_bold_in_code_not_counted(self):
+        r = ste_lint.lint("Open the valve.\n\n```\n**a** **b** **c**\n```\n")
+        self.assertNotIn("bold-overuse", rules(r))
+
+
 if __name__ == "__main__":
     unittest.main()

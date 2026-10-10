@@ -19,7 +19,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ste_dictionary import (  # noqa: E402
     WORD_SUBSTITUTIONS, PHRASE_SUBSTITUTIONS, WORDINESS_PHRASES, REMOVED_TERMS,
-    CONTRACTIONS,
+    CONTRACTIONS, FILLER_OPENERS, FILLER_CLOSERS,
 )
 
 # Optional local cache built from the user's own official copy (never shipped).
@@ -102,8 +102,9 @@ def _effective_maps(cache, custom=None):
 PROFILES = {
     # STE distinguishes procedures (<=20 words) from descriptions (<=25).
     # "chat" is a pragmatic conversational subset; "full" is document-strict.
-    "chat": {"max_sentence_words": 25, "max_paragraph_sentences": 6},
-    "full": {"max_sentence_words": 20, "max_paragraph_sentences": 6},
+    # format_rules: chat-only style warnings (see _check_format).
+    "chat": {"max_sentence_words": 25, "max_paragraph_sentences": 6, "format_rules": True},
+    "full": {"max_sentence_words": 20, "max_paragraph_sentences": 6, "format_rules": False},
 }
 
 BE_VERBS = {"am", "is", "are", "was", "were", "be", "been", "being"}
@@ -147,6 +148,14 @@ LIST_RE = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+(.*)$")
 TABLE_RE = re.compile(r"^\s*\|")
 TABLE_SEP_RE = re.compile(r"^[\s|:\-]+$")
 FENCE_RE = re.compile(r"^\s*(```|~~~)")
+BOLD_RE = re.compile(r"\*\*[^*\n]+\*\*|__[^_\n]+__")
+HEADER_RE = re.compile(r"^#{1,6}\s", re.MULTILINE)
+BULLET_RE = re.compile(r"^\s*[-*+]\s+")
+
+# Chat format limits. Sources: behaviours-kit/Research/2026-10-10-chat-format-rule-sources.md
+MAX_BOLD_SPANS = 2          # GOV.UK and Google: use bold sparingly. The limit of 2 is our own number.
+MIN_WORDS_FOR_HEADER = 150  # Microsoft Style Guide: use headings judiciously. 150 is our own number.
+MAX_BULLETS = 7             # Microsoft Style Guide: 2 to 7 items. Google: no 1-item lists.
 INLINE_CODE_RE = re.compile(r"`[^`\n]+`")
 
 
@@ -312,6 +321,72 @@ def _check_sentence(sentence, cfg, violations, line,
                 f"'{term}' was removed from the ASD-STE100 word list", sentence[:60], line))
 
 
+def _line_of(text, pos):
+    return text[:pos].count("\n") + 1
+
+
+def _starts_with_phrase(sentence, phrases):
+    low = sentence.lower().lstrip()
+    return next((p for p in phrases
+                 if re.match(re.escape(p) + r"\b", low)), None)
+
+
+def _check_format(text, violations):
+    """Chat-only format warnings for a whole reply. Text is already code-free."""
+    bold = list(BOLD_RE.finditer(text))
+    if len(bold) > MAX_BOLD_SPANS:
+        violations.append(_make(
+            "bold-overuse", "warning",
+            f"{len(bold)} bold spans (max {MAX_BOLD_SPANS}); use bold sparingly",
+            bold[0].group(0)[:60], _line_of(text, bold[0].start())))
+
+    header = HEADER_RE.search(text)
+    word_count = len(WORD_RE.findall(text))
+    if header and word_count < MIN_WORDS_FOR_HEADER:
+        violations.append(_make(
+            "header-in-short-reply", "warning",
+            f"header in a reply of {word_count} words (min {MIN_WORDS_FOR_HEADER})",
+            text[header.start():header.start() + 60].split("\n")[0],
+            _line_of(text, header.start())))
+
+    # A bullet list is a run of bullet lines. Blank lines do not end it.
+    lists, current = [], []
+    for i, line in enumerate(text.split("\n"), 1):
+        if BULLET_RE.match(line):
+            current.append(i)
+        elif line.strip() and current:
+            lists.append(current)
+            current = []
+    if current:
+        lists.append(current)
+    for items in lists:
+        if len(items) == 1 or len(items) > MAX_BULLETS:
+            violations.append(_make(
+                "bullet-overuse", "warning",
+                f"bullet list of {len(items)} items (use 2 to {MAX_BULLETS})",
+                "", items[0]))
+
+    segments = list(_iter_segments(text))
+    if not segments:
+        return
+    first = _split_sentences(segments[0][1])
+    if first:
+        phrase = _starts_with_phrase(first[0], FILLER_OPENERS)
+        if phrase:
+            violations.append(_make(
+                "filler-opener", "warning",
+                f"remove '{phrase}'; start with the answer", first[0][:60], segments[0][2]))
+    last = _split_sentences(segments[-1][1])
+    if last:
+        low = last[-1].lower()
+        phrase = next((p for p in FILLER_CLOSERS
+                       if re.search(r"\b" + re.escape(p) + r"\b", low)), None)
+        if phrase:
+            violations.append(_make(
+                "filler-closer", "warning",
+                f"remove '{phrase}'; end with the last fact", last[-1][:60], segments[-1][2]))
+
+
 def lint(text, profile="chat", cache=None, custom=None):
     cfg = PROFILES.get(profile, PROFILES["chat"])
     if cache is None:
@@ -340,6 +415,9 @@ def lint(text, profile="chat", cache=None, custom=None):
                 chunk[:60], line))
         for sentence in sentences:
             _check_sentence(sentence, cfg, violations, line, word_subs, phrase_subs)
+
+    if cfg["format_rules"]:
+        _check_format(text, violations)
 
     passed = not any(v["severity"] == "error" for v in violations)
     return {"passed": passed, "profile": profile, "violations": violations}
