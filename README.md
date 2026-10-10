@@ -160,7 +160,7 @@ The repo doubles as a plugin marketplace:
 
 ```
 /plugin marketplace add stayukasabov/Stayux-Clear-Answer
-/plugin install clear-answer@stayux
+/plugin install clear-answer@stayux-clear
 ```
 
 Update later with `/plugin update clear-answer`, then restart Claude Code to apply.
