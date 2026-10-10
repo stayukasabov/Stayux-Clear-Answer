@@ -161,9 +161,9 @@ class DictionaryTests(unittest.TestCase):
         self.assertNotIn("unapproved-word", rules(r))
 
     def test_unapproved_phrase_flagged(self):
-        r = ste_lint.lint("Push the button in order to start.")
+        r = ste_lint.lint("Push the button in the event that it stops.")
         self.assertIn("unapproved-word", rules(r))
-        self.assertIn("to", self._detail(r, "unapproved-word"))
+        self.assertIn("if", self._detail(r, "unapproved-word"))
 
     def test_unapproved_is_warning_not_error(self):
         r = ste_lint.lint("Commence the test.")

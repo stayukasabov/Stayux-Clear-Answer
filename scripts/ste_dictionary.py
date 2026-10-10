@@ -97,11 +97,10 @@ WORD_SUBSTITUTIONS = {
     # And do NOT suggest these banned words as replacements: need, expect, ask, now.
 }
 
-# Wordy multiword phrases -> a shorter form. [plain-English], except a few
-# ("in order to", "prior to") that also appear in the Google Developer
-# Documentation Style Guide word list (CC BY 4.0).
+# Wordy multiword phrases -> a shorter form. [plain-English], except
+# "prior to", which also appears in the Google Developer Documentation Style
+# Guide word list (CC BY 4.0).
 PHRASE_SUBSTITUTIONS = {
-    "in order to": "to",
     "due to the fact that": "because",
     "in the event that": "if",
     "prior to": "before",
@@ -143,6 +142,9 @@ WORDINESS_PHRASES = {
     "the fact that": "that",
     "in my opinion": "",
     "please note that": "",
+    # [Google style] Not an ASD-STE100 entry. Issue 9 has no "in order to", so
+    # it is wordiness advice, not a dictionary finding.
+    "in order to": "to",
 }
 
 # Terms removed from the ASD-STE100 word list in Issue 9. No approved
@@ -195,6 +197,12 @@ CONTRACTIONS = {
     "you'll": "you will",
     "you're": "you are",
     "you've": "you have",
+}
+
+# Verbs that Issue 9 approves only as nouns. A sentence that starts with one
+# (optionally after an -ly adverb) uses it as an imperative verb. [Issue 9]
+NOUN_ONLY_VERBS = {
+    "test": "do a test of",
 }
 
 # Chat filler at the start or the end of a reply. [plain-English] original

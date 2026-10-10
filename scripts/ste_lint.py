@@ -19,7 +19,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ste_dictionary import (  # noqa: E402
     WORD_SUBSTITUTIONS, PHRASE_SUBSTITUTIONS, WORDINESS_PHRASES, REMOVED_TERMS,
-    CONTRACTIONS, FILLER_OPENERS, FILLER_CLOSERS,
+    CONTRACTIONS, FILLER_OPENERS, FILLER_CLOSERS, NOUN_ONLY_VERBS,
 )
 
 # Optional local cache built from the user's own official copy (never shipped).
@@ -130,6 +130,8 @@ PHRASAL_VERBS = {
     ("plug", "in"), ("switch", "off"), ("switch", "on"), ("break", "down"),
     ("check", "out"), ("find", "out"), ("go", "through"), ("hold", "on"),
 }
+
+DETERMINERS = {"the", "a", "an", "all", "each", "this", "that", "these", "those"}
 
 # Common technical imperative verbs. Used only to detect two instructions
 # joined by "and"/"then" in one sentence (the one-instruction rule).
@@ -287,6 +289,17 @@ def _check_sentence(sentence, cfg, violations, line,
             violations.append(_make(
                 "contraction", "error",
                 f"use '{CONTRACTIONS[w]}' instead of '{w}'", sentence[:60], line))
+
+    # A noun-only word used as an imperative verb ("Test the software",
+    # "Functionally test the software"). A determiner must follow, so a noun
+    # subject ("Test results show ...") is not flagged.
+    k = 1 if len(lower) > 2 and lower[0].endswith("ly") else 0
+    if (len(lower) > k + 1 and lower[k] in NOUN_ONLY_VERBS
+            and lower[k + 1] in DETERMINERS):
+        violations.append(_make(
+            "unapproved-word", "warning",
+            f"'{lower[k]}' is a noun only: use '{NOUN_ONLY_VERBS[lower[k]]}'",
+            sentence[:60], line))
 
     # One instruction per sentence: flag an imperative sentence that joins a
     # second action verb with "and" or "then" (for example "Open X and close Y").
