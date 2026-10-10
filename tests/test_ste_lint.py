@@ -328,5 +328,35 @@ class CodeExemptionTests(unittest.TestCase):
         self.assertNotIn("unapproved-word", rules(r))
 
 
+class TableTests(unittest.TestCase):
+    TABLE = "| Name | Value |\n|---|:---:|\n| Valve | Open |\n| Pump | Off |"
+
+    def test_short_cells_pass(self):
+        rows = "\n".join("| Valve | Open | Pump |" for _ in range(10))
+        r = ste_lint.lint("| Name | Value | Part |\n|---|---|---|\n" + rows)
+        self.assertNotIn("sentence-length", rules(r))
+        self.assertNotIn("paragraph-length", rules(r))
+
+    def test_long_cell_flagged(self):
+        cell = " ".join(["word"] * 26)
+        r = ste_lint.lint("| Name | Note |\n|---|---|\n| Valve | " + cell + " |", profile="chat")
+        self.assertIn("sentence-length", errors(r))
+
+    def test_separator_row_not_flagged(self):
+        r = ste_lint.lint("|---|:---:|---:|")
+        self.assertEqual(r["violations"], [])
+
+    def test_table_not_counted_in_paragraph_above(self):
+        prose = " ".join(["Open the valve."] * 6)
+        rows = "\n".join("| Close the door. | Stop the pump. |" for _ in range(2))
+        r = ste_lint.lint(prose + "\n" + rows)
+        self.assertNotIn("paragraph-length", rules(r))
+
+    def test_cell_violation_reports_row_line(self):
+        r = ste_lint.lint(self.TABLE + "\n| Pump | is running |")
+        line = next(v["line"] for v in r["violations"] if v["rule"] == "progressive-tense")
+        self.assertEqual(line, 5)
+
+
 if __name__ == "__main__":
     unittest.main()

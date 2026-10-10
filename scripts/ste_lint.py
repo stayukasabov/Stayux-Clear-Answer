@@ -144,6 +144,8 @@ ACTION_VERBS = {
 WORD_RE = re.compile(r"[A-Za-z][A-Za-z'\-]*")
 SENTENCE_RE = re.compile(r"[^.!?]+[.!?]*", re.DOTALL)
 LIST_RE = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+(.*)$")
+TABLE_RE = re.compile(r"^\s*\|")
+TABLE_SEP_RE = re.compile(r"^[\s|:\-]+$")
 FENCE_RE = re.compile(r"^\s*(```|~~~)")
 INLINE_CODE_RE = re.compile(r"`[^`\n]+`")
 
@@ -174,7 +176,8 @@ def _iter_segments(text):
 
     line_no is the 1-based line where the segment starts. Blank lines split
     blocks. List items are separated so a bullet/numbered list is not mistaken
-    for one over-long paragraph. Consecutive non-list lines join into a prose
+    for one over-long paragraph. Each table cell is yielded as a list item, and
+    separator rows are skipped. Consecutive other lines join into a prose
     chunk that keeps the first line's number.
     """
     lines = text.split("\n")
@@ -186,7 +189,16 @@ def _iter_segments(text):
         prose, prose_line = [], None
         while i < n and lines[i].strip():
             m = LIST_RE.match(lines[i])
-            if m:
+            if TABLE_RE.match(lines[i]):
+                # Each table cell is its own item, like a list item.
+                if prose:
+                    yield ("prose", " ".join(prose), prose_line)
+                    prose, prose_line = [], None
+                if not TABLE_SEP_RE.match(lines[i]):
+                    for cell in lines[i].strip().strip("|").split("|"):
+                        if cell.strip():
+                            yield ("list", cell.strip(), i + 1)
+            elif m:
                 if prose:
                     yield ("prose", " ".join(prose), prose_line)
                     prose, prose_line = [], None
