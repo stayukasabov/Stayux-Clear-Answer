@@ -299,5 +299,34 @@ class LineNumberTests(unittest.TestCase):
         self.assertEqual(self._line(r, "semicolon"), 3)
 
 
+class CodeExemptionTests(unittest.TestCase):
+    def test_semicolon_in_backtick_fence_passes(self):
+        r = ste_lint.lint("Open the valve.\n\n```\nx = 1; y = 2\n```\n")
+        self.assertNotIn("semicolon", rules(r))
+        self.assertTrue(r["passed"])
+
+    def test_semicolon_in_tilde_fence_passes(self):
+        r = ste_lint.lint("Open the valve.\n\n~~~python\nx = 1; y = 2\n~~~\n")
+        self.assertNotIn("semicolon", rules(r))
+
+    def test_semicolon_in_inline_code_passes(self):
+        r = ste_lint.lint("Type `a; b` in the box.")
+        self.assertNotIn("semicolon", rules(r))
+
+    def test_semicolon_after_fence_keeps_line_number(self):
+        r = ste_lint.lint("Open the valve.\n\n```\nx = 1\ny = 2\n```\n\nDo this; do that.")
+        semis = [v for v in r["violations"] if v["rule"] == "semicolon"]
+        self.assertEqual(len(semis), 1)
+        self.assertEqual(semis[0]["line"], 8)
+
+    def test_unapproved_word_in_fence_not_flagged(self):
+        r = ste_lint.lint("Open the valve.\n\n```\nverify the build\n```\n")
+        self.assertNotIn("unapproved-word", rules(r))
+
+    def test_unapproved_word_in_inline_code_not_flagged(self):
+        r = ste_lint.lint("Type `make verify` now.")
+        self.assertNotIn("unapproved-word", rules(r))
+
+
 if __name__ == "__main__":
     unittest.main()

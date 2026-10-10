@@ -144,6 +144,29 @@ ACTION_VERBS = {
 WORD_RE = re.compile(r"[A-Za-z][A-Za-z'\-]*")
 SENTENCE_RE = re.compile(r"[^.!?]+[.!?]*", re.DOTALL)
 LIST_RE = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+(.*)$")
+FENCE_RE = re.compile(r"^\s*(```|~~~)")
+INLINE_CODE_RE = re.compile(r"`[^`\n]+`")
+
+
+def _strip_code(text):
+    """Remove code so the prose rules do not apply to it.
+
+    A fenced block becomes empty lines, so line numbers do not move. An inline
+    code span becomes the word "code", so the sentence keeps its shape.
+    """
+    out, fence = [], None
+    for line in text.split("\n"):
+        m = FENCE_RE.match(line)
+        if fence:
+            if m and m.group(1) == fence:
+                fence = None
+            out.append("")
+        elif m:
+            fence = m.group(1)
+            out.append("")
+        else:
+            out.append(INLINE_CODE_RE.sub("code", line))
+    return "\n".join(out)
 
 
 def _iter_segments(text):
@@ -287,7 +310,7 @@ def lint(text, profile="chat", cache=None, custom=None):
     violations = []
 
     # Normalize curly apostrophes so contractions match regardless of source.
-    text = text.replace("’", "'")
+    text = _strip_code(text.replace("’", "'"))
 
     if ";" in text:
         semi_line = text[:text.index(";")].count("\n") + 1
