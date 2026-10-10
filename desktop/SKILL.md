@@ -46,8 +46,8 @@ in a code-execution container. All files sit at the skill root: `SKILL.md`,
 4. Send only the final compliant text. Do not show the user the linter output or
    the list of violations. This is a rewrite-only guard.
 
-Warnings (passive-voice, phrasal-verb, unapproved-word, removed-word) do not
-fail the gate, but prefer to fix them too. They usually make the text clearer.
+Warnings (passive-voice, phrasal-verb, unapproved-word, removed-word, and the
+chat format warnings) do not fail the gate, but prefer to fix them too. They usually make the text clearer.
 The unapproved-word warning suggests an approved replacement. Apply it.
 
 ## The rules you write by
@@ -62,6 +62,13 @@ The unapproved-word warning suggests an approved replacement. Apply it.
 - Prefer single verbs over phrasal verbs ("remove" not "take off").
 - Keep paragraphs to six sentences or fewer, one topic each.
 - Cut hedging and filler. Say the thing.
+- Put the answer in the first sentence. Do not open with filler ("Great
+  question") or close with filler ("I hope this helps").
+- In chat, use bold rarely, use headers only in long replies, and keep bullet
+  lists to 2 to 7 items. If the user asks for a table, a list, or headers,
+  ignore the format warnings for that reply.
+- Avoid em dashes and "Label: text" openers. Use a period instead. This is a
+  style choice, not an STE rule, and the linter does not check it.
 
 See `writing-rules.md` for the condensed rule set and `ste_lint.py` for exactly
 what the gate enforces.

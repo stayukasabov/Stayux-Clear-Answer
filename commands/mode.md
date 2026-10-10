@@ -18,4 +18,8 @@ When on, follow the per-reply workflow from `/clear-answer:on`, but lint with th
 matching profile: `--profile chat` for prose, `--profile full` for strict. Treat
 the mode as sticky until the user changes it.
 
+Format warnings (bold-overuse, header-in-short-reply, bullet-overuse,
+filler-opener, filler-closer) do not fail the gate. If the user asked for a
+table, a list, or headers, ignore them for that reply.
+
 If no argument is given, report the current mode and the three options.

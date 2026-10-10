@@ -27,5 +27,9 @@ Treat the mode as sticky across turns until the user changes it.
    until `passed` is true.
 4. Send only the final compliant text. Do not show the linter output.
 
+Format warnings (bold-overuse, header-in-short-reply, bullet-overuse,
+filler-opener, filler-closer) do not fail the gate. If the user asked for a
+table, a list, or headers, ignore them for that reply.
+
 Use `/clear-answer:mode strict` for document-strict checking (sentences of 20
 words or fewer).

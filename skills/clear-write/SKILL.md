@@ -56,6 +56,13 @@ short and gated.
 - Prefer single verbs over phrasal verbs ("remove" not "take off").
 - Keep paragraphs to six sentences or fewer, one topic each.
 - Cut hedging and filler. Say the thing.
+- Put the answer in the first sentence. Do not open with filler ("Great
+  question") or close with filler ("I hope this helps").
+- In chat, use bold rarely, use headers only in long replies, and keep bullet
+  lists to 2 to 7 items. If the user asks for a table, a list, or headers,
+  ignore the format warnings for that reply.
+- Avoid em dashes and "Label: text" openers. Use a period instead. This is a
+  style choice, not an STE rule, and the linter does not check it.
 
 See `${CLAUDE_PLUGIN_ROOT}/references/writing-rules.md` for the condensed rule set
 and `${CLAUDE_PLUGIN_ROOT}/scripts/ste_lint.py` for exactly what the gate
