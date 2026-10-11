@@ -1,0 +1,29 @@
+[
+  {"id": "c1", "type": "chat", "prompt": "What is the difference between a process and a thread?"},
+  {"id": "c2", "type": "chat", "prompt": "Why does git reject my push with \"non-fast-forward\"?"},
+  {"id": "c3", "type": "chat", "prompt": "What does a CDN do?"},
+  {"id": "c4", "type": "chat", "prompt": "Should a small SaaS app use PostgreSQL or MongoDB?"},
+  {"id": "c5", "type": "chat", "prompt": "What does HTTP 429 mean, and what should a client do when it gets one?"},
+  {"id": "c6", "type": "chat", "prompt": "How does an OAuth login work?"},
+  {"id": "c7", "type": "chat", "prompt": "What is technical debt?"},
+  {"id": "c8", "type": "chat", "prompt": "Why does my React component render twice in development?"},
+  {"id": "c9", "type": "chat", "prompt": "What is the difference between UX design and UI design?"},
+  {"id": "c10", "type": "chat", "prompt": "How do I name a command-line flag well?"},
+
+  {"id": "d1", "type": "write", "prompt": "Write a procedure for rotating an API key in production without downtime."},
+  {"id": "d2", "type": "write", "prompt": "Write release notes for version 2.4. It fixes a bug where users were logged out after 5 minutes, and it adds a dark mode."},
+  {"id": "d3", "type": "write", "prompt": "Write the error message and help text shown when a user uploads a file larger than the 25 MB limit."},
+  {"id": "d4", "type": "write", "prompt": "Write a procedure for replacing the inner tube of a bicycle tire."},
+  {"id": "d5", "type": "write", "prompt": "Write a troubleshooting section for a help center article titled \"The printer does not print\"."},
+
+  {"id": "d6", "type": "rewrite", "prompt": "Rewrite this README install section so it is clearer.",
+   "source": "## Installation\n\nIn order to get started with using the tool, it is important to note that you will first need to make sure that you have Python 3.10 or a later version installed on your machine, since earlier versions are not going to be supported due to the fact that we are making use of some newer language features. Once you have gone ahead and verified that, you can then proceed to install the package by running pip install acme-cli, and after that has finished you should be able to run acme --help in order to check that everything has been set up correctly and is working as expected."},
+  {"id": "d7", "type": "rewrite", "prompt": "Rewrite this incident summary so it is clearer.",
+   "source": "On the evening of March 3rd, at approximately 18:40 UTC, our monitoring systems began alerting the on-call engineer to the fact that a significant number of checkout requests were failing with timeout errors. Upon investigation, it was determined that a database migration which had been deployed earlier in the afternoon had inadvertently removed an index on the orders table, which consequently caused queries that would normally complete in milliseconds to take upwards of thirty seconds. The index was subsequently restored at 19:25 UTC, at which point error rates returned to normal levels. Going forward, we will be implementing an additional review step for all migrations that modify indexes."},
+  {"id": "d8", "type": "rewrite", "prompt": "Rewrite this privacy policy paragraph so it is clearer.",
+   "source": "Notwithstanding any other provision herein, the Company reserves the right to retain, for such period as may be reasonably necessary for the fulfilment of the purposes for which it was collected, including for the purposes of satisfying any legal, accounting, or reporting requirements, any and all personal data that has been provided by the User, and the User hereby acknowledges and agrees that such retention shall not constitute a breach of the User's rights under applicable data protection legislation."},
+  {"id": "d9", "type": "rewrite", "prompt": "Rewrite these first-day onboarding notes for a new support agent so they are clearer.",
+   "source": "Welcome aboard! On your first day you'll basically want to start off by getting yourself logged into Zendesk, which your team lead should have already sent you an invite for, and if not then just ping them on Slack. After that it would be a good idea to spend some time going through the macros folder so you can get a feel for how we typically respond to the most common types of tickets. Around lunchtime you'll be shadowing a senior agent for a couple of hours, and then later in the afternoon you can try picking up a few of the easier tickets that are tagged 'first-timer', but don't worry too much if you're not able to close them all."},
+  {"id": "d10", "type": "rewrite", "prompt": "Rewrite this product feature announcement so it is clearer.",
+   "source": "We're absolutely thrilled to announce that, after months of hard work and listening carefully to all of your amazing feedback, we've finally launched what is without a doubt our most exciting feature to date: Smart Folders! Smart Folders are a revolutionary new way of keeping your documents organized, as they automatically sort any files that you upload into the appropriate folders based on their content, which means that you'll never again have to waste valuable time manually dragging and dropping files around. Smart Folders are available starting today for all users on the Pro and Business plans."}
+]
