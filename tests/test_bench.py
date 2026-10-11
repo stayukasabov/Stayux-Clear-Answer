@@ -72,17 +72,30 @@ class BuildCmdTests(unittest.TestCase):
         self.assertIn("--no-session-persistence", cmd)
         self.assertEqual(self._arg(cmd, "--output-format"), "json")
 
-    def test_on_chat_uses_on_command_and_plugin(self):
-        cmd = bench.build_cmd("sonnet", "on", CHAT, "/repo")
-        self.assertEqual(cmd[2], "/clear-answer:on What is a CDN?")
+    def test_setup_chat_turns_mode_on_with_plugin(self):
+        cmd = bench.setup_cmd("sonnet", CHAT, "/repo")
+        self.assertEqual(cmd[2], "/clear-answer:on")
         self.assertEqual(self._arg(cmd, "--plugin-dir"), "/repo")
-        self.assertEqual(self._arg(cmd, "--tools"), "Bash")
-        self.assertEqual(self._arg(cmd, "--allowedTools"), "Bash(python3:*)")
         self.assertEqual(self._arg(cmd, "--setting-sources"), "")
+        self.assertNotIn("--no-session-persistence", cmd)
 
-    def test_on_document_uses_strict_mode(self):
-        cmd = bench.build_cmd("opus", "on", WRITE, "/repo")
-        self.assertEqual(cmd[2], "/clear-answer:mode strict Write a procedure.")
+    def test_setup_document_uses_strict_mode(self):
+        cmd = bench.setup_cmd("opus", WRITE, "/repo")
+        self.assertEqual(cmd[2], "/clear-answer:mode strict")
+
+    def test_on_resumes_the_setup_session(self):
+        cmd = bench.build_cmd("sonnet", "on", CHAT, "/repo", resume="abc-123")
+        self.assertEqual(cmd[2], "What is a CDN?")
+        self.assertEqual(self._arg(cmd, "--resume"), "abc-123")
+        self.assertEqual(self._arg(cmd, "--plugin-dir"), "/repo")
+        self.assertEqual(self._arg(cmd, "--tools"), "Bash,Read")
+        self.assertEqual(self._arg(cmd, "--allowedTools"), "Bash(python3:*)")
+        self.assertNotIn("--no-session-persistence", cmd)
+
+    def test_on_can_read_the_plugin_files(self):
+        for cmd in (bench.setup_cmd("haiku", CHAT, "/repo"),
+                    bench.build_cmd("haiku", "on", CHAT, "/repo", resume="x")):
+            self.assertEqual(self._arg(cmd, "--add-dir"), "/repo")
 
 
 class MetricsTests(unittest.TestCase):

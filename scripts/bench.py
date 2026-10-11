@@ -68,18 +68,25 @@ def profile_for(task):
     return "chat" if task["type"] == "chat" else "full"
 
 
-def build_cmd(model, condition, task, repo):
-    text = task_text(task)
-    tools = ""
-    extra = []
+def _on_flags(repo):
+    return ["--plugin-dir", repo, "--add-dir", repo, "--tools", "Bash,Read",
+            "--allowedTools", "Bash(python3:*)"]
+
+
+def setup_cmd(model, task, repo):
+    """First turn of the on condition: turn the mode on, as a user would."""
+    command = "/clear-answer:on" if task["type"] == "chat" else "/clear-answer:mode strict"
+    return ["claude", "-p", command, "--model", model, "--setting-sources", "",
+            "--output-format", "json", *_on_flags(repo)]
+
+
+def build_cmd(model, condition, task, repo, resume=None):
+    """The task turn. For the on condition, it resumes the setup session."""
+    base = ["claude", "-p", task_text(task), "--model", model,
+            "--setting-sources", "", "--output-format", "json"]
     if condition == "on":
-        command = "/clear-answer:on" if task["type"] == "chat" else "/clear-answer:mode strict"
-        text = f"{command} {text}"
-        tools = "Bash"
-        extra = ["--plugin-dir", repo, "--allowedTools", "Bash(python3:*)"]
-    return ["claude", "-p", text, "--model", model, "--tools", tools,
-            "--setting-sources", "", "--no-session-persistence",
-            "--output-format", "json", *extra]
+        return [*base, "--resume", resume, *_on_flags(repo)]
+    return [*base, "--tools", "", "--no-session-persistence"]
 
 
 def metrics(text, profile):
@@ -150,18 +157,31 @@ def is_stop(cli):
     return bool(cli.get("is_error"))
 
 
-def run_claude(cmd):
-    """Run one `claude -p` call in a new empty directory. Return its JSON."""
-    with tempfile.TemporaryDirectory(prefix="ca-bench-") as cwd:
-        try:
-            p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True,
-                               timeout=TIMEOUT_SECONDS)
-        except subprocess.TimeoutExpired:
-            return {"is_error": True, "result": f"timeout after {TIMEOUT_SECONDS}s"}
+def run_claude(cmd, cwd):
+    """Run one `claude -p` call in the given directory. Return its JSON."""
+    try:
+        p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True,
+                           timeout=TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired:
+        return {"is_error": True, "result": f"timeout after {TIMEOUT_SECONDS}s"}
     try:
         return json.loads(p.stdout)
     except ValueError:
         return {"is_error": True, "result": (p.stdout + p.stderr)[-1000:]}
+
+
+def run_condition(model, condition, task):
+    """Run one task in a new empty directory. Return (prompt, setup, cli)."""
+    with tempfile.TemporaryDirectory(prefix="ca-bench-") as cwd:
+        setup = None
+        resume = None
+        if condition == "on":
+            setup = run_claude(setup_cmd(model, task, ROOT), cwd)
+            if is_stop(setup):
+                return None, setup, setup
+            resume = setup.get("session_id")
+        cmd = build_cmd(model, condition, task, ROOT, resume=resume)
+        return cmd[2], setup, run_claude(cmd, cwd)
 
 
 def _save(path, data):
@@ -179,16 +199,15 @@ def cmd_run(models, tasks, root=RESULTS_DIR):
     todo = [(m, t, c) for m in models for t in tasks for c in CONDITIONS
             if not os.path.exists(result_path(root, m, t["id"], c))]
     for n, (model, task, cond) in enumerate(todo, 1):
-        cmd = build_cmd(model, cond, task, ROOT)
         print(f"[{n}/{len(todo)}] {model} {task['id']} {cond}", flush=True)
-        cli = run_claude(cmd)
+        prompt, setup, cli = run_condition(model, cond, task)
         if is_stop(cli):
             print(f"STOP: {str(cli.get('result'))[:300]}")
             print(f"{len(todo) - n + 1} runs remain. Run the same command again later.")
             return 2
         _save(result_path(root, model, task["id"], cond), {
             "model": model, "task": task["id"], "condition": cond,
-            "prompt": cmd[2], "cli": cli,
+            "prompt": prompt, "setup": setup, "cli": cli,
             "metrics": metrics(cli.get("result", ""), profile_for(task))})
     print("run: all results present.")
     return 0
@@ -210,7 +229,8 @@ def cmd_judge(models, tasks, root=RESULTS_DIR):
                "--setting-sources", "", "--no-session-persistence",
                "--output-format", "json"]
         print(f"[{n}/{len(todo)}] judge {model} {task['id']} with {judge}", flush=True)
-        cli = run_claude(cmd)
+        with tempfile.TemporaryDirectory(prefix="ca-bench-") as cwd:
+            cli = run_claude(cmd, cwd)
         if is_stop(cli):
             print(f"STOP: {str(cli.get('result'))[:300]}")
             print(f"{len(todo) - n + 1} judgements remain. Run the same command again later.")
@@ -284,9 +304,10 @@ def cmd_report(models, tasks, root=RESULTS_DIR, path=REPORT_PATH):
         "- Writers: Claude Haiku, Sonnet, and Opus through `claude -p` on a Claude Pro plan.",
         "- Off: `claude -p \"<task>\" --model <m> --tools \"\" --setting-sources \"\" "
         "--no-session-persistence --output-format json`, in a new empty directory.",
-        "- On: the same, plus `--plugin-dir <repo> --tools Bash --allowedTools "
-        "\"Bash(python3:*)\"`. Chat prompts start with `/clear-answer:on`, document "
-        "prompts with `/clear-answer:mode strict`.",
+        "- On: two turns, as a user would do it. Turn 1 is `/clear-answer:on` (chat) "
+        "or `/clear-answer:mode strict` (documents). Turn 2 resumes that session "
+        "with the task. Both turns add `--plugin-dir <repo> --add-dir <repo> --tools Bash,Read "
+        "--allowedTools \"Bash(python3:*)\"`. Only turn 2 is measured.",
         "- Lint metrics: `scripts/ste_lint.py` with the seed dictionary only. Chat "
         "tasks use the `chat` profile, document tasks the `full` profile.",
         "- Judge: a different Claude model from the writer (Opus judges Haiku and "
