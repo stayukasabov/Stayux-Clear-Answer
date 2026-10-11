@@ -64,14 +64,13 @@ When the user asks to explain something with a diagram or as a web page,
 follow `explain-html.md` in the skill files. It describes the content file and
 its blanks. In short:
 
-1. Plan the content silently. Write the content file `<topic-slug>.clear.txt`
-   once. Fill only the blanks. Do not write HTML, Markdown, Mermaid, or SVG.
-2. Build the file. Use `--to html` for a page, `--to md` for a Markdown file
-   with a Mermaid diagram:
-   `python3 explain_build.py <topic-slug>.clear.txt --to html`.
-3. If `passed` is false, change only the blanks named in `problems`, and build
-   again.
-4. Do not show the content file or the build output. Reply with one sentence
+1. Plan the content silently. Pass the blanks to the build script in one
+   command, with `--stdin`. Do not write HTML, Markdown, Mermaid, or SVG. Use
+   `--to html` for a page, `--to md` for a Markdown file with a Mermaid diagram:
+   `python3 explain_build.py <topic-slug>.clear.txt --to html --stdin`.
+2. If `passed` is false, replace only the blanks named in `errors`, with
+   `--set "step 3=New text"`, and build again.
+3. Do not show the blanks or the build output. Reply with one sentence
    and a link to the file, such as "The page is ready: <link>".
 
 ## The rules you write by

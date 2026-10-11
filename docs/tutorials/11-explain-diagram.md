@@ -20,12 +20,18 @@ Mermaid diagram, and fixed sections. The dialogue shows only a link to the file.
 Claude does not write Markdown or Mermaid. It fills named blanks in a small
 content file, and a script builds the file.
 
-1. Claude writes `how-dns-works.clear.txt` once, with one blank on each line.
-2. `scripts/explain_build.py` checks the structure and lints each blank. It
-   reports only the errors, each with the name of its blank, such as "step 3".
-3. If there is an error, Claude changes only that blank and builds again.
+1. Claude passes the blanks to `scripts/explain_build.py` in one shell
+   command. The script saves them to `how-dns-works.clear.txt`.
+2. The script checks the structure and lints each blank. It reports only the
+   errors, each with the name of its blank, such as "step 3".
+3. If there is an error, Claude replaces only that blank with `--set`, in one
+   more shell command.
 4. When the build passes, the script writes `how-dns-works.md`, with the
    Mermaid diagram and the footer.
+
+Claude uses shell commands only, so the dialogue shows one collapsed command
+and no file diffs. In a real run with Claude Sonnet on a new topic, this took
+one command and 621 output tokens.
 
 The real content file is
 [`examples/explain-dns-diagram.clear.txt`](examples/explain-dns-diagram.clear.txt).
@@ -37,7 +43,6 @@ The built file is
 ```text
 title: How DNS works
 answer: The answer, in 3 sentences or fewer.
-diagram: sequence
 actor B: Browser
 actor R: Resolver
 B -> R: Ask for the address
@@ -48,14 +53,15 @@ step: The browser asks the resolver for the address.
 limits: One short paragraph.
 ```
 
-- `diagram: sequence` is for actors that send messages. `diagram: flow` is for
-  a straight chain of stages, with `node:` lines.
+- The diagram is always actors that send messages. For a process, each stage
+  is an actor that hands the work to the next one.
 - `->` is a request, and `-->` is a reply.
 - The full list of blanks is in the command, `commands/explain/diagram.md`.
 
 ## What you get
 
-Each file has the same sections, in the same order. They are the title, the
+Each file has the same sections, in the same order, and the same kind of
+diagram, in the Stayux colors. They are the title, the
 answer, the diagram and its caption, "The parts" as a table, "The steps", and
 "Limits". The Mermaid CLI (`mmdc`) gave this image of the real diagram:
 

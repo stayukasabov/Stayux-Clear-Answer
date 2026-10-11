@@ -21,14 +21,17 @@ shows only a link to the file.
 Claude does not write HTML, CSS, or SVG. It fills the same content file as the
 diagram command (see tutorial 11), and a script builds the page.
 
-1. Claude writes `how-dns-works.clear.txt` once.
-2. `scripts/explain_build.py` lints each blank and reports only the errors.
-3. If there is an error, Claude changes only that blank and builds again.
+1. Claude passes the blanks to `scripts/explain_build.py` in one shell
+   command. The script saves them to `how-dns-works.clear.txt`.
+2. The script lints each blank and reports only the errors.
+3. If there is an error, Claude replaces only that blank with `--set`, in one
+   more shell command.
 4. When the build passes, the script writes the page. It adds the frame, the
-   CSS, the SVG diagram, and the footer.
+   CSS, the SVG diagram, the theme switch, and the footer.
 
-In a real run with Claude Sonnet, this took one content file, one fix, and two
-builds, for 1,199 output tokens.
+Claude uses shell commands only, so the dialogue shows no file diffs. In a real
+run with Claude Sonnet on a new topic, this took one command and 715 output
+tokens.
 
 ## What you get
 
@@ -44,18 +47,21 @@ The page follows the system theme. This is the dark mode:
 
 ![The DNS page in dark mode](examples/explain-dns-page-dark.png)
 
-To force a theme, add `data-theme="light"` or `data-theme="dark"` to the
-`<html>` element.
+The circle at the top right switches between light and dark, like the switch
+on stayux.com. The page keeps the choice for the next visit. With no choice,
+the page follows the system theme.
 
 ## The diagram
 
 The script draws the diagram from the content file, so every page looks the
 same:
 
-- **Sequence**: the actors are boxes in a row at the top, with a dotted line
-  down from each box. Each message is a horizontal arrow with its label above
-  it. Replies are dashed. Arrows do not cross.
-- **Flow**: the stages are boxes in a row, with an arrow between neighbors.
+- The actors are boxes in a row at the top, with a dotted line down from each
+  box.
+- Each message is a numbered horizontal arrow with its label above it.
+  Replies are dashed. Arrows do not cross.
+- Every page uses this one kind of diagram. The Markdown file shows the same
+  diagram as a Mermaid sequence diagram, in the same colors.
 
 The colors, the fonts, and the box corners come from the Stayux design system.
 The SX fonts show when they are installed. Else the page uses the system font.
