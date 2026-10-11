@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How DNS works</title>
+<style>
+  :root {
+    --ca-bg: #ffffff; --ca-text: #1f2328; --ca-muted: #59636e; --ca-line: #d1d9e0;
+    --ca-box: #f6f8fa; --ca-accent: #3b5bdb; --ca-code: #eff2f5;
+    --ca-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --ca-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ca-bg: #0d1117; --ca-text: #e6edf3; --ca-muted: #9198a1; --ca-line: #3d444d;
+      --ca-box: #151b23; --ca-accent: #7c97ff; --ca-code: #1f2630;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ca-bg); color: var(--ca-text); font: 17px/1.6 var(--ca-font); }
+  .ca-page { max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 2rem; }
+  h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 1rem; }
+  h2 { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+  p, li, dd { color: var(--ca-text); }
+  .ca-answer { font-size: 1.1rem; }
+  code { font: 0.9em var(--ca-mono); background: var(--ca-code); padding: 0.1em 0.35em; border-radius: 4px; }
+  ol, ul { padding-left: 1.5rem; }
+  li { margin-bottom: 0.4rem; }
+  dl { margin: 0; }
+  dt { font-weight: 600; margin-top: 0.9rem; }
+  dd { margin: 0.2rem 0 0 0; }
+  .ca-diagram { margin: 2rem 0; }
+  .ca-diagram svg { display: block; width: 100%; height: auto; }
+  .ca-diagram figcaption { margin-top: 0.5rem; text-align: center; color: var(--ca-muted); font-size: 0.95rem; }
+  .node rect { fill: var(--ca-box); stroke: var(--ca-line); stroke-width: 1.5; }
+  .node text { fill: var(--ca-text); font: 600 14px var(--ca-font); text-anchor: middle; dominant-baseline: middle; }
+  .edge { fill: none; stroke: var(--ca-accent); stroke-width: 1.75; marker-end: url(#ca-arrow); }
+  .edge.reply { stroke-dasharray: 5 4; }
+  .step { fill: var(--ca-muted); font: 13px var(--ca-font); text-anchor: middle; }
+  .lifeline { fill: none; stroke: var(--ca-line); stroke-width: 1.5; stroke-dasharray: 2 4; }
+  #ca-arrow path { fill: var(--ca-accent); }
+  .ca-footer { margin-top: 3rem; text-align: center; font: 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .ca-footer p { margin: 0.25rem 0; }
+  .ca-footer a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+  .ca-footer a:hover, .ca-footer a:focus-visible { color: #3b5bdb; text-decoration-thickness: 2px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ca-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z"/>
+    </marker>
+  </defs>
+</svg>
+<main class="ca-page">
+<!-- ca:body:start -->
+<h1>How DNS works</h1>
+<p class="ca-answer">DNS turns a name, such as example.com, into a number called an IP address. Your computer needs that number to find the site. A resolver asks a chain of servers until one of them knows the number.</p>
+<figure class="ca-diagram">
+  <svg viewBox="0 0 760 408" role="img" aria-label="The resolver asks the root, TLD, and name servers for an address">
+    <g class="node"><rect x="10" y="10" width="140" height="48" rx="8"/><text x="80" y="34">Browser</text></g>
+    <g class="node"><rect x="160" y="10" width="140" height="48" rx="8"/><text x="230" y="34">Resolver</text></g>
+    <g class="node"><rect x="310" y="10" width="140" height="48" rx="8"/><text x="380" y="34">Root server</text></g>
+    <g class="node"><rect x="460" y="10" width="140" height="48" rx="8"/><text x="530" y="34">TLD server</text></g>
+    <g class="node"><rect x="610" y="10" width="140" height="48" rx="8"/><text x="680" y="34">Name server</text></g>
+    <path class="lifeline" d="M 80 58 V 398"/>
+    <path class="lifeline" d="M 230 58 V 398"/>
+    <path class="lifeline" d="M 380 58 V 398"/>
+    <path class="lifeline" d="M 530 58 V 398"/>
+    <path class="lifeline" d="M 680 58 V 398"/>
+    <path class="edge" d="M 80 98 H 226"/>
+    <text class="step" x="155" y="90">1. Ask for address</text>
+    <path class="edge" d="M 230 138 H 376"/>
+    <text class="step" x="305" y="130">2. Ask root server</text>
+    <path class="edge reply" d="M 380 178 H 234"/>
+    <text class="step" x="305" y="170">3. Send TLD address</text>
+    <path class="edge" d="M 230 218 H 526"/>
+    <text class="step" x="380" y="210">4. Ask TLD server</text>
+    <path class="edge reply" d="M 530 258 H 234"/>
+    <text class="step" x="380" y="250">5. Send server address</text>
+    <path class="edge" d="M 230 298 H 676"/>
+    <text class="step" x="455" y="290">6. Ask name server</text>
+    <path class="edge reply" d="M 680 338 H 234"/>
+    <text class="step" x="455" y="330">7. Send address</text>
+    <path class="edge reply" d="M 230 378 H 84"/>
+    <text class="step" x="155" y="370">8. Send address</text>
+  </svg>
+  <figcaption>The resolver asks three servers in turn and gives the final address to the browser.</figcaption>
+</figure>
+<h2>The parts</h2>
+<dl>
+  <dt>Browser</dt><dd>Needs the address of a site, and starts the request.</dd>
+  <dt>Resolver</dt><dd>Does the lookup work for your computer. Your internet provider usually runs it.</dd>
+  <dt>Root server</dt><dd>Knows which server handles each ending, such as .com or .org.</dd>
+  <dt>TLD server</dt><dd>Handles one ending, and knows which name server holds each domain.</dd>
+  <dt>Name server</dt><dd>Holds the records for a domain, and gives the final address.</dd>
+</dl>
+<h2>The steps</h2>
+<ol>
+  <li>The browser asks the resolver for the address of a name.</li>
+  <li>The resolver checks its cache. If the answer is not there, it asks a root server.</li>
+  <li>The root server sends the address of the TLD server for that ending.</li>
+  <li>The resolver asks the TLD server.</li>
+  <li>The TLD server sends the address of the name server for the domain.</li>
+  <li>The resolver asks the name server.</li>
+  <li>The name server sends the IP address.</li>
+  <li>The resolver saves the answer and sends it to the browser.</li>
+</ol>
+<h2>Example</h2>
+<p>You type www.example.com. The root server points to the .com server. The .com server points to the name server for example.com. That name server gives the IP address, and the browser connects to it.</p>
+<h2>Limits</h2>
+<p>This page shows the common case. Real lookups often end sooner, because the resolver and your computer keep recent answers in a cache. Each answer has a time limit, set by the domain owner, after which the cache must ask again.</p>
+<!-- ca:body:end -->
+<footer class="ca-footer">
+  <p>Stayux Clear Answer</p>
+  <p><a href="https://stayux.com" target="_blank" rel="noopener noreferrer">Stayux.com</a> | <a href="https://www.linkedin.com/in/stayu-kasabov-stayux/" target="_blank" rel="noopener noreferrer">LinkedIn</a> | <a href="https://x.com/StayuKasabov" target="_blank" rel="noopener noreferrer">X.com</a></p>
+</footer>
+</main>
+</body>
+</html>

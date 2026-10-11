@@ -1,74 +1,71 @@
 # 11. Explain a topic with a diagram
 
 `/clear-answer:explain --format diagram` writes a markdown file with a short
-explanation, one Mermaid diagram, and the Stayux Clear Answer footer. The linter
-checks the text and every label in the diagram. The dialogue shows only a link
-to the file.
+answer, one Mermaid diagram, and fixed sections. The linter checks the text and
+every label in the diagram. The dialogue shows only a link to the file.
 
 ## Run it
 
 1. Open Claude Code with the plugin installed.
 2. Run:
    ```
-   /clear-answer:explain --format diagram How does HTTPS keep a connection private?
+   /clear-answer:explain --format diagram How does DNS work?
    ```
+3. Claude replies with one sentence and the path of the file:
+   ```
+   The diagram is ready: /Users/you/project/how-dns-works.md
+   ```
+
+## What Claude does
+
+Claude writes the file once. It does not write a draft first.
+
+1. It writes the file in plain English, with the fixed structure.
+2. `scripts/explain_page.py` adds the footer.
+3. The linter checks the file on disk.
+4. If the linter finds an error, Claude changes only the flagged lines.
+
+In a real run with Claude Sonnet, this took one write and one lint, and the file
+passed on the first lint.
 
 ## What you get
 
-Claude replies with one sentence and the path of the file:
+The real file is
+[`examples/explain-dns-diagram.md`](examples/explain-dns-diagram.md). Each file
+has the same sections, in the same order:
 
-```
-The diagram is ready: /Users/you/project/how-https-keeps-a-connection-private.md
-```
+1. The title, "How X works".
+2. The answer, in 3 sentences or fewer.
+3. The diagram and a one-sentence caption.
+4. "The parts", as a table.
+5. "The steps", as a numbered list.
+6. "Limits".
 
-The file has a title, the explanation, the diagram, and the footer. This is the
-real text from Claude Sonnet, saved in
-[`examples/explain-https-diagram.md`](examples/explain-https-diagram.md),
-without the title and the footer:
+The Mermaid CLI (`mmdc`) gave this image of the diagram:
 
-````markdown
-HTTPS keeps a connection private with encryption. The browser and the server first agree on a secret key. Then they use that key to lock all data.
+![The DNS sequence diagram](examples/explain-dns-diagram.png)
 
-```mermaid
-sequenceDiagram
-    participant B as Browser
-    participant S as Server
-    B->>S: Send hello and supported ciphers
-    S->>B: Send certificate and public key
-    B->>B: Check certificate with trusted authority
-    B->>S: Send key share
-    S->>B: Send key share
-    Note over B,S: The two sides make the same secret key
-    B->>S: Send encrypted data
-    S->>B: Send encrypted data
-```
+The diagram rules keep the style the same from run to run. The theme is
+`neutral`, and the diagram uses `sequenceDiagram` with `autonumber`. Each label
+is a verb and an object, such as "Send the IP address".
 
-The certificate proves who the server is. The secret key never crosses the network. An attacker who reads the traffic sees only scrambled data.
-````
+## Where the diagram shows
 
 The diagram shows as a picture only in a viewer that supports Mermaid, such as
-Obsidian or GitHub. MacDown shows the Mermaid code instead. The Mermaid CLI
-(`mmdc`) gave this image:
-
-![The HTTPS sequence diagram](examples/explain-https-diagram.png)
+Obsidian or GitHub. MacDown shows the Mermaid code instead.
 
 ## What the gate checks
 
-- The text gets all the usual rules.
-- Each node label, edge label, and sequence message gets the word rules: simple
-  tenses, no contractions, and approved words.
-- A label of more than 8 words is an error (`label-length`).
-- The linter reads `flowchart`, `graph`, and `sequenceDiagram` diagrams. In
-  other diagram types, it does not read the labels.
-
-Check the file yourself:
-
 ```bash
-python3 scripts/ste_lint.py --profile chat --pretty < docs/tutorials/examples/explain-https-diagram.md
+python3 scripts/ste_lint.py --profile chat --pretty < docs/tutorials/examples/explain-dns-diagram.md
 ```
 
-The result is `"passed": true`. The footer links are HTML, and the linter
-skips HTML tags in markdown.
+- The text gets all the usual rules.
+- Each node label, edge label, and message gets the word rules.
+- A label of more than 8 words is an error (`label-length`).
+- The footer is HTML, and the linter skips HTML tags in markdown.
+
+The gate checks words, not drawings. Read the diagram before you share it.
 
 ## The footer
 
@@ -81,17 +78,3 @@ Stayux.com | LinkedIn | X.com
 
 The links open in a new tab. Some markdown viewers, such as GitHub, remove the
 `target` attribute and the styles, so there the links open in the same tab.
-
-## What the gate does not check
-
-The gate checks words, not drawings. It does not check that the arrows are in
-the correct order or that the diagram is correct. Read the diagram before you
-share it.
-
-## Render the diagram to an image (optional)
-
-```bash
-npx -p @mermaid-js/mermaid-cli mmdc -i diagram.mmd -o diagram.png -b white
-```
-
-This downloads the Mermaid CLI and a browser the first time.

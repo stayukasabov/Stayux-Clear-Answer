@@ -1,68 +1,77 @@
 # 12. Explain a topic as an HTML page
 
-`/clear-answer:explain --format html` writes one HTML file that works with no
-network. The page has an introduction, a diagram, and step-by-step sections.
-The linter checks every word that a reader sees.
+`/clear-answer:explain --format html` writes one HTML page that works with no
+network. The page has a short answer, a diagram, and fixed sections. The linter
+checks every word that a reader sees. The dialogue shows only a link to the
+file.
 
 ## Run it
 
 1. Open Claude Code with the plugin installed, in the folder for the page.
 2. Run:
    ```
-   /clear-answer:explain --format html How do Git branches and merges work?
+   /clear-answer:explain --format html How does DNS work?
    ```
-3. Claude writes the file, for example `git-branches-and-merges.html`. The
-   dialogue shows only one sentence and the path:
+3. Claude replies with one sentence and the path:
    ```
-   The page is ready: /Users/you/project/git-branches-and-merges.html
+   The page is ready: /Users/you/project/how-dns-works.html
    ```
+
+## What Claude does
+
+Claude writes only the body of the page, once. It does not write the CSS or the
+footer.
+
+1. It writes the body: the title, the answer, the diagram, and the sections.
+2. `scripts/explain_page.py` adds the fixed frame: the page head, the CSS for
+   light and dark mode, and the footer.
+3. The linter checks the visible text of the page.
+4. If the linter finds an error, Claude changes only the flagged lines.
+
+In a real run with Claude Sonnet, this took one write and one lint, and the page
+passed on the first lint.
 
 ## What you get
 
-This is a real page from Claude Sonnet, saved in
-[`examples/explain-git-page.html`](examples/explain-git-page.html). This is the
+The real page is
+[`examples/explain-dns-page.html`](examples/explain-dns-page.html). This is the
 page in a browser with the network blocked:
 
-![The Git page in a browser](examples/explain-git-page.png)
+![The DNS page in a browser](examples/explain-dns-page.png)
 
-All styles are in the page. The diagram is inline SVG, so the page needs no
-script and no network.
+Each page has the same sections as the diagram files, in the same order. They
+are the title, the answer, the diagram, "The parts", "The steps", and "Limits".
 
-The page ends with the Stayux Clear Answer footer. It is centered, in a 14 px
-system font. The links are underlined, change color on hover, and open in a new
-tab. The
-footer links are normal links, so they do not count as network requests.
+## The diagram
+
+The diagram is inline SVG. It uses only the classes of the frame, so the colors
+and the fonts are the same on every page. Claude picks one of two layouts:
+
+- **Row**: a chain of 2 or 3 boxes, where each box talks only to its
+  neighbors.
+- **Lanes**: boxes in a row at the top, with a dotted line down from each box.
+  Each step is a horizontal arrow with its label above it, so arrows do not
+  cross. The DNS page uses this layout.
 
 ## What the gate checks
 
-Check the page yourself:
-
 ```bash
-python3 scripts/ste_lint.py --format html --profile chat --pretty < docs/tutorials/examples/explain-git-page.html
+python3 scripts/ste_lint.py --format html --profile chat --pretty < docs/tutorials/examples/explain-dns-page.html
 ```
 
 - Only visible text is checked. The linter skips the head, scripts, styles, and
-  code, such as `git merge feature`.
+  code.
 - Each paragraph, list item, and table cell is checked on its own.
 - Text in the SVG diagram is checked as labels, with a limit of 8 words.
 - A page that loads a script, style, font, or image from the network fails
   with `external-request`. A link to another page is fine.
 
-The result for this page is `"passed": true`, with some warnings. The linter
-checks each word by its part of speech. "Open the file" passes, because "file"
-is a noun there. With an imported official dictionary, the warnings point to
-verbs that STE does not approve, such as "switch" and "run". Two short SVG
-labels, "D (feature)" and "main", have no context, so the linter cannot tell
-that they are nouns. It warns, and the warning names the part of speech.
-
-## What the gate does not check
-
-The gate checks words, not drawings. In this real page, one arrow starts at an
-empty place near the "main" label, and one arrowhead covers the "C" label. The
-words pass, but the drawing has errors. Open the page and look at the diagram
+The gate checks words, not drawings. Open the page and look at the diagram
 before you share it.
 
-## Open the page with no network
+## The footer
 
-To confirm that the page works offline, open it with the network turned off.
-All text, styles, and the diagram must show.
+The page ends with the Stayux Clear Answer footer. It is centered, in a 14 px
+system font. The links are underlined, change color on hover, and open in a new
+tab. The footer links are normal links, so they do not count as network
+requests.
