@@ -50,5 +50,5 @@ Follow the workflow of `/clear-answer:on` for one reply.
    ```
 4. If `passed` is false, edit the flagged text in the file. Lint again until
    `passed` is true. Do not delete a fact to pass the gate.
-5. Reply with one sentence that gives the path of the file. Do not show the
-   linter output.
+5. Reply with one sentence that gives the path of the file. Do not show or
+   summarize the linter output or its warnings.

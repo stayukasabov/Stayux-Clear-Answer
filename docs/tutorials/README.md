@@ -16,6 +16,8 @@ example you can run.
 4. [Rewrite a document](04-rewrite-a-document.md)
 5. [Set up a repo, and use Clear Answer on Desktop](05-init-and-desktop.md)
 6. [Add your own words with a project dictionary](06-custom-dictionary.md)
+11. [Explain a topic with a diagram](11-explain-diagram.md)
+12. [Explain a topic as an HTML page](12-explain-html.md)
 
 Other agents (untested, see the note in each page):
 

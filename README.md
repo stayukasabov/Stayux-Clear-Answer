@@ -343,6 +343,8 @@ ways:
   4. [Rewrite a document](docs/tutorials/04-rewrite-a-document.md)
   5. [Repo and Desktop setup](docs/tutorials/05-init-and-desktop.md)
   6. [Add your own words with a project dictionary](docs/tutorials/06-custom-dictionary.md)
+  11. [Explain a topic with a diagram](docs/tutorials/11-explain-diagram.md)
+  12. [Explain a topic as an HTML page](docs/tutorials/12-explain-html.md)
   7. [Codex CLI](docs/tutorials/07-codex.md) (untested)
   8. [Cursor](docs/tutorials/08-cursor.md) (untested)
   9. [Gemini CLI](docs/tutorials/09-gemini-cli.md) (untested)
