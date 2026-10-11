@@ -41,6 +41,7 @@ WORD_SUBSTITUTIONS = {
     "assistance (n)": "help",        # assistance (n) -> AID (n) / HELP (v)
     "blank (v)": "seal",             # blank (v) -> SEAL (v)
     "test (v)": "do a test of",      # test (v) -> TEST (n): "Do a test of the software"
+    "check (v)": "examine",          # check (v) -> MAKE SURE / MEASURE / EXAMINE (v), CHECK (n)
     # NOTE: "subsequently" is an APPROVED word in Issue 9. Do not add it here.
 
     # --- [Google style] Google Developer Documentation Style Guide (CC BY 4.0) ---
@@ -66,7 +67,7 @@ WORD_SUBSTITUTIONS = {
     "endeavour": "try",
     "facilitate": "help",
     "regarding": "about",
-    "ascertain": "check",
+    "ascertain": "make sure",
     "commencement": "start",
     "consequently": "so",
     "accordingly": "so",
@@ -94,7 +95,7 @@ WORD_SUBSTITUTIONS = {
     "rectify": "correct",
     "relocate": "move",
     "undertake": "do",
-    "verify": "check",
+    "verify": "make sure",
     "whilst": "while",
     # NOTE: the following are APPROVED words in Issue 9 -> do NOT flag them:
     # approximately, sufficient, equivalent, previous, transmit.
@@ -208,6 +209,7 @@ CONTRACTIONS = {
 # linter stays silent. [Issue 9]
 APPROVED_POS = {
     "test": ["n"],
+    "check": ["n"],
     "complete": ["v"],
 }
 

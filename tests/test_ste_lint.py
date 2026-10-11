@@ -689,7 +689,7 @@ class PartOfSpeechTests(unittest.TestCase):
     def test_custom_entry_with_pos(self):
         custom = ste_lint.parse_custom_dict("deploy (v) = install\n")
         self.assertTrue(self.unapproved(self.lint("You must deploy the app.", custom=custom)))
-        self.assertEqual(self.unapproved(self.lint("Check the deploy log.", custom=custom)), [])
+        self.assertEqual(self.unapproved(self.lint("Open the deploy log.", custom=custom)), [])
 
     def test_custom_approval_with_pos(self):
         custom = ste_lint.parse_custom_dict("file (v)\n")

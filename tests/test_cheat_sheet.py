@@ -66,5 +66,24 @@ class InOrderToTests(unittest.TestCase):
         self.assertNotIn("unapproved-word", rules(r))
 
 
+class CheckAsVerbTests(unittest.TestCase):
+    # Issue 9: check (v) is not approved. Use MAKE SURE, MEASURE, or EXAMINE.
+    # CHECK (n) is approved: "Do a leakage check of the valve."
+    def details(self, text):
+        return [v["detail"] for v in lint(text)["violations"] if v["rule"] == "unapproved-word"]
+
+    def test_check_as_verb_flagged(self):
+        self.assertEqual(self.details("Check the casting for corrosion."),
+                         ["'check' as a verb: use 'examine'"])
+
+    def test_check_as_noun_passes(self):
+        self.assertEqual(self.details("Do a leakage check of the valve."), [])
+
+    def test_seed_never_suggests_check(self):
+        for word in ("verify", "ascertain"):
+            for d in self.details(f"You must {word} the seal."):
+                self.assertNotIn("'check'", d)
+
+
 if __name__ == "__main__":
     unittest.main()
