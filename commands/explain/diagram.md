@@ -20,9 +20,12 @@ needs. Only the sentences change.
    ```bash
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/explain_build.py" "<topic-slug>.clear.txt" --to md
    ```
-3. If `passed` is false, read `problems`. Each problem names its blank in
-   `where`, such as "step 3". Change only those blanks. Build again.
-4. Fix a warning only when a one-word change fixes it.
+3. If `passed` is true, the work is done. Do not build again for a warning.
+4. If `passed` is false, read `problems`. Each problem names its blank in
+   `where`, such as "step 3". Change only the lines of those blanks, with the
+   Edit tool. Do not use `sed`, and do not write the whole file again. In the
+   same edit, you can also fix a warning with a one-word change. Then build
+   again.
 5. Reply with exactly one sentence and the path in `file`:
    "The diagram is ready: /absolute/path/how-dns-works.md". Do not show the content file,
    the build output, or the linter output.
