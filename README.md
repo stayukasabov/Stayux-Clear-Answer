@@ -314,6 +314,7 @@ ways:
   bolt = fastener      # flag "bolt", suggest "fastener"
   as per = by          # multiword left side is a phrase swap
   widget               # a bare word is approved: never flag it
+  file (v) = remove    # flag "file" only as a verb, not the noun
   ```
 
   Custom entries win over the seed and the official cache, so this is where
@@ -332,6 +333,10 @@ ways:
   approves. The official data is read from disk, never shipped or committed, and
   costs no model-context tokens. Needs `pdftotext` for a PDF, or pass an already
   extracted `.txt`.
+
+  The cache keeps the part of speech of each entry, as the standard does. If
+  you imported your copy before version 0.4.0, run the import again. An older
+  cache still works, but it skips noun uses of its entries.
 
 ## Documentation
 
@@ -381,7 +386,9 @@ outdated Issue 8 terms in the cheat sheet. Clear Answer uses the Issue 9 terms.
 - [x] Custom / project dictionary loading (a `.ste-dict.txt` merged over the seed)
 - [x] Local official-dictionary parsing (bring your own copy) via
   `scripts/ste_import.py` into a git-ignored cache
-- [ ] Multi-word noun rule (needs part-of-speech tagging)
+- [x] Part-of-speech checks: a dictionary entry applies only to its part of
+  speech (`file (v)` flags "file the edge", not "open the file")
+- [ ] Multi-word noun rule (the part-of-speech tagger now makes it possible)
 
 ## License
 

@@ -21,6 +21,7 @@ mkdir -p "$OUT"
 cp "$ROOT/desktop/SKILL.md"            "$OUT/SKILL.md"
 cp "$ROOT/scripts/ste_lint.py"        "$OUT/ste_lint.py"
 cp "$ROOT/scripts/ste_dictionary.py"  "$OUT/ste_dictionary.py"
+cp "$ROOT/scripts/ste_pos.py"         "$OUT/ste_pos.py"
 cp "$ROOT/references/writing-rules.md" "$OUT/writing-rules.md"
 
 ( cd "$ROOT/dist" && rm -f stayux-clear-answer.zip && zip -r -q stayux-clear-answer.zip stayux-clear-answer )

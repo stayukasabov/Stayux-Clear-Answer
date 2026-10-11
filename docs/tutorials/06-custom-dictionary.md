@@ -21,6 +21,10 @@ widget               # a bare word is approved: never flag it
 - A bare word marks it **approved**, so the linter stops flagging it. Use this for
   house-style words you want to keep.
 - Custom entries win over the built-in seed and any imported official cache.
+- A word can name its part of speech, as in the STE dictionary:
+  `file (v) = remove` flags "file" only when it is a verb ("file the edge"),
+  not when it is a noun ("open the file"). `file (n)` on its own line approves
+  only the noun. Use `n`, `v`, `adj`, or `adv`.
 
 ## Worked example
 

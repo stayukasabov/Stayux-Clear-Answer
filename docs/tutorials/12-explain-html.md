@@ -40,9 +40,12 @@ python3 scripts/ste_lint.py --format html --profile chat --pretty < docs/tutoria
 - A page that loads a script, style, font, or image from the network fails
   with `external-request`. A link to another page is fine.
 
-The result for this page is `"passed": true`. It also has warnings. Most of them
-are Git terms such as "branch" and "file", which the dictionary reads as verbs.
-A later version adds part-of-speech tags to fix this.
+The result for this page is `"passed": true`, with some warnings. The linter
+checks each word by its part of speech. "Open the file" passes, because "file"
+is a noun there. With an imported official dictionary, the warnings point to
+verbs that STE does not approve, such as "switch" and "run". Two short SVG
+labels, "D (feature)" and "main", have no context, so the linter cannot tell
+that they are nouns. It warns, and the warning names the part of speech.
 
 ## What the gate does not check
 
