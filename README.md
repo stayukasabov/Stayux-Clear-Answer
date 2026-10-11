@@ -343,8 +343,10 @@ ways:
   costs no model-context tokens. Needs `pdftotext` for a PDF, or pass an already
   extracted `.txt`.
 
-  The cache keeps the part of speech of each entry, as the standard does. If
-  you imported your copy before version 0.4.0, run the import again. An older
+  The cache keeps the part of speech and every approved alternative of each
+  entry, as the standard does ("use 'make sure' or 'measure' or 'examine'").
+  The importer reads only dictionary entries, not the change log or the summary
+  tables. If you imported your copy before version 0.7.1, run the import again. An older
   cache still works, but it skips noun uses of its entries.
 
 ## Documentation
