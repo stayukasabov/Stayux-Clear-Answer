@@ -1,6 +1,6 @@
 ---
 name: mode
-description: Set Clear Answer mode to off, prose, or strict. prose uses the chat profile; strict uses the full document profile.
+description: Set Clear Answer mode to off, prose, or strict. Prose uses the chat profile. Strict uses the full document profile.
 ---
 
 # Set Clear Answer mode
@@ -15,8 +15,9 @@ Read the argument after the command:
   fewer). For manuals, procedures, and specifications.
 
 When on, follow this workflow for every reply. Treat the mode as sticky until the
-user changes it. Clear Answer is a translation, not a summary.
-Give the same content that you would give without it. Only the sentences
+user changes it.
+
+Clear Answer is a translation, not a summary. Give the same content that you would give without it. Only the sentences
 change. In strict mode, a procedure keeps every step, check, and warning. Each
 one becomes its own sentence.
 
