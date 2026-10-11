@@ -99,10 +99,17 @@ def _add_entries(words, subs, legacy=False, overrides=False):
     way: a new entry replaces an earlier one for every use."""
     for key, repl in subs.items():
         word, pos = ste_pos.split_key(key.lower())
+        pos = LEGACY_POS if legacy else pos
         entries = words.setdefault(word, {})
+        if repl.lower() == word:
+            # "test (v)" -> "TEST (n)": the word is approved only in another
+            # part of speech. Keep earlier advice; else say it is not approved.
+            if pos not in entries and None not in entries:
+                entries[pos] = ""
+            continue
         if overrides:
             entries.pop(None, None)
-        entries[LEGACY_POS if legacy else pos] = repl
+        entries[pos] = repl
 
 
 def _approvals(layer):
@@ -147,27 +154,33 @@ def _effective_maps(cache, custom=None):
     return words, phrases, approved_pos
 
 
+def _advice(word, pos, repl):
+    if pos is None or pos == LEGACY_POS:
+        return f"use '{repl}' instead of '{word}'" if repl else f"'{word}' is not approved"
+    name = POS_NAMES.get(pos, pos)
+    return f"'{word}' as {name}: use '{repl}'" if repl else f"'{word}' as {name} is not approved"
+
+
 def _word_advice(word, tag, entries, approved_pos):
     """Return the unapproved-word detail for one use of a word, or None."""
     if tag is not None:
         if tag in entries:
-            return f"'{word}' as {POS_NAMES.get(tag, tag)}: use '{entries[tag]}'"
+            return _advice(word, tag, entries[tag])
         if None in entries:
-            return f"use '{entries[None]}' instead of '{word}'"
+            return _advice(word, None, entries[None])
         if LEGACY_POS in entries and tag not in ("n", "adj"):
-            return f"use '{entries[LEGACY_POS]}' instead of '{word}'"
+            return _advice(word, LEGACY_POS, entries[LEGACY_POS])
         return None
     # Unknown part of speech: warn as before, unless the word is approved for
     # another part of speech.
     if None in entries:
-        return f"use '{entries[None]}' instead of '{word}'"
+        return _advice(word, None, entries[None])
     if approved_pos.get(word):
         return None
     if LEGACY_POS in entries:
-        return f"use '{entries[LEGACY_POS]}' instead of '{word}'"
-    pos = next(p for p in ("v", "adj", "adv", "n") if p in entries) if any(
-        p in entries for p in ("v", "adj", "adv", "n")) else next(iter(entries))
-    return f"'{word}' as {POS_NAMES.get(pos, pos)}: use '{entries[pos]}'"
+        return _advice(word, LEGACY_POS, entries[LEGACY_POS])
+    pos = next((p for p in ("v", "adj", "adv", "n") if p in entries), next(iter(entries)))
+    return _advice(word, pos, entries[pos])
 
 PROFILES = {
     # STE distinguishes procedures (<=20 words) from descriptions (<=25).

@@ -707,5 +707,25 @@ class PartOfSpeechWordingTests(unittest.TestCase):
         self.assertIn("'main' as an adjective: use 'primary'", details)
 
 
+class SelfReplacementTests(unittest.TestCase):
+    # The official entry "test (v)" points to "TEST (n)", so the cache maps the
+    # word to itself. That is not useful advice.
+    CACHE = {"version": 2, "approved": {"test": ["n"]},
+             "word_substitutions": {"test (v)": "test", "zorp (v)": "zorp"},
+             "phrase_substitutions": {}}
+
+    def details(self, text):
+        r = ste_lint.lint(text, cache=self.CACHE, custom={})
+        return [v["detail"] for v in r["violations"] if v["rule"] == "unapproved-word"]
+
+    def test_seed_advice_is_kept(self):
+        self.assertEqual(self.details("Test the software."),
+                         ["'test' as a verb: use 'do a test of'"])
+
+    def test_self_replacement_without_seed_names_the_problem(self):
+        self.assertEqual(self.details("Zorp the pump."),
+                         ["'zorp' as a verb is not approved"])
+
+
 if __name__ == "__main__":
     unittest.main()
