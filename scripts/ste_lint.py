@@ -91,7 +91,10 @@ _DEFAULT_CUSTOM = load_custom_dict()
 # Part-of-speech key for an entry from a version 1 cache, which has no part of
 # speech: it applies to every use except a noun or a noun modifier.
 LEGACY_POS = "legacy"
-POS_NAMES = {"n": "a noun", "v": "a verb", "adj": "an adjective", "adv": "an adverb"}
+POS_NAMES = {"n": "a noun", "v": "a verb", "adj": "an adjective", "adv": "an adverb",
+             "prep": "a preposition", "pron": "a pronoun", "conj": "a conjunction",
+             "art": "an article", "abbr": "an abbreviation", "TN": "a technical noun",
+             "IV": "a technical verb"}
 
 
 def _add_entries(words, subs, legacy=False, overrides=False):
@@ -247,6 +250,9 @@ MAX_BOLD_SPANS = 2          # GOV.UK and Google: use bold sparingly. The limit o
 MIN_WORDS_FOR_HEADER = 150  # Microsoft Style Guide: use headings judiciously. 150 is our own number.
 MAX_BULLETS = 7             # Microsoft Style Guide: 2 to 7 items. Google: no 1-item lists.
 INLINE_CODE_RE = re.compile(r"`[^`\n]+`")
+# An HTML tag in markdown, such as <a href="..." target="_blank">. Only the text
+# between tags is prose; the tag and its attributes are not.
+HTML_TAG_RE = re.compile(r"</?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>\n]*)?/?>")
 
 
 def _strip_code(text):
@@ -266,7 +272,7 @@ def _strip_code(text):
             fence = m.group(1)
             out.append("")
         else:
-            out.append(INLINE_CODE_RE.sub("code", line))
+            out.append(HTML_TAG_RE.sub(" ", INLINE_CODE_RE.sub("code", line)))
     return "\n".join(out)
 
 

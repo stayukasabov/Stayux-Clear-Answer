@@ -727,5 +727,28 @@ class SelfReplacementTests(unittest.TestCase):
                          ["'zorp' as a verb is not approved"])
 
 
+class MarkdownHtmlTagTests(unittest.TestCase):
+    FOOTER = ('<p align="center">Stayux Clear Answer<br>\n'
+              '<a href="https://stayux.com" target="_blank" rel="noopener noreferrer">stayux.com</a> | '
+              '<a href="https://x.com/StayuKasabov" target="_blank" rel="noopener noreferrer">X.com</a></p>')
+
+    def test_tag_attributes_are_not_words(self):
+        r = ste_lint.lint("Open the valve.\n\n" + self.FOOTER, cache={}, custom={})
+        self.assertEqual(r["violations"], [])
+
+    def test_text_inside_tags_is_checked(self):
+        r = ste_lint.lint('<p align="center">The pump is running.</p>', cache={}, custom={})
+        self.assertIn("progressive-tense", errors(r))
+
+
+class PosNameTests(unittest.TestCase):
+    def test_preposition_is_named_in_full(self):
+        cache = {"version": 2, "approved": {}, "word_substitutions": {"past (prep)": "after"},
+                 "phrase_substitutions": {}}
+        r = ste_lint.lint("Go past it.", cache=cache, custom={})
+        details = [v["detail"] for v in r["violations"] if v["rule"] == "unapproved-word"]
+        self.assertEqual(details, ["'past' as a preposition: use 'after'"])
+
+
 if __name__ == "__main__":
     unittest.main()
