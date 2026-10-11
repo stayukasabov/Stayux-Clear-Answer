@@ -9,7 +9,9 @@ Take the user's text (the command argument, a pasted block, or a named file) and
 rewrite it into short, plain English (Simplified Technical English).
 
 1. Rewrite the text using the rules in
-   `${CLAUDE_PLUGIN_ROOT}/references/writing-rules.md`.
+   `${CLAUDE_PLUGIN_ROOT}/references/writing-rules.md`. Keep every fact, step,
+   number, condition, and warning of the original. Split long sentences. Do not
+   delete content.
 2. Lint the rewrite until it passes:
    ```bash
    python3 "${CLAUDE_PLUGIN_ROOT}/scripts/ste_lint.py" --profile full --pretty <<'EOF'

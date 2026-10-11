@@ -1,8 +1,8 @@
 ---
 name: clear-write
 description: >
-  Clear Answer: write, rewrite, and check text in short, plain English
-  (Simplified Technical English, ASD-STE100). Load this when the user asks for a
+  Clear Answer: write, rewrite, and check text in plain English with short
+  sentences (Simplified Technical English, ASD-STE100). Load this when the user asks for a
   clear answer, plain English, short replies, to write or rewrite in STE, to
   check STE compliance, apply ASD-STE100, or simplify technical documentation.
   Commands: /clear-answer:on, /clear-answer:off, /clear-answer:mode,
@@ -12,7 +12,7 @@ description: >
 # Simplified Technical English (STE)
 
 Simplified Technical English (ASD-STE100) is a controlled-English standard for
-technical text that is short, direct, and unambiguous. Use it to write or rewrite
+technical text that is clear, direct, and unambiguous. Use it to write or rewrite
 text so any reader, including a non-native reader, parses it the same way.
 
 The plugin bundles a zero-dependency Python linter that is the objective
@@ -22,8 +22,8 @@ cost no model-context tokens.
 ## Commands
 
 - `/clear-answer:on`, `/clear-answer:off`: turn Clear Answer dialogue mode on or
-  off. While on, every reply is written in short, plain English and gated by the
-  linter.
+  off. While on, every reply is written in plain English with short sentences
+  and gated by the linter.
 - `/clear-answer:mode off|prose|strict`: set the mode and strictness.
 - `/clear-answer:check`: check a file or text and report the violations.
 - `/clear-answer:rewrite`: rewrite text with a before and after.
@@ -40,8 +40,32 @@ EOF
 ```
 
 Rewrite until `passed` is true. For a rewrite task, show a before and after. For
-a compliance check, report the violations. For a dialogue request, keep replies
-short and gated.
+a compliance check, report the violations. For a dialogue request, keep the
+sentences short and gate every reply.
+
+## How to write a Clear Answer
+
+Clear Answer is a translation into plain English, not a summary. A translation
+keeps all the content. Only the sentences change.
+
+1. **Full draft first.** Write the answer that you would give without Clear
+   Answer. Do not shorten it.
+2. **Lint the draft, then fix only the flagged sentences.** Split a long
+   sentence into two or more sentences, or rephrase it. Keep every sentence
+   that passed. Do not merge or drop content.
+3. **Check the content.** Compare the final text with the draft. Every fact,
+   step, check, and warning must still be there.
+
+A Clear Answer is often the same length as a normal answer, or longer.
+
+Example:
+
+- Normal: "Before you revoke the old key, disable it and wait a day, so that
+  you can re-enable it if something breaks."
+- Clear Answer: "Disable the old key. Wait 24 hours. If errors occur, enable
+  the old key again. If no errors occur, delete the old key."
+
+The Clear Answer has more sentences and the same facts.
 
 ## The rules you write by
 

@@ -15,6 +15,10 @@ ASD-STE100 standard. It is a rewrite-only style guard on your own output. It
 does not report findings to the user. It just makes you write in short, plain
 English.
 
+Clear Answer is a translation into plain English, not a summary. Keep the
+content that you would give without it. Only the sentences change. Because STE
+splits long sentences, a compliant answer is often the same length or longer.
+
 This build is packaged for Claude Desktop and the API, where the skill files run
 in a code-execution container. All files sit at the skill root: `SKILL.md`,
 `ste_lint.py`, `ste_dictionary.py`, and `writing-rules.md`.
@@ -31,7 +35,9 @@ in a code-execution container. All files sit at the skill root: `SKILL.md`,
 
 ## Workflow for every reply while Clear Answer mode is on
 
-1. Draft the reply following the rules below.
+1. Write the full answer that you would give without Clear Answer, following
+   the rules below. Do not shorten it or leave out any fact, step, check, or
+   warning.
 2. Run the draft through the bundled linter with the code execution tool. The
    files are at the skill root, so run:
    ```bash
@@ -41,8 +47,10 @@ in a code-execution container. All files sit at the skill root: `SKILL.md`,
    ```
    Use `--profile full` for document work. If the working directory differs,
    locate `ste_lint.py` in the skill files and run it from there.
-3. If `passed` is false, rewrite the flagged sentences and run it again. Repeat
-   until `passed` is true.
+3. If `passed` is false, fix only the flagged sentences. Split a long sentence
+   into two or more sentences, or rephrase it. Keep every sentence that passed.
+   Do not delete a fact to pass the gate. Run it again. Repeat until `passed` is
+   true. Then check that every fact of the draft is still in the text.
 4. Send only the final compliant text. Do not show the user the linter output or
    the list of violations. This is a rewrite-only guard.
 

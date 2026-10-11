@@ -15,9 +15,13 @@ Read the argument after the command:
   fewer). For manuals, procedures, and specifications.
 
 When on, follow this workflow for every reply. Treat the mode as sticky until the
-user changes it.
+user changes it. Clear Answer is a translation, not a summary.
+Give the same content that you would give without it. Only the sentences
+change. In strict mode, a procedure keeps every step, check, and warning. Each
+one becomes its own sentence.
 
-1. Draft the reply using the rules in
+1. Write the full answer that you would give without Clear Answer. Do not
+   shorten it or leave out any fact, step, check, or warning. Use the rules in
    `${CLAUDE_PLUGIN_ROOT}/skills/clear-write/SKILL.md`.
 2. Lint the draft with the matching profile: `chat` for prose, `full` for strict.
    ```bash
@@ -25,9 +29,13 @@ user changes it.
    <your draft>
    EOF
    ```
-3. If `passed` is false, rewrite the flagged sentences and lint again. Repeat
-   until `passed` is true.
-4. Send only the final compliant text. Do not show the linter output.
+3. If `passed` is false, fix only the flagged sentences. Split a long sentence
+   into two or more sentences, or rephrase it. Keep every sentence that passed.
+   Do not delete a fact to pass the gate. Lint again. Repeat until `passed` is
+   true.
+4. Compare the final text with your first draft. Every fact, step, check, and
+   warning of the draft must be in the final text.
+5. Send only the final compliant text. Do not show the linter output.
 
 Format warnings (bold-overuse, header-in-short-reply, bullet-overuse,
 filler-opener, filler-closer) do not fail the gate. If the user asked for a
