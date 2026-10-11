@@ -149,7 +149,7 @@ SENTENCE_RE = re.compile(r"[^.!?]+[.!?]*", re.DOTALL)
 LIST_RE = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+(.*)$")
 TABLE_RE = re.compile(r"^\s*\|")
 TABLE_SEP_RE = re.compile(r"^[\s|:\-]+$")
-FENCE_RE = re.compile(r"^\s*(```|~~~)")
+FENCE_RE = re.compile(r"^\s*(```|~~~)\s*(\w*)")
 BOLD_RE = re.compile(r"\*\*[^*\n]+\*\*|__[^_\n]+__")
 HEADER_RE = re.compile(r"^#{1,6}\s", re.MULTILINE)
 BULLET_RE = re.compile(r"^\s*[-*+]\s+")
@@ -180,6 +180,63 @@ def _strip_code(text):
         else:
             out.append(INLINE_CODE_RE.sub("code", line))
     return "\n".join(out)
+
+
+# Mermaid labels (PRD F3). Labels get the word rules and a length limit, not
+# the sentence rules. The limit of 8 words is our own number.
+MAX_LABEL_WORDS = 8
+BR_RE = re.compile(r"<br\s*/?>", re.IGNORECASE)
+NODE_RE = re.compile(
+    r'\b\w+\s*(?:\[\[|\[\(|\(\(|\[/|\[\\|\{\{|\[|\(|\{)\s*"?([^\[\](){}"|]*?)"?\s*'
+    r'(?:\]\]|\)\]|\)\)|/\]|\\\]|\}\}|\]|\)|\})')
+EDGE_PIPE_RE = re.compile(r"\|([^|]+)\|")
+EDGE_TEXT_RE = re.compile(r"(?:--|==|-\.)\s+([^-=.>|][^>|]*?)\s+(?:-->|==>|\.->|---)")
+SEQ_ARROW_RE = re.compile(r"-{1,2}(?:>>|>|x|\))")
+SEQ_NOTE_RE = re.compile(r"^\s*note\s", re.IGNORECASE)
+
+
+def _mermaid_blocks(text):
+    """Yield (lines, first_line_no) for each ```mermaid fence in the text."""
+    lines = text.split("\n")
+    i = 0
+    while i < len(lines):
+        m = FENCE_RE.match(lines[i])
+        if not m:
+            i += 1
+            continue
+        fence, lang, start = m.group(1), m.group(2).lower(), i + 1
+        i += 1
+        while i < len(lines) and not (lines[i].strip().startswith(fence)):
+            i += 1
+        if lang == "mermaid":
+            yield lines[start:i], start + 1
+        i += 1
+
+
+def mermaid_labels(lines, first_line):
+    """Return (label, line_no) for the labels of a flowchart or sequence diagram."""
+    kind = None
+    for line in lines:
+        head = line.strip()
+        if head and not head.startswith("%%"):
+            kind = head.split()[0].rstrip(";")
+            break
+    found = []
+    for n, raw in enumerate(lines, first_line):
+        line = BR_RE.sub(" ", raw)
+        if kind in ("graph", "flowchart"):
+            hits = [(m.start(1), m.group(1)) for r in (NODE_RE, EDGE_PIPE_RE, EDGE_TEXT_RE)
+                    for m in r.finditer(line)]
+        elif kind == "sequenceDiagram" and ":" in line:
+            left, _, right = line.partition(":")
+            hits = [(0, right)] if SEQ_ARROW_RE.search(left) or SEQ_NOTE_RE.match(left) else []
+        else:
+            hits = []
+        for _, label in sorted(hits):
+            label = " ".join(label.split())
+            if label:
+                found.append((label, n))
+    return found
 
 
 def _iter_segments(text):
@@ -410,7 +467,17 @@ def lint(text, profile="chat", cache=None, custom=None):
     violations = []
 
     # Normalize curly apostrophes so contractions match regardless of source.
-    text = _strip_code(text.replace("’", "'"))
+    text = text.replace("’", "'")
+    label_cfg = dict(cfg, max_sentence_words=float("inf"))
+    for block, first in _mermaid_blocks(text):
+        for label, line in mermaid_labels(block, first):
+            if len(WORD_RE.findall(label)) > MAX_LABEL_WORDS:
+                violations.append(_make(
+                    "label-length", "error",
+                    f"{len(WORD_RE.findall(label))} words in a diagram label (max {MAX_LABEL_WORDS})",
+                    label[:60], line))
+            _check_sentence(label, label_cfg, violations, line, word_subs, phrase_subs)
+    text = _strip_code(text)
 
     if ";" in text:
         semi_line = text[:text.index(";")].count("\n") + 1

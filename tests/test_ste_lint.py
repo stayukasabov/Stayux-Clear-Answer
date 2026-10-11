@@ -441,5 +441,68 @@ class FormatRuleTests(unittest.TestCase):
         self.assertNotIn("bold-overuse", rules(r))
 
 
+def mermaid(body):
+    return "Open the valve.\n\n```mermaid\n" + body + "\n```\n"
+
+
+class MermaidLabelTests(unittest.TestCase):
+    def labels(self, body):
+        return [l for l, _ in ste_lint.mermaid_labels(body.split("\n"), 1)]
+
+    def test_flowchart_node_labels(self):
+        self.assertEqual(self.labels("graph TD\nA[Open the valve] --> B{Is the pressure high?}"),
+                         ["Open the valve", "Is the pressure high?"])
+
+    def test_node_shapes_and_quotes(self):
+        body = 'flowchart LR\nA(Start) --> B(("Stop the pump")) --> C[[Check the seal]] --> D[(Store)]'
+        self.assertEqual(self.labels(body), ["Start", "Stop the pump", "Check the seal", "Store"])
+
+    def test_edge_labels(self):
+        body = "graph TD\nA -->|yes| B\nA -- no --> C"
+        self.assertEqual(sorted(self.labels(body)), ["no", "yes"])
+
+    def test_br_tag_becomes_space(self):
+        self.assertEqual(self.labels("graph TD\nA[Open<br>the valve]"), ["Open the valve"])
+
+    def test_sequence_messages(self):
+        body = "sequenceDiagram\nAlice->>Bob: Send the token\nNote over Bob: Check the token"
+        self.assertEqual(self.labels(body), ["Send the token", "Check the token"])
+
+    def test_unknown_diagram_type_has_no_labels(self):
+        self.assertEqual(self.labels('pie\n"Dogs" : 10'), [])
+
+    def test_label_line_numbers(self):
+        found = ste_lint.mermaid_labels(["graph TD", "A[Open the valve]", "B[Close it]"], 10)
+        self.assertEqual(found, [("Open the valve", 11), ("Close it", 12)])
+
+
+class MermaidLintTests(unittest.TestCase):
+    def test_eight_word_label_passes(self):
+        r = ste_lint.lint(mermaid("graph TD\nA[one two three four five six seven eight]"))
+        self.assertNotIn("label-length", rules(r))
+
+    def test_nine_word_label_fails(self):
+        r = ste_lint.lint(mermaid("graph TD\nA[one two three four five six seven eight nine]"))
+        self.assertIn("label-length", errors(r))
+
+    def test_label_word_rules_apply(self):
+        r = ste_lint.lint(mermaid("graph TD\nA[The pump is running] --> B[Don't stop]"))
+        self.assertIn("progressive-tense", errors(r))
+        self.assertIn("contraction", errors(r))
+
+    def test_label_violation_line(self):
+        r = ste_lint.lint(mermaid("graph TD\nA[Open it]\nB[The pump is running]"))
+        line = next(v["line"] for v in r["violations"] if v["rule"] == "progressive-tense")
+        self.assertEqual(line, 6)
+
+    def test_mermaid_semicolons_pass(self):
+        r = ste_lint.lint(mermaid("graph TD;\nA[Open the valve] --> B[Close the door];"))
+        self.assertTrue(r["passed"])
+
+    def test_other_code_fences_still_skipped(self):
+        r = ste_lint.lint("Open the valve.\n\n```python\nx = 'is running'\n```\n")
+        self.assertNotIn("progressive-tense", rules(r))
+
+
 if __name__ == "__main__":
     unittest.main()
