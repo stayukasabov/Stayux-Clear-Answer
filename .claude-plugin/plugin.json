@@ -1,7 +1,7 @@
 {
   "name": "clear-answer",
   "displayName": "Stayux Clear Answer",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Clear Answer: make Claude reply in short, plain English. Dialogue mode plus file check, rewrite, and repo init, backed by a zero-dependency Python linter. Commands: /clear-answer:on, :off, :mode, :check, :rewrite, :init, :explain. Compatible with Simplified Technical English (ASD-STE100). Unofficial.",
   "author": { "name": "Stayux (Stayu Kasabov)", "email": "stayu.kasabov@gmail.com", "url": "https://github.com/stayukasabov" },
   "homepage": "https://github.com/stayukasabov/Stayux-Clear-Answer",
