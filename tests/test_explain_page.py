@@ -118,12 +118,14 @@ class CliTests(unittest.TestCase):
 
 
 class FixtureTests(unittest.TestCase):
-    def test_fixture_page_is_the_wrapped_body(self):
-        with open(os.path.join(SKILL_ROOT, "tests", "fixtures", "explain-body.html")) as f:
-            body = f.read()
+    def test_fixture_files_are_built_from_the_content_fixture(self):
+        import explain_build
+        with open(os.path.join(SKILL_ROOT, "tests", "fixtures", "explain-content.clear.txt")) as f:
+            doc = explain_build.parse(f.read())
         with open(os.path.join(SKILL_ROOT, "tests", "fixtures", "explain-page.html")) as f:
-            self.assertEqual(f.read(), explain_page.wrap_html(body))
-
+            self.assertEqual(f.read(), explain_build.render_html(doc))
+        with open(os.path.join(SKILL_ROOT, "tests", "fixtures", "explain-diagram.md")) as f:
+            self.assertEqual(f.read(), explain_build.render_md(doc))
 
 if __name__ == "__main__":
     unittest.main()

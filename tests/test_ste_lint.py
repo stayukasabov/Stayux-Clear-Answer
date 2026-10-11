@@ -778,26 +778,34 @@ class FooterTests(unittest.TestCase):
     def test_sample_markdown_footer(self):
         self.check("tests/fixtures/explain-diagram.md", "markdown")
 
-    def test_command_has_no_css_or_footer(self):
-        # The frame script adds them, so Claude does not spend tokens on them.
-        with open(os.path.join(SKILL_ROOT, "commands", "explain.md")) as f:
-            cmd = f.read()
-        for text in ("<style>", "ca-footer", "linkedin.com"):
-            self.assertNotIn(text, cmd)
+    COMMANDS = ("commands/explain.md", "commands/explain/diagram.md", "commands/explain/html.md")
 
-    def test_command_examples_pass_when_framed(self):
+    def read(self, path):
+        with open(os.path.join(SKILL_ROOT, path)) as f:
+            return f.read()
+
+    def test_commands_have_no_css_or_footer(self):
+        # The builder adds them, so Claude does not spend tokens on them.
+        for path in self.COMMANDS:
+            for text in ("<style>", "ca-footer", "linkedin.com"):
+                self.assertNotIn(text, self.read(path), path)
+
+    def test_file_commands_share_one_content_format(self):
+        import re
+        blocks = [re.search(r"<!-- content-format:start -->.*<!-- content-format:end -->",
+                            self.read(p), re.S).group(0) for p in self.COMMANDS[1:]]
+        self.assertEqual(blocks[0], blocks[1])
+
+    def test_content_format_example_builds_and_passes(self):
         import re
         sys.path.insert(0, os.path.join(SKILL_ROOT, "scripts"))
-        import explain_page
-        with open(os.path.join(SKILL_ROOT, "commands", "explain.md")) as f:
-            cmd = f.read()
-        md = re.search(r"````markdown\n(.*?)````", cmd, re.S).group(1)
-        bodies = re.findall(r"```html\n(.*?)```", cmd, re.S)
-        self.assertEqual(len(bodies), 2)  # the row layout and the lanes layout
-        self.assertTrue(ste_lint.lint(explain_page.add_md_footer(md), cache={}, custom={})["passed"])
-        for body in bodies:
-            page = explain_page.wrap_html(body)
-            self.assertTrue(ste_lint.lint(page, fmt="html", cache={}, custom={})["passed"])
+        import explain_build
+        example = re.search(r"```text\n(.*?)```", self.read(self.COMMANDS[1]), re.S).group(1)
+        doc = explain_build.parse(example)
+        self.assertTrue(explain_build.check(doc, cache={}, custom={})["passed"])
+        page = explain_build.render_html(doc)
+        self.assertTrue(ste_lint.lint(page, fmt="html", cache={}, custom={})["passed"])
+        self.assertTrue(ste_lint.lint(explain_build.render_md(doc), cache={}, custom={})["passed"])
 
     def test_markdown_sample_footer_is_the_template_footer(self):
         with open(os.path.join(SKILL_ROOT, "templates", "explain-footer.md")) as f:

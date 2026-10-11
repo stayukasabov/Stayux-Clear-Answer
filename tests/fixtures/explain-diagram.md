@@ -1,39 +1,39 @@
-# How DNS works
+# How a CDN works
 
-DNS changes a name, such as `example.com`, into an IP address. Your computer asks a resolver. The resolver asks other servers until it finds the address.
+A content delivery network (CDN) keeps copies of your files on servers near your users. A user gets a file from a near server, not from your main server. The page loads faster, and your main server gets less traffic.
 
 ```mermaid
 %%{init: {"theme": "neutral"}}%%
 sequenceDiagram
     autonumber
-    participant B as Browser
-    participant R as Resolver
-    participant N as Name servers
-    B->>R: Ask for the address
-    R->>N: Ask each server in turn
-    N-->>R: Send the address
-    R-->>B: Send the address
+    participant U as User
+    participant C as CDN server
+    participant M as Main server
+    U->>C: Ask for a file
+    C->>M: Ask if no copy
+    M-->>C: Send the file
+    C-->>U: Send the file
 ```
 
-The resolver asks other servers only when its cache has no answer.
+The CDN server asks the main server only when it has no copy.
 
 ## The parts
 
 | Part | What it does |
 |---|---|
-| Resolver | Finds the address for your computer. |
-| Name servers | Keep the records for each domain. |
+| CDN server | A server near the user that keeps copies of your files. |
+| Main server | Your own server. It has the original files. |
 
 ## The steps
 
-1. The browser asks the resolver for the address.
-2. The resolver asks the name servers, one after the other.
-3. The last server sends the address.
-4. The resolver sends the address to the browser and keeps a copy.
+1. The user asks for a file, such as an image.
+2. The request goes to the nearest CDN server.
+3. If that server has a copy, it sends the copy to the user.
+4. If it has no copy, it gets the file from the main server. It keeps a copy for the next request.
 
 ## Limits
 
-The resolver keeps a copy for a set time. A change to a record can take that long to reach all users.
+A CDN helps most with files that do not change often. For data that changes for each user, the CDN must ask the main server each time.
 
 ---
 
