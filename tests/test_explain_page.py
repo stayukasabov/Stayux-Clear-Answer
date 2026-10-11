@@ -153,5 +153,41 @@ class DesignSystemTests(unittest.TestCase):
         self.assertIn("--ca-radius: 4px", self.page)
 
 
+class ThemeToggleTests(unittest.TestCase):
+    # The eclipse toggle from stayux.com, at the top right of every page.
+    def setUp(self):
+        self.page = explain_page.wrap_html(BODY)
+
+    def test_button_at_the_top_right(self):
+        self.assertIn('id="ca-theme-toggle"', self.page)
+        self.assertIn('aria-label="Switch theme"', self.page)
+        css = self.page[self.page.index(".ca-theme-toggle {"):]
+        css = css[:css.index("}")]
+        for rule in ("position: fixed", "top: 16px", "right: 16px", "width: 44px"):
+            self.assertIn(rule, css)
+
+    def test_eclipse_circle(self):
+        self.assertIn("clip-path: circle(17px)", self.page)
+        self.assertIn("@keyframes ca-eclipse-bounce", self.page)
+
+    def test_choice_is_saved_and_applied_before_drawing(self):
+        head = self.page[:self.page.index("</head>")]
+        self.assertIn('localStorage.getItem("ca-theme")', head)
+        self.assertIn('localStorage.setItem("ca-theme"', self.page)
+
+    def test_label_names_the_next_theme(self):
+        self.assertIn("Switch to light theme", self.page)
+        self.assertIn("Switch to dark theme", self.page)
+
+    def test_motion_and_print(self):
+        self.assertIn("prefers-reduced-motion: reduce", self.page)
+        self.assertIn("@media print", self.page)
+
+    def test_page_still_passes_and_loads_nothing(self):
+        r = ste_lint.lint(self.page, fmt="html", cache={}, custom={})
+        self.assertTrue(r["passed"], r["violations"])
+        self.assertNotIn("external-request", [v["rule"] for v in r["violations"]])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How a CDN works</title>
+<script>try { var t = localStorage.getItem("ca-theme"); if (t) document.documentElement.setAttribute("data-theme", t); } catch (e) {}</script>
 <style>
   /* Colors, type, and spacing from the Stayux design system (design-system.css).
      The page follows the system theme. data-theme="light" or "dark" on <html>
@@ -20,6 +21,7 @@
     --ca-link: oklch(0.436 0.237 280);            /* primary-shade-200 */
     --ca-link-hover: oklch(0.588 0.213 9);        /* secondary-shade-100 */
     --ca-code: oklch(0.503 0.287 280 / 7%);       /* code-bg */
+    --ca-toggle: oklch(0.100 0.006 280);          /* n950 */
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -34,6 +36,7 @@
       --ca-link: oklch(0.858 0.086 304);          /* primary-tint-200 */
       --ca-link-hover: oklch(0.676 0.196 297);    /* primary-tint-600 */
       --ca-code: oklch(0.160 0.012 280 / 50%);    /* code-bg */
+      --ca-toggle: #ffffff;
     }
   }
   [data-theme="dark"] {
@@ -48,6 +51,7 @@
     --ca-link: oklch(0.858 0.086 304);
     --ca-link-hover: oklch(0.676 0.196 297);
     --ca-code: oklch(0.160 0.012 280 / 50%);
+    --ca-toggle: #ffffff;
   }
   :root {
     --ca-font: 'SX', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -80,6 +84,23 @@
   .step { fill: var(--ca-muted); font: 13px var(--ca-font); text-anchor: middle; }
   .lifeline { fill: none; stroke: var(--ca-line); stroke-width: 1.5; stroke-dasharray: 2 4; }
   #ca-arrow path { fill: var(--ca-accent); }
+  /* Theme toggle: the eclipse button from stayux.com. */
+  .ca-theme-toggle { position: fixed; top: 16px; right: 16px; z-index: 10; width: 44px; height: 44px; margin: 0; padding: 0; border: none; background: none; cursor: pointer; color: transparent; display: flex; align-items: center; justify-content: center; --ca-eclipse: 0.5s; }
+  .ca-theme-toggle svg { width: 44px; height: 44px; clip-path: circle(17px); }
+  .ca-theme-toggle .eclipse-bg { fill: var(--ca-toggle); }
+  .ca-theme-toggle:focus-visible { outline: 2px solid var(--ca-accent); outline-offset: 2px; border-radius: 50%; }
+  .ca-theme-toggle__eclipse clipPath path { transition: d var(--ca-eclipse) ease; }
+  .ca-theme-toggle--toggled .ca-theme-toggle__eclipse clipPath path { d: path("M-32 0h64v32h-64zm36 16a1 1 0 0024 1 1 1 0 00-24-1"); }
+  .ca-theme-toggle--to-light, .ca-theme-toggle--to-dark { color: var(--ca-accent); }
+  .ca-theme-toggle--to-light .ca-theme-toggle__eclipse clipPath path,
+  .ca-theme-toggle--to-dark .ca-theme-toggle__eclipse clipPath path { animation: ca-eclipse-bounce var(--ca-eclipse) linear forwards; transition: none; }
+  @keyframes ca-eclipse-bounce {
+    0% { d: path("M0 0h64v32h-64zm4 16a1 1 0 0024 1 1 1 0 00-24-1"); animation-timing-function: ease-in; }
+    50% { d: path("M0 0h64v32h-64zm36 16a1 1 0 0024 1 1 1 0 00-24-1"); animation-timing-function: ease-out; }
+    100% { d: path("M0 0h64v32h-64zm4 16a1 1 0 0024 1 1 1 0 00-24-1"); }
+  }
+  @media (prefers-reduced-motion: reduce) { .ca-theme-toggle * { transition: none !important; animation: none !important; } }
+  @media print { .ca-theme-toggle { display: none; } }
   .ca-footer { margin-top: 4rem; text-align: center; font: 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ca-muted); }
   .ca-footer p { margin: 0.25rem 0; }
   .ca-footer a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
@@ -94,6 +115,13 @@
     </marker>
   </defs>
 </svg>
+<button class="ca-theme-toggle" id="ca-theme-toggle" type="button" aria-label="Switch theme" title="Switch theme">
+  <svg class="ca-theme-toggle__eclipse" viewBox="0 0 32 32" aria-hidden="true" fill="currentColor">
+    <clipPath id="ca-eclipse-cutout"><path d="M0 0h64v32h-64zm4 16a1 1 0 0024 1 1 1 0 00-24-1"/></clipPath>
+    <rect class="eclipse-bg" x="0" y="0" width="32" height="32" rx="2"/>
+    <g clip-path="url(#ca-eclipse-cutout)"><rect x="0" y="0" width="32" height="32" rx="2"/></g>
+  </svg>
+</button>
 <main class="ca-page">
 <!-- ca:body:start -->
 <h1>How a CDN works</h1>
@@ -137,5 +165,33 @@
   <p><a href="https://stayux.com" target="_blank" rel="noopener noreferrer">Stayux.com</a> | <a href="https://www.linkedin.com/in/stayu-kasabov-stayux/" target="_blank" rel="noopener noreferrer">LinkedIn</a> | <a href="https://x.com/StayuKasabov" target="_blank" rel="noopener noreferrer">X.com</a></p>
 </footer>
 </main>
+<script>
+(function () {
+  var root = document.documentElement, button = document.getElementById("ca-theme-toggle");
+  function theme() {
+    return root.getAttribute("data-theme") ||
+      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  }
+  function sync() {
+    var dark = theme() === "dark", label = dark ? "Switch to light theme" : "Switch to dark theme";
+    button.classList.toggle("ca-theme-toggle--toggled", dark);
+    button.setAttribute("aria-label", label);
+    button.title = label;
+  }
+  sync();
+  button.addEventListener("click", function () {
+    var next = theme() === "dark" ? "light" : "dark";
+    button.classList.add(next === "light" ? "ca-theme-toggle--to-light" : "ca-theme-toggle--to-dark");
+    setTimeout(function () {
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("ca-theme", next); } catch (e) {}
+      sync();
+    }, 250);
+    setTimeout(function () {
+      button.classList.remove("ca-theme-toggle--to-light", "ca-theme-toggle--to-dark");
+    }, 500);
+  });
+})();
+</script>
 </body>
 </html>
