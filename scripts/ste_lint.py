@@ -150,7 +150,13 @@ SENTENCE_RE = re.compile(r"[^.!?]+[.!?]*", re.DOTALL)
 LIST_RE = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+(.*)$")
 TABLE_RE = re.compile(r"^\s*\|")
 TABLE_SEP_RE = re.compile(r"^[\s|:\-]+$")
-FENCE_RE = re.compile(r"^\s*(```|~~~)\s*(\w*)")
+FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})\s*(\w*)")
+
+
+def _closes(line, fence):
+    """True if the line closes the fence: the same mark, at least as long."""
+    mark = line.strip()
+    return bool(mark) and set(mark) == {fence[0]} and len(mark) >= len(fence)
 BOLD_RE = re.compile(r"\*\*[^*\n]+\*\*|__[^_\n]+__")
 HEADER_RE = re.compile(r"^#{1,6}\s", re.MULTILINE)
 BULLET_RE = re.compile(r"^\s*[-*+]\s+")
@@ -172,7 +178,7 @@ def _strip_code(text):
     for line in text.split("\n"):
         m = FENCE_RE.match(line)
         if fence:
-            if m and m.group(1) == fence:
+            if _closes(line, fence):
                 fence = None
             out.append("")
         elif m:
@@ -207,7 +213,7 @@ def _mermaid_blocks(text):
             continue
         fence, lang, start = m.group(1), m.group(2).lower(), i + 1
         i += 1
-        while i < len(lines) and not (lines[i].strip().startswith(fence)):
+        while i < len(lines) and not _closes(lines[i], fence):
             i += 1
         if lang == "mermaid":
             yield lines[start:i], start + 1

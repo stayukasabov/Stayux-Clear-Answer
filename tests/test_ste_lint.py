@@ -624,5 +624,22 @@ class ExplainPageFixtureTests(unittest.TestCase):
         self.assertNotIn("external-request", rules(r))
 
 
+class LongFenceTests(unittest.TestCase):
+    QUOTED = ("Open the valve.\n\n````markdown\nA reply.\n\n```mermaid\ngraph TD\n"
+              "A[The pump is running]\n```\n\nThe pump is running; it is hot.\n````\n")
+
+    def test_four_backtick_fence_hides_inner_fences(self):
+        r = ste_lint.lint(self.QUOTED)
+        self.assertTrue(r["passed"], r["violations"])
+
+    def test_text_after_long_fence_is_checked(self):
+        r = ste_lint.lint(self.QUOTED + "\nThe pump is running.\n")
+        self.assertIn("progressive-tense", errors(r))
+
+    def test_shorter_fence_does_not_close_longer_one(self):
+        r = ste_lint.lint("Open it.\n\n````\n```\nx; y\n````\n")
+        self.assertNotIn("semicolon", rules(r))
+
+
 if __name__ == "__main__":
     unittest.main()
