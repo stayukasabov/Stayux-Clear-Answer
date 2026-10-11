@@ -672,6 +672,19 @@ def _check_label(label, line, cfg, violations, word_subs, phrase_subs, approved_
                     line, word_subs, phrase_subs, approved_pos)
 
 
+def lint_label(label, profile="chat", cache=None, custom=None):
+    """Lint one diagram label: the word rules and the label length limit."""
+    cfg = PROFILES.get(profile, PROFILES["chat"])
+    word_subs, phrase_subs, approved_pos = _effective_maps(
+        _DEFAULT_CACHE if cache is None else cache,
+        _DEFAULT_CUSTOM if custom is None else custom)
+    violations = []
+    _check_label(label.replace("’", "'"), None, cfg, violations,
+                 word_subs, phrase_subs, approved_pos)
+    passed = not any(v["severity"] == "error" for v in violations)
+    return {"passed": passed, "profile": profile, "violations": violations}
+
+
 def lint(text, profile="chat", cache=None, custom=None, fmt="markdown"):
     cfg = PROFILES.get(profile, PROFILES["chat"])
     if cache is None:
