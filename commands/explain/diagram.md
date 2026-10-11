@@ -12,22 +12,31 @@ needs. Only the sentences change.
 
 ## Workflow
 
-1. Plan the content silently. Then write the content file
-   `<topic-slug>.clear.txt` once, in the working directory, for example
-   `how-a-cdn-works.clear.txt`. Fill only the blanks below. Write in plain
-   English from the start. Do not write HTML, Markdown, Mermaid, or SVG.
-2. Build the file:
+Use only shell commands. Do not use the Write tool, the Edit tool, or `sed`.
+The dialogue then shows no file content and no diffs.
+
+1. Plan the content silently. Then build the file with one command. Put the
+   blanks (see below) in the command. The script saves them to
+   `<topic-slug>.clear.txt` in the working directory and builds the file:
    ```bash
-   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/explain_build.py" "<topic-slug>.clear.txt" --to md
+   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/explain_build.py" "<topic-slug>.clear.txt" --to md --stdin <<'EOF'
+   title: How a CDN works
+   ...
+   EOF
    ```
-3. If `passed` is true, the work is done.
-4. If `passed` is false, read `errors`. Each error names its blank in `where`,
-   such as "step 3". Fix only those errors, and change nothing else. Use the
-   Edit tool on those lines. Do not use `sed`, and do not write the whole file
-   again. Then build again.
-5. Reply with exactly one sentence and the path in `file`:
-   "The diagram is ready: /absolute/path/how-a-cdn-works.md". Do not show the content file,
-   the build output, or the linter output.
+   Write in plain English from the start.
+2. If `passed` is true, the work is done.
+3. If `passed` is false, read `errors`. Each error names its blank in `where`,
+   such as "step 3". Fix only those errors, and change nothing else. Replace
+   each blank with `--set`, all in one command:
+   ```bash
+   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/explain_build.py" "<topic-slug>.clear.txt" --to md --set "step 3=New text." --set "actor M=Main server"
+   ```
+   For a message, give the whole line: `--set "message 2=C -> M: Ask if no copy"`.
+   For a part or a section, give `Name | text`. Do not send all the blanks again.
+4. Reply with exactly one sentence and the path in `file`:
+   "The diagram is ready: /absolute/path/how-a-cdn-works.md". Do not show the
+   blanks, the build output, or the linter output.
 
 <!-- content-format:start -->
 ## The content file
@@ -37,7 +46,6 @@ Write one blank on each line. A line that starts with `#` is a comment.
 ```text
 title: How a CDN works
 answer: A content delivery network (CDN) keeps copies of your files on servers near your users. A user gets a file from a near server, not from your main server. The page loads faster, and your main server gets less traffic.
-diagram: sequence
 actor U: User
 actor C: CDN server
 actor M: Main server
@@ -59,13 +67,12 @@ The blanks:
 
 - `title`: "How X works", or "What X is" for a thing.
 - `answer`: the answer, in 3 sentences or fewer.
-- `diagram`: `sequence` for actors that send messages, or `flow` for a
-  straight chain of stages.
-- `actor ID: Label`: for `sequence`, 2 to 5 actors. Use a short ID and a
+- The diagram is always actors that send messages, in order. For a process,
+  make each stage an actor that hands the work to the next one.
+- `actor ID: Label`: 2 to 5 actors. Use a short ID and a
   label of 3 words or fewer.
-- `A -> B: label`: a request. `A --> B: label` is a reply. For `sequence`, 1 to
-  12 messages, in order. A label is a verb and an object, 6 words or fewer.
-- `node: Label`: for `flow`, 2 to 5 stages, in order, 3 words or fewer each.
+- `A -> B: label`: a request. `A --> B: label` is a reply. 1 to 12 messages,
+  in order. A label is a verb and an object, 6 words or fewer.
 - `caption`: one sentence about the diagram.
 - `part: Name | what it does`: one line for each part.
 - `step: text`: one line for each step, in order.

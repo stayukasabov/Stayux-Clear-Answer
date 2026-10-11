@@ -1,6 +1,5 @@
 title: How a CDN works
 answer: A content delivery network (CDN) keeps copies of your files on servers near your users. A user gets a file from a near server, not from your main server. The page loads faster, and your main server gets less traffic.
-diagram: sequence
 actor U: User
 actor C: CDN server
 actor M: Main server
