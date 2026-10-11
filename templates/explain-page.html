@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}}</title>
+<style>
+  :root {
+    --ca-bg: #ffffff; --ca-text: #1f2328; --ca-muted: #59636e; --ca-line: #d1d9e0;
+    --ca-box: #f6f8fa; --ca-accent: #3b5bdb; --ca-code: #eff2f5;
+    --ca-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --ca-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ca-bg: #0d1117; --ca-text: #e6edf3; --ca-muted: #9198a1; --ca-line: #3d444d;
+      --ca-box: #151b23; --ca-accent: #7c97ff; --ca-code: #1f2630;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ca-bg); color: var(--ca-text); font: 17px/1.6 var(--ca-font); }
+  .ca-page { max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 2rem; }
+  h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 1rem; }
+  h2 { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+  p, li, dd { color: var(--ca-text); }
+  .ca-answer { font-size: 1.1rem; }
+  code { font: 0.9em var(--ca-mono); background: var(--ca-code); padding: 0.1em 0.35em; border-radius: 4px; }
+  ol, ul { padding-left: 1.5rem; }
+  li { margin-bottom: 0.4rem; }
+  dl { margin: 0; }
+  dt { font-weight: 600; margin-top: 0.9rem; }
+  dd { margin: 0.2rem 0 0 0; }
+  .ca-diagram { margin: 2rem 0; }
+  .ca-diagram svg { display: block; width: 100%; height: auto; }
+  .ca-diagram figcaption { margin-top: 0.5rem; text-align: center; color: var(--ca-muted); font-size: 0.95rem; }
+  .node rect { fill: var(--ca-box); stroke: var(--ca-line); stroke-width: 1.5; }
+  .node text { fill: var(--ca-text); font: 600 14px var(--ca-font); text-anchor: middle; dominant-baseline: middle; }
+  .edge { fill: none; stroke: var(--ca-accent); stroke-width: 1.75; marker-end: url(#ca-arrow); }
+  .edge.reply { stroke-dasharray: 5 4; }
+  .step { fill: var(--ca-muted); font: 13px var(--ca-font); text-anchor: middle; }
+  #ca-arrow path { fill: var(--ca-accent); }
+  .ca-footer { margin-top: 3rem; text-align: center; font: 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .ca-footer p { margin: 0.25rem 0; }
+  .ca-footer a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+  .ca-footer a:hover, .ca-footer a:focus-visible { color: #3b5bdb; text-decoration-thickness: 2px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ca-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z"/>
+    </marker>
+  </defs>
+</svg>
+<main class="ca-page">
+<!-- ca:body:start -->
+{{body}}
+<!-- ca:body:end -->
+<footer class="ca-footer">
+  <p>Stayux Clear Answer</p>
+  <p><a href="https://stayux.com" target="_blank" rel="noopener noreferrer">Stayux.com</a> | <a href="https://www.linkedin.com/in/stayu-kasabov-stayux/" target="_blank" rel="noopener noreferrer">LinkedIn</a> | <a href="https://x.com/StayuKasabov" target="_blank" rel="noopener noreferrer">X.com</a></p>
+</footer>
+</main>
+</body>
+</html>

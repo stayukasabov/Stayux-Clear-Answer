@@ -5,12 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How a CDN works</title>
 <style>
-  body { font: 16px/1.5 system-ui, sans-serif; max-width: 42rem; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
-  h1 { font-size: 1.6rem; }
-  svg { width: 100%; height: auto; }
-  .box { fill: #eef3ff; stroke: #3b5bdb; }
-  .label { font: 14px system-ui, sans-serif; text-anchor: middle; }
-  ol li { margin-bottom: 0.4rem; }
+  :root {
+    --ca-bg: #ffffff; --ca-text: #1f2328; --ca-muted: #59636e; --ca-line: #d1d9e0;
+    --ca-box: #f6f8fa; --ca-accent: #3b5bdb; --ca-code: #eff2f5;
+    --ca-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --ca-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ca-bg: #0d1117; --ca-text: #e6edf3; --ca-muted: #9198a1; --ca-line: #3d444d;
+      --ca-box: #151b23; --ca-accent: #7c97ff; --ca-code: #1f2630;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ca-bg); color: var(--ca-text); font: 17px/1.6 var(--ca-font); }
+  .ca-page { max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 2rem; }
+  h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 1rem; }
+  h2 { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
+  p, li, dd { color: var(--ca-text); }
+  .ca-answer { font-size: 1.1rem; }
+  code { font: 0.9em var(--ca-mono); background: var(--ca-code); padding: 0.1em 0.35em; border-radius: 4px; }
+  ol, ul { padding-left: 1.5rem; }
+  li { margin-bottom: 0.4rem; }
+  dl { margin: 0; }
+  dt { font-weight: 600; margin-top: 0.9rem; }
+  dd { margin: 0.2rem 0 0 0; }
+  .ca-diagram { margin: 2rem 0; }
+  .ca-diagram svg { display: block; width: 100%; height: auto; }
+  .ca-diagram figcaption { margin-top: 0.5rem; text-align: center; color: var(--ca-muted); font-size: 0.95rem; }
+  .node rect { fill: var(--ca-box); stroke: var(--ca-line); stroke-width: 1.5; }
+  .node text { fill: var(--ca-text); font: 600 14px var(--ca-font); text-anchor: middle; dominant-baseline: middle; }
+  .edge { fill: none; stroke: var(--ca-accent); stroke-width: 1.75; marker-end: url(#ca-arrow); }
+  .edge.reply { stroke-dasharray: 5 4; }
+  .step { fill: var(--ca-muted); font: 13px var(--ca-font); text-anchor: middle; }
+  #ca-arrow path { fill: var(--ca-accent); }
   .ca-footer { margin-top: 3rem; text-align: center; font: 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   .ca-footer p { margin: 0.25rem 0; }
   .ca-footer a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
@@ -18,24 +46,44 @@
 </style>
 </head>
 <body>
-<h1>How a CDN works</h1>
-<p>A content delivery network (CDN) keeps copies of your files on servers near your users. A user gets the files from a near server, not from your main server. The page loads faster, and your main server gets less traffic.</p>
-
-<h2>The flow</h2>
-<svg viewBox="0 0 640 120" role="img" aria-label="Request flow">
-  <rect class="box" x="10" y="35" width="160" height="50" rx="8"/>
-  <text class="label" x="90" y="65">User</text>
-  <rect class="box" x="240" y="35" width="160" height="50" rx="8"/>
-  <text class="label" x="320" y="65">Near CDN server</text>
-  <rect class="box" x="470" y="35" width="160" height="50" rx="8"/>
-  <text class="label" x="550" y="65">Main server</text>
-  <line x1="170" y1="60" x2="240" y2="60" stroke="#3b5bdb" marker-end="url(#arrow)"/>
-  <line x1="400" y1="60" x2="470" y2="60" stroke="#3b5bdb" stroke-dasharray="4"/>
-  <text class="label" x="435" y="30">Only if there is no copy</text>
-  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3b5bdb"/></marker></defs>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ca-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z"/>
+    </marker>
+  </defs>
 </svg>
+<main class="ca-page">
+<!-- ca:body:start -->
+<h1>How a CDN works</h1>
+<p class="ca-answer">A content delivery network (CDN) keeps copies of your files on servers near your users. A user gets a file from a near server, not from your main server. The page loads faster, and your main server gets less traffic.</p>
 
-<h2>Step by step</h2>
+<figure class="ca-diagram">
+  <svg viewBox="0 0 760 130" role="img" aria-label="A user gets a file through a CDN server">
+    <g class="node"><rect x="20" y="40" width="150" height="56" rx="8"/><text x="95" y="68">User</text></g>
+    <g class="node"><rect x="305" y="40" width="150" height="56" rx="8"/><text x="380" y="68">CDN server</text></g>
+    <g class="node"><rect x="590" y="40" width="150" height="56" rx="8"/><text x="665" y="68">Main server</text></g>
+    <path class="edge" d="M 172 60 H 302"/>
+    <text class="step" x="237" y="50">1. Ask for file</text>
+    <path class="edge" d="M 457 60 H 587"/>
+    <text class="step" x="522" y="50">2. Ask if missing</text>
+    <path class="edge reply" d="M 588 76 H 458"/>
+    <text class="step" x="522" y="96">3. Send file</text>
+    <path class="edge reply" d="M 303 76 H 173"/>
+    <text class="step" x="237" y="96">4. Send file</text>
+  </svg>
+  <figcaption>The CDN server asks the main server only when it has no copy.</figcaption>
+</figure>
+
+<h2>The parts</h2>
+<dl>
+  <dt>CDN server</dt>
+  <dd>A server near the user that keeps copies of your files.</dd>
+  <dt>Main server</dt>
+  <dd>Your own server. It has the original files.</dd>
+</dl>
+
+<h2>The steps</h2>
 <ol>
   <li>The user asks for a file, such as an image.</li>
   <li>The request goes to the nearest CDN server.</li>
@@ -45,9 +93,11 @@
 
 <h2>Limits</h2>
 <p>A CDN helps most with files that do not change often. For data that changes for each user, the CDN must ask the main server each time.</p>
+<!-- ca:body:end -->
 <footer class="ca-footer">
   <p>Stayux Clear Answer</p>
   <p><a href="https://stayux.com" target="_blank" rel="noopener noreferrer">Stayux.com</a> | <a href="https://www.linkedin.com/in/stayu-kasabov-stayux/" target="_blank" rel="noopener noreferrer">LinkedIn</a> | <a href="https://x.com/StayuKasabov" target="_blank" rel="noopener noreferrer">X.com</a></p>
 </footer>
+</main>
 </body>
 </html>
