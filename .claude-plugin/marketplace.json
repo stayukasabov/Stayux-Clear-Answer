@@ -7,7 +7,7 @@
       "name": "clear-answer",
       "source": ".",
       "description": "Clear Answer: make Claude reply in short, plain English. Dialogue mode plus check, rewrite, init, explain, and mode commands under /clear-answer:. Zero-dependency Python linter. Compatible with ASD-STE100.",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "license": "MIT",
       "keywords": ["clear-answer", "plain-english", "ste", "asd-ste100", "technical-writing"],
       "category": "productivity"
