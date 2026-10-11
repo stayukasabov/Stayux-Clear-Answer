@@ -815,5 +815,44 @@ class DocumentHeaderTests(unittest.TestCase):
         self.assertIn("header-in-short-reply", rules(r))
 
 
+class SentenceSplitTests(unittest.TestCase):
+    def test_domain_does_not_end_a_sentence(self):
+        self.assertEqual(ste_lint._split_sentences("Open example.com in the browser. Close it."),
+                         ["Open example.com in the browser.", "Close it."])
+
+    def test_leading_dot_word_does_not_end_a_sentence(self):
+        self.assertEqual(len(ste_lint._split_sentences("The .com server points to the name server.")), 1)
+
+    def test_numbers_with_dots(self):
+        self.assertEqual(len(ste_lint._split_sentences("Use 1.1.1.1 or version 2.0 now.")), 1)
+
+    def test_question_and_exclamation(self):
+        self.assertEqual(len(ste_lint._split_sentences("Is it open? Close it! Then stop.")), 3)
+
+    def test_no_final_punctuation(self):
+        self.assertEqual(ste_lint._split_sentences("Open the valve"), ["Open the valve"])
+
+    def test_paragraph_with_domains_is_not_too_long(self):
+        text = ("You type a name that ends in .com. The root server points to the .com server. "
+                "The .com server points to the name server. That name server gives the address.")
+        self.assertNotIn("paragraph-length", rules(ste_lint.lint(text, cache={}, custom={})))
+
+
+class UnclosedFenceTests(unittest.TestCase):
+    def test_unclosed_fence_is_an_error(self):
+        r = ste_lint.lint("Open the valve.\n\n```\nThe pump is running.\n", cache={}, custom={})
+        self.assertIn("unclosed-code-fence", errors(r))
+        line = next(v["line"] for v in r["violations"] if v["rule"] == "unclosed-code-fence")
+        self.assertEqual(line, 3)
+
+    def test_closed_fence_is_fine(self):
+        r = ste_lint.lint("Open the valve.\n\n```\nx\n```\n", cache={}, custom={})
+        self.assertNotIn("unclosed-code-fence", rules(r))
+
+    def test_inline_triple_backticks_in_a_bullet(self):
+        r = ste_lint.lint("- Write one\n  ```mermaid block. The pump is running.\n", cache={}, custom={})
+        self.assertIn("unclosed-code-fence", errors(r))
+
+
 if __name__ == "__main__":
     unittest.main()

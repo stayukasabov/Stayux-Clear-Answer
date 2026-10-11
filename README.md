@@ -139,6 +139,7 @@ Deterministic rules (errors fail the gate):
 - Sentence length (chat ≤ 25 words, full ≤ 20)
 - Paragraph length (≤ 6 sentences; lists and table cells parsed separately)
 - Semicolons (banned)
+- Unclosed code fences (the text after one would not be checked)
 - Contractions (`don't` becomes `do not`)
 - Progressive tense (`is running`) and perfect tense (`has done`)
 

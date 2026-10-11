@@ -230,7 +230,9 @@ ACTION_VERBS = {
 }
 
 WORD_RE = re.compile(r"[A-Za-z][A-Za-z'\-]*")
-SENTENCE_RE = re.compile(r"[^.!?]+[.!?]*", re.DOTALL)
+# A sentence ends at ., !, or ? followed by white space or the end of the text,
+# so "example.com", ".com", and "1.1.1.1" stay inside their sentence.
+SENTENCE_END_RE = re.compile(r"(?<=[.!?])\s+")
 LIST_RE = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+(.*)$")
 TABLE_RE = re.compile(r"^\s*\|")
 TABLE_SEP_RE = re.compile(r"^[\s|:\-]+$")
@@ -253,6 +255,20 @@ INLINE_CODE_RE = re.compile(r"`[^`\n]+`")
 # An HTML tag in markdown, such as <a href="..." target="_blank">. Only the text
 # between tags is prose; the tag and its attributes are not.
 HTML_TAG_RE = re.compile(r"</?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>\n]*)?/?>")
+
+
+def _unclosed_fence(text):
+    """Return the line number of a code fence that never closes, or None."""
+    fence, start = None, None
+    for n, line in enumerate(text.split("\n"), 1):
+        if fence:
+            if _closes(line, fence):
+                fence = None
+        else:
+            m = FENCE_RE.match(line)
+            if m:
+                fence, start = m.group(1), n
+    return start if fence else None
 
 
 def _strip_code(text):
@@ -375,7 +391,7 @@ def _iter_segments(text):
 
 
 def _split_sentences(chunk):
-    return [s.strip() for s in SENTENCE_RE.findall(chunk) if s.strip()]
+    return [s.strip() for s in SENTENCE_END_RE.split(chunk) if s.strip()]
 
 
 def _words(sentence):
@@ -675,6 +691,13 @@ def lint(text, profile="chat", cache=None, custom=None, fmt="markdown"):
     else:
         labels = [hit for block, first in _mermaid_blocks(text)
                   for hit in mermaid_labels(block, first)]
+        open_line = _unclosed_fence(text)
+        if open_line:
+            # The rest of the text would be skipped as code, unchecked.
+            violations.append(_make(
+                "unclosed-code-fence", "error",
+                "this code fence never closes, so the text after it is not checked",
+                text.split("\n")[open_line - 1].strip()[:60], open_line))
         text = _strip_code(text)
         format_rules = cfg["format_rules"]
     for label, line in labels:
