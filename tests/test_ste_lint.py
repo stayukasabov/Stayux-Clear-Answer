@@ -504,5 +504,116 @@ class MermaidLintTests(unittest.TestCase):
         self.assertNotIn("progressive-tense", rules(r))
 
 
+def page(body, head=""):
+    return f"<!doctype html>\n<html>\n<head>{head}</head>\n<body>\n{body}\n</body>\n</html>"
+
+
+class HtmlTextTests(unittest.TestCase):
+    def lint(self, html):
+        return ste_lint.lint(html, fmt="html")
+
+    def test_clean_page_passes(self):
+        r = self.lint(page("<h1>Valves</h1>\n<p>Open the valve. Close the door.</p>"))
+        self.assertTrue(r["passed"])
+        self.assertEqual(r["violations"], [])
+
+    def test_visible_text_is_checked(self):
+        r = self.lint(page("<p>The pump is running.</p>"))
+        self.assertIn("progressive-tense", errors(r))
+
+    def test_hidden_elements_are_skipped(self):
+        html = page("<script>var a = 'is running'; b();</script>\n"
+                    "<style>p { color: red; }</style>\n"
+                    "<pre>x = 1; y = 2</pre><p>Use <code>a; b</code> now.</p>",
+                    head="<title>The pump is running</title>")
+        r = self.lint(html)
+        self.assertTrue(r["passed"], r["violations"])
+
+    def test_paragraphs_are_separate(self):
+        six = " ".join(["Open the valve."] * 6)
+        r = self.lint(page(f"<p>{six}</p>\n<p>{six}</p>"))
+        self.assertNotIn("paragraph-length", rules(r))
+
+    def test_long_paragraph_flagged(self):
+        seven = " ".join(["Open the valve."] * 7)
+        r = self.lint(page(f"<p>{seven}</p>"))
+        self.assertIn("paragraph-length", errors(r))
+
+    def test_list_items_are_not_a_paragraph(self):
+        items = "".join("<li>Open the valve.</li>" for _ in range(8))
+        r = self.lint(page(f"<ul>{items}</ul>"))
+        self.assertNotIn("paragraph-length", rules(r))
+
+    def test_table_cells_are_separate(self):
+        rows = "".join("<tr><td>Valve</td><td>Open</td><td>Pump</td></tr>" for _ in range(10))
+        r = self.lint(page(f"<table>{rows}</table>"))
+        self.assertNotIn("sentence-length", rules(r))
+
+    def test_inline_tags_keep_the_sentence(self):
+        r = self.lint(page("<p>The pump <b>is</b> <em>running</em>.</p>"))
+        self.assertIn("progressive-tense", errors(r))
+
+    def test_line_number_is_the_source_line(self):
+        r = self.lint(page("<p>Open the valve.</p>\n<p>The pump is running.</p>"))
+        line = next(v["line"] for v in r["violations"] if v["rule"] == "progressive-tense")
+        self.assertEqual(line, 6)
+
+    def test_chat_format_rules_off_for_html(self):
+        r = self.lint(page("<h1>Steps</h1>\n<p>Great question! Open the valve.</p>"))
+        self.assertNotIn("header-in-short-reply", rules(r))
+        self.assertNotIn("filler-opener", rules(r))
+
+    def test_svg_text_is_a_label(self):
+        svg = "<svg><text>one two three four five six seven eight nine</text></svg>"
+        r = self.lint(page(svg))
+        self.assertIn("label-length", errors(r))
+
+    def test_svg_short_label_passes(self):
+        r = self.lint(page("<svg><text>Open <tspan>the valve</tspan></text></svg>"))
+        self.assertTrue(r["passed"], r["violations"])
+
+
+class ExternalRequestTests(unittest.TestCase):
+    def lint(self, html):
+        return ste_lint.lint(html, fmt="html")
+
+    def test_external_script_flagged(self):
+        r = self.lint(page("<p>Open it.</p>", head='<script src="https://cdn.example.com/a.js"></script>'))
+        self.assertIn("external-request", errors(r))
+
+    def test_external_stylesheet_flagged(self):
+        r = self.lint(page("<p>Open it.</p>", head='<link rel="stylesheet" href="//fonts.example.com/a.css">'))
+        self.assertIn("external-request", errors(r))
+
+    def test_external_image_flagged(self):
+        r = self.lint(page('<p>Open it.</p><img src="http://example.com/a.png" alt="">'))
+        self.assertIn("external-request", errors(r))
+
+    def test_css_import_flagged(self):
+        r = self.lint(page("<p>Open it.</p>", head="<style>@import url('https://x.example.com/a.css');</style>"))
+        self.assertIn("external-request", errors(r))
+
+    def test_link_to_another_page_is_fine(self):
+        r = self.lint(page('<p>Open <a href="https://example.com">the guide</a>.</p>'))
+        self.assertNotIn("external-request", rules(r))
+
+    def test_data_uri_is_fine(self):
+        r = self.lint(page('<p>Open it.</p><img src="data:image/png;base64,AAAA" alt="">'))
+        self.assertNotIn("external-request", rules(r))
+
+    def test_markdown_has_no_external_request_rule(self):
+        r = ste_lint.lint('Open <img src="https://x.example.com/a.png">.')
+        self.assertNotIn("external-request", rules(r))
+
+
+class HtmlCliTests(unittest.TestCase):
+    def test_cli_format_html(self):
+        p = subprocess.run(
+            [sys.executable, os.path.join(SKILL_ROOT, "scripts", "ste_lint.py"), "--format", "html"],
+            input=page("<p>The pump is running.</p>"), capture_output=True, text=True)
+        self.assertEqual(p.returncode, 1)
+        self.assertIn("progressive-tense", p.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()

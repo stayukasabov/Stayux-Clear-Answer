@@ -2,7 +2,7 @@
 """STE linter: deterministic ASD-STE100 checks (v1, dictionary deferred).
 
 Usage:
-    echo "text" | python3 ste_lint.py [--profile chat|full] [--pretty]
+    echo "text" | python3 ste_lint.py [--profile chat|full] [--format markdown|html] [--pretty]
 
 Reads text on stdin, prints a JSON result, exits 1 if any *error* violation.
 `passed` is true when there are no error-severity violations (warnings allowed).
@@ -15,6 +15,7 @@ import json
 import os
 import re
 import sys
+from html.parser import HTMLParser
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ste_dictionary import (  # noqa: E402
@@ -457,7 +458,116 @@ def _check_format(text, violations):
                 f"remove '{phrase}'; end with the last fact", last[-1][:60], segments[-1][2]))
 
 
-def lint(text, profile="chat", cache=None, custom=None):
+# HTML pages (PRD F4): only visible text is checked.
+SKIP_TAGS = {"head", "title", "script", "style", "pre", "code", "template", "noscript"}
+BLOCK_TAGS = {"html", "body", "p", "div", "section", "article", "header", "footer",
+              "main", "nav", "aside", "h1", "h2", "h3", "h4", "h5", "h6", "br", "hr",
+              "tr", "ul", "ol", "li", "table", "td", "th", "blockquote", "figure",
+              "figcaption", "dl", "dt", "dd", "form"}
+# A self-contained page loads nothing from the network. Links (<a href>) are fine.
+EXTERNAL_RES = (
+    re.compile(r"""\bsrc\s*=\s*["']?\s*(?:https?:)?//""", re.IGNORECASE),
+    re.compile(r"""<link\b[^>]*\bhref\s*=\s*["']?\s*(?:https?:)?//""", re.IGNORECASE),
+    re.compile(r"""(?:@import\s+|url\(\s*)["']?\s*(?:https?:)?//""", re.IGNORECASE),
+)
+
+
+class _HtmlText(HTMLParser):
+    """Collect visible text as markdown-like lines, with their source lines.
+
+    Each block element starts a paragraph. List items and table cells become
+    list items. Text inside <svg> <text> elements is collected as labels.
+    """
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.lines, self.labels = [], []
+        self.buf, self.buf_line, self.prefix = [], None, ""
+        self.skip = self.svg = self.svg_text = 0
+        self.label, self.label_line = [], None
+
+    def _flush(self):
+        text = " ".join("".join(self.buf).split())
+        if text:
+            self.lines += [("", self.buf_line), (self.prefix + text, self.buf_line)]
+        self.buf, self.buf_line, self.prefix = [], None, ""
+
+    def handle_starttag(self, tag, attrs):
+        if tag in SKIP_TAGS:
+            self.skip += 1
+        elif tag == "svg":
+            self._flush()
+            self.svg += 1
+        elif self.svg and tag == "text":
+            self.svg_text += 1
+        elif tag in BLOCK_TAGS:
+            self._flush()
+            if tag in ("li", "td", "th"):
+                self.prefix = "- "
+
+    def handle_startendtag(self, tag, attrs):
+        if tag in BLOCK_TAGS:
+            self._flush()
+
+    def handle_endtag(self, tag):
+        if tag in SKIP_TAGS:
+            self.skip = max(0, self.skip - 1)
+        elif tag == "svg":
+            self.svg = max(0, self.svg - 1)
+        elif self.svg and tag == "text":
+            self.svg_text = max(0, self.svg_text - 1)
+            label = " ".join("".join(self.label).split())
+            if label:
+                self.labels.append((label, self.label_line))
+            self.label, self.label_line = [], None
+        elif tag in BLOCK_TAGS:
+            self._flush()
+
+    def handle_data(self, data):
+        if self.skip:
+            return
+        line = self.getpos()[0] + data[:len(data) - len(data.lstrip())].count("\n")
+        if self.svg:
+            if self.svg_text:
+                self.label.append(data)
+                self.label_line = self.label_line or line
+            return
+        if data.strip() and self.buf_line is None:
+            self.buf_line = line
+        self.buf.append(data)
+
+
+def _html_to_text(source):
+    """Return (text, line_map, svg_labels). line_map[i] is the source line of
+    text line i + 1."""
+    parser = _HtmlText()
+    parser.feed(source)
+    parser.close()
+    parser._flush()
+    return ("\n".join(t for t, _ in parser.lines),
+            [n or 1 for _, n in parser.lines], parser.labels)
+
+
+def _check_external(source, violations):
+    for pattern in EXTERNAL_RES:
+        for m in pattern.finditer(source):
+            violations.append(_make(
+                "external-request", "error",
+                "the page loads a file from the network; inline it instead",
+                source[m.start():m.start() + 60], source[:m.start()].count("\n") + 1))
+
+
+def _check_label(label, line, cfg, violations, word_subs, phrase_subs):
+    words = len(WORD_RE.findall(label))
+    if words > MAX_LABEL_WORDS:
+        violations.append(_make(
+            "label-length", "error",
+            f"{words} words in a diagram label (max {MAX_LABEL_WORDS})", label[:60], line))
+    _check_sentence(label, dict(cfg, max_sentence_words=float("inf")), violations,
+                    line, word_subs, phrase_subs)
+
+
+def lint(text, profile="chat", cache=None, custom=None, fmt="markdown"):
     cfg = PROFILES.get(profile, PROFILES["chat"])
     if cache is None:
         cache = _DEFAULT_CACHE
@@ -468,36 +578,43 @@ def lint(text, profile="chat", cache=None, custom=None):
 
     # Normalize curly apostrophes so contractions match regardless of source.
     text = text.replace("’", "'")
-    label_cfg = dict(cfg, max_sentence_words=float("inf"))
-    for block, first in _mermaid_blocks(text):
-        for label, line in mermaid_labels(block, first):
-            if len(WORD_RE.findall(label)) > MAX_LABEL_WORDS:
-                violations.append(_make(
-                    "label-length", "error",
-                    f"{len(WORD_RE.findall(label))} words in a diagram label (max {MAX_LABEL_WORDS})",
-                    label[:60], line))
-            _check_sentence(label, label_cfg, violations, line, word_subs, phrase_subs)
-    text = _strip_code(text)
+    line_map = None
+    if fmt == "html":
+        _check_external(text, violations)
+        text, line_map, labels = _html_to_text(text)
+        format_rules = False
+    else:
+        labels = [hit for block, first in _mermaid_blocks(text)
+                  for hit in mermaid_labels(block, first)]
+        text = _strip_code(text)
+        format_rules = cfg["format_rules"]
+    for label, line in labels:
+        _check_label(label, line, cfg, violations, word_subs, phrase_subs)
 
+    body = []
     if ";" in text:
         semi_line = text[:text.index(";")].count("\n") + 1
-        violations.append(_make("semicolon", "error",
-                                 "semicolons are not allowed; use separate sentences",
-                                 ";", semi_line))
+        body.append(_make("semicolon", "error",
+                          "semicolons are not allowed; use separate sentences",
+                          ";", semi_line))
 
     for kind, chunk, line in _iter_segments(text):
         sentences = _split_sentences(chunk)
         # paragraph-length applies to prose only; list items are separate.
         if kind == "prose" and len(sentences) > cfg["max_paragraph_sentences"]:
-            violations.append(_make(
+            body.append(_make(
                 "paragraph-length", "error",
                 f"{len(sentences)} sentences (max {cfg['max_paragraph_sentences']})",
                 chunk[:60], line))
         for sentence in sentences:
-            _check_sentence(sentence, cfg, violations, line, word_subs, phrase_subs)
+            _check_sentence(sentence, cfg, body, line, word_subs, phrase_subs)
 
-    if cfg["format_rules"]:
-        _check_format(text, violations)
+    if format_rules:
+        _check_format(text, body)
+    if line_map:
+        for v in body:
+            v["line"] = line_map[v["line"] - 1]
+    violations += body
 
     passed = not any(v["severity"] == "error" for v in violations)
     return {"passed": passed, "profile": profile, "violations": violations}
@@ -508,10 +625,12 @@ def main(argv=None):
     ap.add_argument("--profile", choices=sorted(PROFILES), default="chat")
     ap.add_argument("--pretty", action="store_true")
     ap.add_argument("--text", help="lint this string instead of stdin")
+    ap.add_argument("--format", choices=("markdown", "html"), default="markdown",
+                    help="html: check only the visible text of a page")
     args = ap.parse_args(argv)
 
     text = args.text if args.text is not None else sys.stdin.read()
-    result = lint(text, profile=args.profile)
+    result = lint(text, profile=args.profile, fmt=args.format)
     print(json.dumps(result, indent=2 if args.pretty else None))
     return 0 if result["passed"] else 1
 
