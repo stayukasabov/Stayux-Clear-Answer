@@ -9,9 +9,9 @@ The template, the plugin title, and the footer are never linted.
 Usage:
     python3 explain_build.py how-dns-works.clear.txt --to html|md
 
-Prints JSON: {"passed", "file", "problems": [{"where", "rule", "severity",
-"detail", "text"}]}. Writes the output file only when there is no error, and
-exits 1 on an error.
+Prints JSON: {"passed", "file", "errors": [{"where", "rule", "severity",
+"detail", "text"}], "warnings": <count>}. Writes the output file only when there
+is no error, and exits 1 on an error.
 """
 import argparse
 import html
@@ -260,8 +260,11 @@ def main(argv=None):
         out = os.path.abspath(output_path(args.content, args.to))
         with open(out, "w") as f:
             f.write(render_html(doc) if args.to == "html" else render_md(doc))
-    print(json.dumps({"passed": result["passed"], "file": out,
-                      "problems": result["problems"]}, indent=2))
+    # Claude sees only the errors. Warnings are counted, not listed, so a fix
+    # pass does not chase them. Run ste_lint.py on the output to see them.
+    errors = [p for p in result["problems"] if p["severity"] == "error"]
+    print(json.dumps({"passed": result["passed"], "file": out, "errors": errors,
+                      "warnings": len(result["problems"]) - len(errors)}, indent=2))
     return 0 if result["passed"] else 1
 
 

@@ -244,6 +244,16 @@ class CliTests(unittest.TestCase):
         self.assertEqual(p.returncode, 0)
         self.assertTrue(os.path.exists(os.path.join(d, "how-dns-works.md")))
 
+    def test_output_lists_errors_only_and_counts_warnings(self):
+        text = SEQUENCE.replace("Keeps the records", "Has kept the records").replace(
+            "Ask the name server", "Utilize the name server")
+        p, d = self.build(text, "html")
+        out = json.loads(p.stdout)
+        self.assertEqual([e["rule"] for e in out["errors"]], ["perfect-tense"])
+        self.assertEqual(out["errors"][0]["where"], "part 2")
+        self.assertGreaterEqual(out["warnings"], 1)
+        self.assertNotIn("problems", out)
+
     def test_error_writes_no_file(self):
         p, d = self.build(SEQUENCE.replace("Keeps the records", "Has kept the records"), "html")
         self.assertEqual(p.returncode, 1)
