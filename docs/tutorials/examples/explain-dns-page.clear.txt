@@ -1,0 +1,26 @@
+title: How DNS works
+answer: The Domain Name System (DNS) turns a name like `example.com` into an IP address that computers use to find each other. Your device asks a resolver, and the resolver asks a chain of DNS servers until one has the answer. The answer is kept for a short time, so the next request is fast.
+diagram: sequence
+actor U: Your device
+actor R: Resolver
+actor T: Root and TLD
+actor A: Authoritative server
+U -> R: Ask for example.com
+R -> T: Ask who knows .com
+T --> R: Send server address
+R -> A: Ask for example.com
+A --> R: Send the IP address
+R --> U: Send the IP address
+caption: The resolver follows the chain of servers and returns the final IP address to your device.
+part: Resolver | A server, often run by your internet provider, that looks up names for your device and keeps answers for reuse.
+part: Root and TLD servers | Servers that know which servers handle each top-level domain, such as `.com`.
+part: Authoritative server | The server that holds the real records for a domain, including its IP address.
+part: Cache | A short-term store of earlier answers, kept on your device and on the resolver.
+step: You type `example.com` in your browser.
+step: Your device checks its own cache. If it has the address, it stops here.
+step: If not, it asks the resolver, which checks its own cache.
+step: If the resolver has no answer, it asks a root server, then the `.com` server, to find the authoritative server.
+step: The authoritative server sends the IP address for `example.com`.
+step: The resolver returns the address to your device and keeps a copy for a set time, called the TTL.
+step: Your browser connects to the IP address.
+limits: DNS answers are cached, so a changed record can take minutes or hours to reach everyone. Plain DNS is not encrypted, so others on the network can see the names you look up. DNS over HTTPS or DNS over TLS hides them.

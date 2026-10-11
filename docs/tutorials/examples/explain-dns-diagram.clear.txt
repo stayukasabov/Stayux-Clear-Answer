@@ -1,0 +1,23 @@
+title: How DNS works
+answer: DNS turns a name, such as `example.com`, into an IP address. Your computer asks a resolver, and the resolver asks other name servers until it finds the address. The resolver then keeps a copy for a short time.
+diagram: sequence
+actor B: Browser
+actor R: Resolver
+actor T: Root servers
+actor N: Domain server
+B -> R: Request the address
+R -> T: Request the domain server
+T --> R: Send the name server
+R -> N: Request the address
+N --> R: Send the address
+R --> B: Send the address
+caption: The resolver asks each level of servers until it finds the address for the browser.
+part: Resolver | Finds the address for your computer and keeps a copy.
+part: Root servers | Point the resolver to the servers for a domain.
+part: Domain server | Keeps the records for a domain and gives the last address.
+step: The browser asks the resolver for the address of a name.
+step: The resolver asks the root servers which name server holds the domain.
+step: The resolver asks that name server for the address.
+step: The resolver sends the address to the browser, and the browser connects.
+section: Example | You type `www.example.com` in the browser. The resolver learns the address, such as `93.184.216.34`, and the browser connects to it.
+limits: The resolver keeps a copy for a set time, called the TTL, so a change to a record can be slow to get to everyone.

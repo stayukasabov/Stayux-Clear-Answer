@@ -5,45 +5,85 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How DNS works</title>
 <style>
-  :root {
-    --ca-bg: #ffffff; --ca-text: #1f2328; --ca-muted: #59636e; --ca-line: #d1d9e0;
-    --ca-box: #f6f8fa; --ca-accent: #3b5bdb; --ca-code: #eff2f5;
-    --ca-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    --ca-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* Colors, type, and spacing from the Stayux design system (design-system.css).
+     The page follows the system theme. data-theme="light" or "dark" on <html>
+     overrides it. The SX fonts show when installed, else the system font. */
+  :root, [data-theme="light"] {
+    --ca-bg: oklch(0.984 0.007 87);               /* paper-35 */
+    --ca-heading: oklch(0.140 0.006 280);         /* n900 */
+    --ca-text: oklch(0.300 0.006 280);            /* n700 */
+    --ca-muted: oklch(0.380 0.006 280);           /* n600 */
+    --ca-line: oklch(0.910 0.006 280);            /* n200 */
+    --ca-box: oklch(0.503 0.287 280 / 2.5%);      /* node-bg */
+    --ca-box-line: oklch(0.840 0.006 280);        /* n300 */
+    --ca-accent: oklch(0.503 0.287 280);          /* primary */
+    --ca-link: oklch(0.436 0.237 280);            /* primary-shade-200 */
+    --ca-link-hover: oklch(0.588 0.213 9);        /* secondary-shade-100 */
+    --ca-code: oklch(0.503 0.287 280 / 7%);       /* code-bg */
   }
   @media (prefers-color-scheme: dark) {
-    :root {
-      --ca-bg: #0d1117; --ca-text: #e6edf3; --ca-muted: #9198a1; --ca-line: #3d444d;
-      --ca-box: #151b23; --ca-accent: #7c97ff; --ca-code: #1f2630;
+    :root:not([data-theme="light"]) {
+      --ca-bg: oklch(0.100 0.006 280);            /* n950 */
+      --ca-heading: #ffffff;
+      --ca-text: #ffffff;
+      --ca-muted: oklch(0.840 0.006 280);         /* n300 */
+      --ca-line: oklch(0.503 0.287 280 / 18%);    /* border */
+      --ca-box: oklch(0.503 0.287 280 / 3.5%);    /* node-bg */
+      --ca-box-line: oklch(0.503 0.287 280 / 38%); /* border-hover */
+      --ca-accent: oklch(0.676 0.196 297);        /* primary-tint-600 */
+      --ca-link: oklch(0.858 0.086 304);          /* primary-tint-200 */
+      --ca-link-hover: oklch(0.676 0.196 297);    /* primary-tint-600 */
+      --ca-code: oklch(0.160 0.012 280 / 50%);    /* code-bg */
     }
   }
+  [data-theme="dark"] {
+    --ca-bg: oklch(0.100 0.006 280);
+    --ca-heading: #ffffff;
+    --ca-text: #ffffff;
+    --ca-muted: oklch(0.840 0.006 280);
+    --ca-line: oklch(0.503 0.287 280 / 18%);
+    --ca-box: oklch(0.503 0.287 280 / 3.5%);
+    --ca-box-line: oklch(0.503 0.287 280 / 38%);
+    --ca-accent: oklch(0.676 0.196 297);
+    --ca-link: oklch(0.858 0.086 304);
+    --ca-link-hover: oklch(0.676 0.196 297);
+    --ca-code: oklch(0.160 0.012 280 / 50%);
+  }
+  :root {
+    --ca-font: 'SX', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --ca-title: 'SX-Title', 'SX', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --ca-mono: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+    --ca-radius: 4px;                             /* radius-lg */
+  }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--ca-bg); color: var(--ca-text); font: 17px/1.6 var(--ca-font); }
-  .ca-page { max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 2rem; }
-  h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 1rem; }
-  h2 { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
-  p, li, dd { color: var(--ca-text); }
-  .ca-answer { font-size: 1.1rem; }
-  code { font: 0.9em var(--ca-mono); background: var(--ca-code); padding: 0.1em 0.35em; border-radius: 4px; }
+  body { margin: 0; background: var(--ca-bg); color: var(--ca-text); font: 400 1.08rem/1.6 var(--ca-font); }
+  .ca-page { max-width: 740px; margin: 0 auto; padding: 3rem 1rem 2rem; }
+  h1, h2, dt { color: var(--ca-heading); }
+  h1 { font: 400 2.441rem/1.2 var(--ca-title); letter-spacing: -0.025em; margin: 0 0 1.5rem; }
+  h2 { font: 500 1.5625rem/1.2 var(--ca-title); letter-spacing: -0.025em; margin: 3rem 0 1rem; }
+  .ca-answer { font-size: 1.25rem; line-height: 1.5; }
+  a { color: var(--ca-link); }
+  a:hover, a:focus-visible { color: var(--ca-link-hover); }
+  code { font: 0.9em var(--ca-mono); background: var(--ca-code); padding: 0.1em 0.35em; border-radius: var(--ca-radius); }
   ol, ul { padding-left: 1.5rem; }
-  li { margin-bottom: 0.4rem; }
+  li { margin-bottom: 0.5rem; }
   dl { margin: 0; }
-  dt { font-weight: 600; margin-top: 0.9rem; }
-  dd { margin: 0.2rem 0 0 0; }
+  dt { font-weight: 600; margin-top: 1rem; }
+  dd { margin: 0.25rem 0 0 0; }
   .ca-diagram { margin: 2rem 0; }
   .ca-diagram svg { display: block; width: 100%; height: auto; }
-  .ca-diagram figcaption { margin-top: 0.5rem; text-align: center; color: var(--ca-muted); font-size: 0.95rem; }
-  .node rect { fill: var(--ca-box); stroke: var(--ca-line); stroke-width: 1.5; }
-  .node text { fill: var(--ca-text); font: 600 14px var(--ca-font); text-anchor: middle; dominant-baseline: middle; }
-  .edge { fill: none; stroke: var(--ca-accent); stroke-width: 1.75; marker-end: url(#ca-arrow); }
+  .ca-diagram figcaption { margin-top: 0.5rem; text-align: center; color: var(--ca-muted); font-size: 0.9rem; }
+  .node rect { fill: var(--ca-box); stroke: var(--ca-box-line); stroke-width: 1; }
+  .node text { fill: var(--ca-heading); font: 600 14px var(--ca-font); text-anchor: middle; dominant-baseline: middle; }
+  .edge { fill: none; stroke: var(--ca-accent); stroke-width: 1.5; marker-end: url(#ca-arrow); }
   .edge.reply { stroke-dasharray: 5 4; }
   .step { fill: var(--ca-muted); font: 13px var(--ca-font); text-anchor: middle; }
   .lifeline { fill: none; stroke: var(--ca-line); stroke-width: 1.5; stroke-dasharray: 2 4; }
   #ca-arrow path { fill: var(--ca-accent); }
-  .ca-footer { margin-top: 3rem; text-align: center; font: 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .ca-footer { margin-top: 4rem; text-align: center; font: 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ca-muted); }
   .ca-footer p { margin: 0.25rem 0; }
   .ca-footer a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
-  .ca-footer a:hover, .ca-footer a:focus-visible { color: #3b5bdb; text-decoration-thickness: 2px; }
+  .ca-footer a:hover, .ca-footer a:focus-visible { color: var(--ca-link-hover); text-decoration-thickness: 2px; }
 </style>
 </head>
 <body>
@@ -57,61 +97,51 @@
 <main class="ca-page">
 <!-- ca:body:start -->
 <h1>How DNS works</h1>
-<p class="ca-answer">DNS turns a name, such as example.com, into a number called an IP address. Your computer needs that number to find the site. A resolver asks a chain of servers until one of them knows the number.</p>
+<p class="ca-answer">The Domain Name System (DNS) turns a name like <code>example.com</code> into an IP address that computers use to find each other. Your device asks a resolver, and the resolver asks a chain of DNS servers until one has the answer. The answer is kept for a short time, so the next request is fast.</p>
 <figure class="ca-diagram">
-  <svg viewBox="0 0 760 408" role="img" aria-label="The resolver asks the root, TLD, and name servers for an address">
-    <g class="node"><rect x="10" y="10" width="140" height="48" rx="8"/><text x="80" y="34">Browser</text></g>
-    <g class="node"><rect x="160" y="10" width="140" height="48" rx="8"/><text x="230" y="34">Resolver</text></g>
-    <g class="node"><rect x="310" y="10" width="140" height="48" rx="8"/><text x="380" y="34">Root server</text></g>
-    <g class="node"><rect x="460" y="10" width="140" height="48" rx="8"/><text x="530" y="34">TLD server</text></g>
-    <g class="node"><rect x="610" y="10" width="140" height="48" rx="8"/><text x="680" y="34">Name server</text></g>
-    <path class="lifeline" d="M 80 58 V 398"/>
-    <path class="lifeline" d="M 230 58 V 398"/>
-    <path class="lifeline" d="M 380 58 V 398"/>
-    <path class="lifeline" d="M 530 58 V 398"/>
-    <path class="lifeline" d="M 680 58 V 398"/>
-    <path class="edge" d="M 80 98 H 226"/>
-    <text class="step" x="155" y="90">1. Ask for address</text>
-    <path class="edge" d="M 230 138 H 376"/>
-    <text class="step" x="305" y="130">2. Ask root server</text>
-    <path class="edge reply" d="M 380 178 H 234"/>
-    <text class="step" x="305" y="170">3. Send TLD address</text>
-    <path class="edge" d="M 230 218 H 526"/>
-    <text class="step" x="380" y="210">4. Ask TLD server</text>
-    <path class="edge reply" d="M 530 258 H 234"/>
-    <text class="step" x="380" y="250">5. Send server address</text>
-    <path class="edge" d="M 230 298 H 676"/>
-    <text class="step" x="455" y="290">6. Ask name server</text>
-    <path class="edge reply" d="M 680 338 H 234"/>
-    <text class="step" x="455" y="330">7. Send address</text>
-    <path class="edge reply" d="M 230 378 H 84"/>
-    <text class="step" x="155" y="370">8. Send address</text>
+  <svg viewBox="0 0 760 328" role="img" aria-label="The resolver follows the chain of servers and returns the final IP address to your device.">
+    <g class="node"><rect x="85" y="10" width="140" height="48" rx="4"/><text x="155" y="34">Your device</text></g>
+    <g class="node"><rect x="235" y="10" width="140" height="48" rx="4"/><text x="305" y="34">Resolver</text></g>
+    <g class="node"><rect x="385" y="10" width="140" height="48" rx="4"/><text x="455" y="34">Root and TLD</text></g>
+    <g class="node"><rect x="535" y="10" width="140" height="48" rx="4"/><text x="605" y="34">Authoritative server</text></g>
+    <path class="lifeline" d="M 155 58 V 318"/>
+    <path class="lifeline" d="M 305 58 V 318"/>
+    <path class="lifeline" d="M 455 58 V 318"/>
+    <path class="lifeline" d="M 605 58 V 318"/>
+    <path class="edge" d="M 155 98 H 301"/>
+    <text class="step" x="230" y="90">1. Ask for example.com</text>
+    <path class="edge" d="M 305 138 H 451"/>
+    <text class="step" x="380" y="130">2. Ask who knows .com</text>
+    <path class="edge reply" d="M 455 178 H 309"/>
+    <text class="step" x="380" y="170">3. Send server address</text>
+    <path class="edge" d="M 305 218 H 601"/>
+    <text class="step" x="455" y="210">4. Ask for example.com</text>
+    <path class="edge reply" d="M 605 258 H 309"/>
+    <text class="step" x="455" y="250">5. Send the IP address</text>
+    <path class="edge reply" d="M 305 298 H 159"/>
+    <text class="step" x="230" y="290">6. Send the IP address</text>
   </svg>
-  <figcaption>The resolver asks three servers in turn and gives the final address to the browser.</figcaption>
+  <figcaption>The resolver follows the chain of servers and returns the final IP address to your device.</figcaption>
 </figure>
 <h2>The parts</h2>
 <dl>
-  <dt>Browser</dt><dd>Needs the address of a site, and starts the request.</dd>
-  <dt>Resolver</dt><dd>Does the lookup work for your computer. Your internet provider usually runs it.</dd>
-  <dt>Root server</dt><dd>Knows which server handles each ending, such as .com or .org.</dd>
-  <dt>TLD server</dt><dd>Handles one ending, and knows which name server holds each domain.</dd>
-  <dt>Name server</dt><dd>Holds the records for a domain, and gives the final address.</dd>
+  <dt>Resolver</dt><dd>A server, often run by your internet provider, that looks up names for your device and keeps answers for reuse.</dd>
+  <dt>Root and TLD servers</dt><dd>Servers that know which servers handle each top-level domain, such as <code>.com</code>.</dd>
+  <dt>Authoritative server</dt><dd>The server that holds the real records for a domain, including its IP address.</dd>
+  <dt>Cache</dt><dd>A short-term store of earlier answers, kept on your device and on the resolver.</dd>
 </dl>
 <h2>The steps</h2>
 <ol>
-  <li>The browser asks the resolver for the address of a name.</li>
-  <li>The resolver checks its cache. If the answer is not there, it asks a root server.</li>
-  <li>The root server sends the address of the TLD server for that ending.</li>
-  <li>The resolver asks the TLD server.</li>
-  <li>The TLD server sends the address of the name server for the domain.</li>
-  <li>The resolver asks the name server.</li>
-  <li>The name server sends the IP address.</li>
-  <li>The resolver saves the answer and sends it to the browser.</li>
+  <li>You type <code>example.com</code> in your browser.</li>
+  <li>Your device checks its own cache. If it has the address, it stops here.</li>
+  <li>If not, it asks the resolver, which checks its own cache.</li>
+  <li>If the resolver has no answer, it asks a root server, then the <code>.com</code> server, to find the authoritative server.</li>
+  <li>The authoritative server sends the IP address for <code>example.com</code>.</li>
+  <li>The resolver returns the address to your device and keeps a copy for a set time, called the TTL.</li>
+  <li>Your browser connects to the IP address.</li>
 </ol>
-<h2>Example</h2>
-<p>You type www.example.com. The root server points to the .com server. The .com server points to the name server for example.com. That name server gives the IP address, and the browser connects to it.</p>
 <h2>Limits</h2>
-<p>This page shows the common case. Real lookups often end sooner, because the resolver and your computer keep recent answers in a cache. Each answer has a time limit, set by the domain owner, after which the cache must ask again.</p>
+<p>DNS answers are cached, so a changed record can take minutes or hours to reach everyone. Plain DNS is not encrypted, so others on the network can see the names you look up. DNS over HTTPS or DNS over TLS hides them.</p>
 <!-- ca:body:end -->
 <footer class="ca-footer">
   <p>Stayux Clear Answer</p>

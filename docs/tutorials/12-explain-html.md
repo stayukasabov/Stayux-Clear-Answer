@@ -1,16 +1,15 @@
 # 12. Explain a topic as an HTML page
 
-`/clear-answer:explain --format html` writes one HTML page that works with no
-network. The page has a short answer, a diagram, and fixed sections. The linter
-checks every word that a reader sees. The dialogue shows only a link to the
-file.
+`/clear-answer:explain:html` writes one HTML page that works with no network.
+The page uses the Stayux design system, in light and dark mode. The dialogue
+shows only a link to the file.
 
 ## Run it
 
 1. Open Claude Code with the plugin installed, in the folder for the page.
 2. Run:
    ```
-   /clear-answer:explain --format html How does DNS work?
+   /clear-answer:explain:html How does DNS work?
    ```
 3. Claude replies with one sentence and the path:
    ```
@@ -19,59 +18,66 @@ file.
 
 ## What Claude does
 
-Claude writes only the body of the page, once. It does not write the CSS or the
-footer.
+Claude does not write HTML, CSS, or SVG. It fills the same content file as the
+diagram command (see tutorial 11), and a script builds the page.
 
-1. It writes the body: the title, the answer, the diagram, and the sections.
-2. `scripts/explain_page.py` adds the fixed frame: the page head, the CSS for
-   light and dark mode, and the footer.
-3. The linter checks the visible text of the page.
-4. If the linter finds an error, Claude changes only the flagged lines.
+1. Claude writes `how-dns-works.clear.txt` once.
+2. `scripts/explain_build.py` lints each blank and reports only the errors.
+3. If there is an error, Claude changes only that blank and builds again.
+4. When the build passes, the script writes the page. It adds the frame, the
+   CSS, the SVG diagram, and the footer.
 
-In a real run with Claude Sonnet, this took one write and one lint, and the page
-passed on the first lint.
+In a real run with Claude Sonnet, this took one content file, one fix, and two
+builds, for 1,199 output tokens.
 
 ## What you get
 
-The real page is
-[`examples/explain-dns-page.html`](examples/explain-dns-page.html). This is the
-page in a browser with the network blocked:
+The real content file is
+[`examples/explain-dns-page.clear.txt`](examples/explain-dns-page.clear.txt),
+and the page is
+[`examples/explain-dns-page.html`](examples/explain-dns-page.html). This is
+the page in a browser with the network blocked:
 
-![The DNS page in a browser](examples/explain-dns-page.png)
+![The DNS page in light mode](examples/explain-dns-page.png)
 
-Each page has the same sections as the diagram files, in the same order. They
-are the title, the answer, the diagram, "The parts", "The steps", and "Limits".
+The page follows the system theme. This is the dark mode:
+
+![The DNS page in dark mode](examples/explain-dns-page-dark.png)
+
+To force a theme, add `data-theme="light"` or `data-theme="dark"` to the
+`<html>` element.
 
 ## The diagram
 
-The diagram is inline SVG. It uses only the classes of the frame, so the colors
-and the fonts are the same on every page. Claude picks one of two layouts:
+The script draws the diagram from the content file, so every page looks the
+same:
 
-- **Row**: a chain of 2 or 3 boxes, where each box talks only to its
-  neighbors.
-- **Lanes**: boxes in a row at the top, with a dotted line down from each box.
-  Each step is a horizontal arrow with its label above it, so arrows do not
-  cross. The DNS page uses this layout.
+- **Sequence**: the actors are boxes in a row at the top, with a dotted line
+  down from each box. Each message is a horizontal arrow with its label above
+  it. Replies are dashed. Arrows do not cross.
+- **Flow**: the stages are boxes in a row, with an arrow between neighbors.
+
+The colors, the fonts, and the box corners come from the Stayux design system.
+The SX fonts show when they are installed. Else the page uses the system font.
 
 ## What the gate checks
 
+- Each blank is checked on its own: the text with the usual rules, the labels
+  with the word rules and a limit of 8 words.
+- The script checks the structure, for example 3 sentences or fewer in the
+  answer, and 2 to 5 actors.
+- The frame, the CSS, and the footer are not checked, because the script adds
+  them.
+- The page loads nothing from the network.
+
+To see the warnings too, run the linter on the page:
+
 ```bash
-python3 scripts/ste_lint.py --format html --profile chat --pretty < docs/tutorials/examples/explain-dns-page.html
+python3 scripts/ste_lint.py --format html --pretty < docs/tutorials/examples/explain-dns-page.html
 ```
-
-- Only visible text is checked. The linter skips the head, scripts, styles, and
-  code.
-- Each paragraph, list item, and table cell is checked on its own.
-- Text in the SVG diagram is checked as labels, with a limit of 8 words.
-- A page that loads a script, style, font, or image from the network fails
-  with `external-request`. A link to another page is fine.
-
-The gate checks words, not drawings. Open the page and look at the diagram
-before you share it.
 
 ## The footer
 
 The page ends with the Stayux Clear Answer footer. It is centered, in a 14 px
 system font. The links are underlined, change color on hover, and open in a new
-tab. The footer links are normal links, so they do not count as network
-requests.
+tab.

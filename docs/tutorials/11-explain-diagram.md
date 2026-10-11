@@ -1,15 +1,14 @@
 # 11. Explain a topic with a diagram
 
-`/clear-answer:explain --format diagram` writes a markdown file with a short
-answer, one Mermaid diagram, and fixed sections. The linter checks the text and
-every label in the diagram. The dialogue shows only a link to the file.
+`/clear-answer:explain:diagram` writes a Markdown file with a short answer, one
+Mermaid diagram, and fixed sections. The dialogue shows only a link to the file.
 
 ## Run it
 
 1. Open Claude Code with the plugin installed.
 2. Run:
    ```
-   /clear-answer:explain --format diagram How does DNS work?
+   /clear-answer:explain:diagram How does DNS work?
    ```
 3. Claude replies with one sentence and the path of the file:
    ```
@@ -18,63 +17,65 @@ every label in the diagram. The dialogue shows only a link to the file.
 
 ## What Claude does
 
-Claude writes the file once. It does not write a draft first.
+Claude does not write Markdown or Mermaid. It fills named blanks in a small
+content file, and a script builds the file.
 
-1. It writes the file in plain English, with the fixed structure.
-2. `scripts/explain_page.py` adds the footer.
-3. The linter checks the file on disk.
-4. If the linter finds an error, Claude changes only the flagged lines.
+1. Claude writes `how-dns-works.clear.txt` once, with one blank on each line.
+2. `scripts/explain_build.py` checks the structure and lints each blank. It
+   reports only the errors, each with the name of its blank, such as "step 3".
+3. If there is an error, Claude changes only that blank and builds again.
+4. When the build passes, the script writes `how-dns-works.md`, with the
+   Mermaid diagram and the footer.
 
-In a real run with Claude Sonnet, this took one write and one lint, and the file
-passed on the first lint.
+The real content file is
+[`examples/explain-dns-diagram.clear.txt`](examples/explain-dns-diagram.clear.txt).
+The built file is
+[`examples/explain-dns-diagram.md`](examples/explain-dns-diagram.md).
+
+## The content file
+
+```text
+title: How DNS works
+answer: The answer, in 3 sentences or fewer.
+diagram: sequence
+actor B: Browser
+actor R: Resolver
+B -> R: Ask for the address
+R --> B: Send the address
+caption: One sentence about the diagram.
+part: Resolver | Finds the address for your computer.
+step: The browser asks the resolver for the address.
+limits: One short paragraph.
+```
+
+- `diagram: sequence` is for actors that send messages. `diagram: flow` is for
+  a straight chain of stages, with `node:` lines.
+- `->` is a request, and `-->` is a reply.
+- The full list of blanks is in the command, `commands/explain/diagram.md`.
 
 ## What you get
 
-The real file is
-[`examples/explain-dns-diagram.md`](examples/explain-dns-diagram.md). Each file
-has the same sections, in the same order:
-
-1. The title, "How X works".
-2. The answer, in 3 sentences or fewer.
-3. The diagram and a one-sentence caption.
-4. "The parts", as a table.
-5. "The steps", as a numbered list.
-6. "Limits".
-
-The Mermaid CLI (`mmdc`) gave this image of the diagram:
+Each file has the same sections, in the same order. They are the title, the
+answer, the diagram and its caption, "The parts" as a table, "The steps", and
+"Limits". The Mermaid CLI (`mmdc`) gave this image of the real diagram:
 
 ![The DNS sequence diagram](examples/explain-dns-diagram.png)
-
-The diagram rules keep the style the same from run to run. The theme is
-`neutral`, and the diagram uses `sequenceDiagram` with `autonumber`. Each label
-is a verb and an object, such as "Send the IP address".
-
-## Where the diagram shows
 
 The diagram shows as a picture only in a viewer that supports Mermaid, such as
 Obsidian or GitHub. MacDown shows the Mermaid code instead.
 
-## What the gate checks
+## Build the other format
+
+The content file stays in the folder. To make an HTML page from the same
+content, with no new request to Claude:
 
 ```bash
-python3 scripts/ste_lint.py --profile chat --pretty < docs/tutorials/examples/explain-dns-diagram.md
+python3 scripts/explain_build.py how-dns-works.clear.txt --to html
 ```
-
-- The text gets all the usual rules.
-- Each node label, edge label, and message gets the word rules.
-- A label of more than 8 words is an error (`label-length`).
-- The footer is HTML, and the linter skips HTML tags in markdown.
-
-The gate checks words, not drawings. Read the diagram before you share it.
 
 ## The footer
 
-Each file ends with this footer, centered:
-
-```
-Stayux Clear Answer
-Stayux.com | LinkedIn | X.com
-```
-
-The links open in a new tab. Some markdown viewers, such as GitHub, remove the
-`target` attribute and the styles, so there the links open in the same tab.
+Each file ends with the Stayux Clear Answer footer, centered, with links to
+Stayux.com, LinkedIn, and X.com. The script adds it, so the linter does not
+check it. Some viewers, such as GitHub, remove the `target` attribute, so there
+the links open in the same tab.

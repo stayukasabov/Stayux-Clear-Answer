@@ -1,6 +1,6 @@
 # How DNS works
 
-DNS turns a name, such as example.com, into an IP address. Your computer asks a resolver. The resolver asks other servers in order until it gets the address.
+DNS turns a name, such as `example.com`, into an IP address. Your computer asks a resolver, and the resolver asks other name servers until it finds the address. The resolver then keeps a copy for a short time.
 
 ```mermaid
 %%{init: {"theme": "neutral"}}%%
@@ -8,51 +8,40 @@ sequenceDiagram
     autonumber
     participant B as Browser
     participant R as Resolver
-    participant Root as Root server
-    participant T as TLD server
-    participant A as Authoritative server
-    B->>R: Ask for example.com
-    R->>Root: Ask for example.com
-    Root-->>R: Send the TLD address
-    R->>T: Ask for example.com
-    T-->>R: Send the authoritative address
-    R->>A: Ask for example.com
-    A-->>R: Send the IP address
-    R-->>B: Send the IP address
+    participant T as Root servers
+    participant N as Domain server
+    B->>R: Request the address
+    R->>T: Request the domain server
+    T-->>R: Send the name server
+    R->>N: Request the address
+    N-->>R: Send the address
+    R-->>B: Send the address
 ```
 
-The resolver asks three servers in turn, then gives the IP address to the browser.
+The resolver asks each level of servers until it finds the address for the browser.
 
 ## The parts
 
 | Part | What it does |
 |---|---|
-| Browser | Needs the IP address of a site. |
-| Resolver | Finds the address for your computer and keeps a copy for later. |
-| Root server | Tells the resolver which server handles the end of the name, such as .com. |
-| TLD server | Tells the resolver which server holds the records for the domain. |
-| Authoritative server | Holds the real records and gives the IP address. |
+| Resolver | Finds the address for your computer and keeps a copy. |
+| Root servers | Point the resolver to the servers for a domain. |
+| Domain server | Keeps the records for a domain and gives the last address. |
 
 ## The steps
 
-1. The browser asks the resolver for the address of example.com.
-2. The resolver checks its cache. If it has the address, it answers now.
-3. The resolver asks a root server.
-4. The root server sends the address of the .com TLD server.
-5. The resolver asks the TLD server.
-6. The TLD server sends the address of the authoritative server.
-7. The resolver asks the authoritative server.
-8. The authoritative server sends the IP address.
-9. The resolver saves the address and sends it to the browser.
+1. The browser asks the resolver for the address of a name.
+2. The resolver asks the root servers which name server holds the domain.
+3. The resolver asks that name server for the address.
+4. The resolver sends the address to the browser, and the browser connects.
 
-## Common mistakes
+## Example
 
-- People think DNS is one big list on one server. It is a tree of many servers.
-- People think a change shows at once. Caches keep old answers until the time to live ends.
+You type `www.example.com` in the browser. The resolver learns the address, such as `93.184.216.34`, and the browser connects to it.
 
 ## Limits
 
-This is the basic path. Real DNS also has other record types, security checks such as DNSSEC, and encrypted lookups. The steps change a little when a cache already holds part of the answer.
+The resolver keeps a copy for a set time, called the TTL, so a change to a record can be slow to get to everyone.
 
 ---
 
