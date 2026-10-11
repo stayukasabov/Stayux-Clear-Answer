@@ -778,17 +778,41 @@ class FooterTests(unittest.TestCase):
     def test_sample_markdown_footer(self):
         self.check("tests/fixtures/explain-diagram.md", "markdown")
 
-    def test_command_snippets_match_the_tested_samples(self):
-        import re
+    def test_command_has_no_css_or_footer(self):
+        # The frame script adds them, so Claude does not spend tokens on them.
         with open(os.path.join(SKILL_ROOT, "commands", "explain.md")) as f:
-            md_footer, html_footer, css = re.findall(r"```(?:html|css)\n(.*?)```", f.read(), re.S)
+            cmd = f.read()
+        for text in ("<style>", "ca-footer", "linkedin.com"):
+            self.assertNotIn(text, cmd)
+
+    def test_command_examples_pass_when_framed(self):
+        import re
+        sys.path.insert(0, os.path.join(SKILL_ROOT, "scripts"))
+        import explain_page
+        with open(os.path.join(SKILL_ROOT, "commands", "explain.md")) as f:
+            cmd = f.read()
+        md = re.search(r"````markdown\n(.*?)````", cmd, re.S).group(1)
+        body = re.search(r"```html\n(.*?)```", cmd, re.S).group(1)
+        self.assertTrue(ste_lint.lint(explain_page.add_md_footer(md), cache={}, custom={})["passed"])
+        page = explain_page.wrap_html(body)
+        self.assertTrue(ste_lint.lint(page, fmt="html", cache={}, custom={})["passed"])
+
+    def test_markdown_sample_footer_is_the_template_footer(self):
+        with open(os.path.join(SKILL_ROOT, "templates", "explain-footer.md")) as f:
+            footer = f.read().strip()
         with open(os.path.join(SKILL_ROOT, "tests", "fixtures", "explain-diagram.md")) as f:
-            self.assertIn(md_footer.strip(), f.read())
-        with open(os.path.join(SKILL_ROOT, "tests", "fixtures", "explain-page.html")) as f:
-            page = f.read()
-        self.assertIn(html_footer.strip(), page)
-        for line in css.strip().splitlines():
-            self.assertIn(line.strip(), page)
+            self.assertIn(footer, f.read())
+
+
+class DocumentHeaderTests(unittest.TestCase):
+    def test_document_with_title_may_have_headers(self):
+        r = ste_lint.lint("# How a valve works\n\nOpen the valve.\n\n## The steps\n\n1. Open it.\n2. Close it.\n",
+                          cache={}, custom={})
+        self.assertNotIn("header-in-short-reply", rules(r))
+
+    def test_short_reply_with_header_still_warns(self):
+        r = ste_lint.lint("Open the valve.\n\n## Steps\n\nClose the door.", cache={}, custom={})
+        self.assertIn("header-in-short-reply", rules(r))
 
 
 if __name__ == "__main__":

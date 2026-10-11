@@ -500,7 +500,9 @@ def _check_format(text, violations):
 
     header = HEADER_RE.search(text)
     word_count = len(WORD_RE.findall(text))
-    if header and word_count < MIN_WORDS_FOR_HEADER:
+    # A text that starts with a level-1 title is a document, not a chat reply.
+    is_document = text.lstrip().startswith("# ")
+    if header and word_count < MIN_WORDS_FOR_HEADER and not is_document:
         violations.append(_make(
             "header-in-short-reply", "warning",
             f"header in a reply of {word_count} words (min {MIN_WORDS_FOR_HEADER})",

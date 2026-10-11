@@ -3,16 +3,37 @@
 DNS changes a name, such as `example.com`, into an IP address. Your computer asks a resolver. The resolver asks other servers until it finds the address.
 
 ```mermaid
-flowchart LR
-    A[Browser asks for example.com] --> B[Resolver]
-    B -->|Not in cache| C[Root server]
-    C --> D[TLD server for .com]
-    D --> E[Name server for example.com]
-    E -->|IP address| B
-    B -->|IP address| A
+%%{init: {"theme": "neutral"}}%%
+sequenceDiagram
+    autonumber
+    participant B as Browser
+    participant R as Resolver
+    participant N as Name servers
+    B->>R: Ask for the address
+    R->>N: Ask each server in turn
+    N-->>R: Send the address
+    R-->>B: Send the address
 ```
 
-The resolver keeps the answer for a set time. The next request for the same name is faster.
+The resolver asks other servers only when its cache has no answer.
+
+## The parts
+
+| Part | What it does |
+|---|---|
+| Resolver | Finds the address for your computer. |
+| Name servers | Keep the records for each domain. |
+
+## The steps
+
+1. The browser asks the resolver for the address.
+2. The resolver asks the name servers, one after the other.
+3. The last server sends the address.
+4. The resolver sends the address to the browser and keeps a copy.
+
+## Limits
+
+The resolver keeps a copy for a set time. A change to a record can take that long to reach all users.
 
 ---
 
