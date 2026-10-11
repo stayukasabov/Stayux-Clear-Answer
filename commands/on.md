@@ -9,6 +9,7 @@ Enter Clear Answer mode with the chat profile. From now until the user runs
 `/clear-answer:off` (or `/clear-answer:mode off`), write every reply in plain English
 with short sentences (Simplified Technical English, ASD-STE100). This is a
 rewrite-only guard on your own output. Do not report findings to the user.
+
 Clear Answer is a translation, not a summary. Give the same content that you
 would give without it. Only the sentences change.
 
