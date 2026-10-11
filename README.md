@@ -86,21 +86,36 @@ without adding any context cost. The AI layer only handles the judgment rules on
 top.
 
 To be precise about what *does* cost tokens: turning the skill on loads
-`SKILL.md` once, and each draft-check adds a small lint round-trip. Those are
-fixed and small. The part that scales, the rules and the ~900-word-scale
-dictionary, stays out of context.
+`SKILL.md` once. Each lint pass also costs output tokens, because Claude sends
+the full draft to the linter and then sends the final text as the reply. So the
+gate writes the answer at least twice. The part that scales, the rules and the
+~900-word-scale dictionary, stays out of context.
 
 ### Token economy (measured)
 
-Counts use the `o200k_base` BPE tokenizer as a proxy for Claude's, which is not
-public, so treat them as approximate, not exact.
+Context counts use the `o200k_base` BPE tokenizer as a proxy for Claude's, which
+is not public, so treat them as approximate, not exact.
 
 | Item | Tokens | In model context? |
 |---|---:|---|
-| `clear-write` skill body, when it loads | ~680 | yes |
-| Lint round-trip, clean pass | ~50 | yes (per check) |
-| Lint round-trip, many violations | ~270 | yes (per failing check) |
+| `clear-write` skill body, when it loads | ~900 | yes |
+| Lint result, clean pass | ~50 | yes (per check) |
+| Lint result, many violations | ~270 | yes (per failing check) |
+| Draft sent to the linter | about the length of the answer | yes (output, per check) |
 | Rule engine + dictionary + rules reference | ~3,455 | **no** (read by Python) |
+
+Output tokens per answer, from the benchmark pilot (`docs/benchmark.md`):
+
+| Task | Model | Off | On | Change |
+|---|---|---:|---:|---:|
+| Chat (c1) | Haiku | 594 | 892 | +50% |
+| Chat (c1) | Sonnet | 567 | 859 | +51% |
+| Procedure (d1) | Haiku | 2,290 | 1,499 | -35% |
+| Procedure (d1) | Sonnet | 1,524 | 1,490 | -2% |
+
+The gate costs extra output tokens for each lint pass. Gated answers are also
+more compact, so for long answers the total can stay level or fall. These are
+single runs, so treat them as an indication, not an average.
 
 The last row is the point: that material never enters the context window. An
 LLM-only skill would load and reason over the equivalent every turn.
