@@ -792,10 +792,12 @@ class FooterTests(unittest.TestCase):
         with open(os.path.join(SKILL_ROOT, "commands", "explain.md")) as f:
             cmd = f.read()
         md = re.search(r"````markdown\n(.*?)````", cmd, re.S).group(1)
-        body = re.search(r"```html\n(.*?)```", cmd, re.S).group(1)
+        bodies = re.findall(r"```html\n(.*?)```", cmd, re.S)
+        self.assertEqual(len(bodies), 2)  # the row layout and the lanes layout
         self.assertTrue(ste_lint.lint(explain_page.add_md_footer(md), cache={}, custom={})["passed"])
-        page = explain_page.wrap_html(body)
-        self.assertTrue(ste_lint.lint(page, fmt="html", cache={}, custom={})["passed"])
+        for body in bodies:
+            page = explain_page.wrap_html(body)
+            self.assertTrue(ste_lint.lint(page, fmt="html", cache={}, custom={})["passed"])
 
     def test_markdown_sample_footer_is_the_template_footer(self):
         with open(os.path.join(SKILL_ROOT, "templates", "explain-footer.md")) as f:

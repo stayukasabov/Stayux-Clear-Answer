@@ -127,17 +127,51 @@ Mermaid rules:
 <p>One short paragraph.</p>
 ```
 
-SVG rules:
+SVG rules (both layouts):
 
-- Use only the classes `node`, `edge`, `edge reply`, and `step`. Do not set
-  colors, fonts, or sizes. The frame CSS styles them in light and dark mode.
-- A box is 150 by 56, with its label centered, 3 words or fewer, on one line.
-  Put boxes in a row from left to right, 135 apart. When one box talks to
-  several, put the others in a column on the right.
-- A request arrow runs 8 above the center of the boxes. Its answer is a
-  `reply` arrow 8 below the center. Arrows do not cross.
-- A step label is a number, a verb, and an object: "2. Ask root server". Put
-  it above a request arrow or below a reply arrow, never on a box or a line.
-- At most 6 boxes and 8 steps.
+- Use only the classes `node`, `edge`, `edge reply`, `step`, and `lifeline`.
+  Do not set colors, fonts, or sizes. The frame CSS styles them in light and
+  dark mode.
+- A box label is 3 words or fewer, on one line, centered in the box.
+- A step label is a number, a verb, and an object: "2. Ask root server". Put it
+  8 above its arrow, centered on the arrow. Never put it on a box or a line.
+- All arrows are horizontal. Arrows do not cross.
+- At most 5 boxes and 8 steps.
 - The page must work with no network. Do not load scripts, fonts, styles, or
   images from a URL.
+
+Choose the layout:
+
+- **Row** (the example above): a chain of 2 or 3 boxes, where each box talks
+  only to its neighbors. Boxes are 150 by 56, 135 apart. A request arrow runs 8
+  above the center of the boxes. Its answer is a `reply` arrow 8 below the
+  center, with its label 20 below the arrow.
+- **Lanes**: any other case, for example one box that talks to several. Boxes
+  are 140 by 48 in a row at the top, with centers at x = 80, 230, 380, 530,
+  680. A `lifeline` runs down from the center of each box. Step k is a
+  horizontal arrow at y = 58 + 40k, from one lifeline to another. The height
+  of the `viewBox` is 58 + 40 times the number of steps, plus 30.
+
+Lanes example:
+
+```html
+<figure class="ca-diagram">
+  <svg viewBox="0 0 760 248" role="img" aria-label="The resolver asks a name server">
+    <g class="node"><rect x="10" y="10" width="140" height="48" rx="8"/><text x="80" y="34">Browser</text></g>
+    <g class="node"><rect x="160" y="10" width="140" height="48" rx="8"/><text x="230" y="34">Resolver</text></g>
+    <g class="node"><rect x="310" y="10" width="140" height="48" rx="8"/><text x="380" y="34">Name server</text></g>
+    <path class="lifeline" d="M 80 58 V 238"/>
+    <path class="lifeline" d="M 230 58 V 238"/>
+    <path class="lifeline" d="M 380 58 V 238"/>
+    <path class="edge" d="M 80 98 H 226"/>
+    <text class="step" x="155" y="90">1. Ask for address</text>
+    <path class="edge" d="M 230 138 H 376"/>
+    <text class="step" x="305" y="130">2. Ask name server</text>
+    <path class="edge reply" d="M 380 178 H 234"/>
+    <text class="step" x="305" y="170">3. Send address</text>
+    <path class="edge reply" d="M 230 218 H 84"/>
+    <text class="step" x="155" y="210">4. Send address</text>
+  </svg>
+  <figcaption>The resolver asks the name server for the browser.</figcaption>
+</figure>
+```
