@@ -14,9 +14,20 @@ Read the argument after the command:
 - `strict`: enter Clear Answer mode with the full profile (sentences of 20 words or
   fewer). For manuals, procedures, and specifications.
 
-When on, follow the per-reply workflow from `/clear-answer:on`, but lint with the
-matching profile: `--profile chat` for prose, `--profile full` for strict. Treat
-the mode as sticky until the user changes it.
+When on, follow this workflow for every reply. Treat the mode as sticky until the
+user changes it.
+
+1. Draft the reply using the rules in
+   `${CLAUDE_PLUGIN_ROOT}/skills/clear-write/SKILL.md`.
+2. Lint the draft with the matching profile: `chat` for prose, `full` for strict.
+   ```bash
+   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/ste_lint.py" --profile full --pretty <<'EOF'
+   <your draft>
+   EOF
+   ```
+3. If `passed` is false, rewrite the flagged sentences and lint again. Repeat
+   until `passed` is true.
+4. Send only the final compliant text. Do not show the linter output.
 
 Format warnings (bold-overuse, header-in-short-reply, bullet-overuse,
 filler-opener, filler-closer) do not fail the gate. If the user asked for a
