@@ -30,17 +30,88 @@ _HEAD = re.compile(rf"^\s*([A-Za-z][A-Za-z\-]*)\s+\(({POS})\)")
 # The single-space join stops it from bridging the wide column gaps that
 # pdftotext -layout leaves between the alternative and the example text.
 _ALT = re.compile(rf"([A-Z][A-Z\-]*(?:\s[A-Z][A-Z\-]*){{0,2}})\s*\({POS}\)")
+# Words that continue an alternative after its tag, joined by single spaces:
+# "ONE (TN) MORE", "TWO (TN) … NOT". The STE example column usually starts
+# after a wider gap. pdftotext can join the two with one space ("ONE (TN) OF
+# THE TWO IF THERE IS ..."), so take at most 3 words.
+_ALT_TAIL = re.compile(r"(?: (?:…|[A-Z][A-Z\-]*)){1,3}")
+
+
+# Lines that follow an entry, where more approved alternatives can start.
+_LOOKAHEAD = 25
+
+
+def _entry_rank(after):
+    """Rank the text after an alternative. 2: a dictionary entry, with an
+    UPPERCASE STE example. 1: nothing after it, as in a summary table. 0: not
+    an entry, as in a change-log line ("removed from ...") or a comma list."""
+    rest = after.strip()
+    if not rest:
+        return 1
+    return 2 if rest[0].isupper() or rest[0] in "(…0123456789" else 0
+
+
+_SEGMENT = re.compile(r"(?:^|(?<=\s\s))\S")
+
+
+def _example_column(lines, start, alt_column):
+    """The column where the STE example text starts, from the first line after
+    an entry that has text right of the alternatives column, or None."""
+    for line in lines[start + 1:start + 1 + _LOOKAHEAD]:
+        if line[:alt_column].strip():
+            return None  # the next headword: the entry has one line only
+        for m in _SEGMENT.finditer(line):
+            if m.start() > alt_column + 2:
+                return m.start()
+    return None
+
+
+def _alternative(text, alt, limit=None):
+    """The alternative of a match, with any words that continue it. limit is
+    the index in text where the example column starts."""
+    words = alt.group(1)
+    tail = _ALT_TAIL.match(text, alt.end())
+    if tail:
+        for token in re.finditer(r" (…|[A-Z][A-Z\-]*)", tail.group(0)):
+            if limit is not None and alt.end() + token.end() > limit:
+                break
+            words += token.group(0)
+    return words.lower()
+
+
+def _more_alternatives(lines, start, column, limit=None):
+    """Approved alternatives that start in the same column on the lines after
+    an entry, up to the next headword."""
+    found = []
+    for line in lines[start + 1:start + 1 + _LOOKAHEAD]:
+        if line[:column].strip():
+            if _HEAD.match(line):
+                break  # the next headword, at the left margin
+            continue
+        text = line[column:]
+        alt = _ALT.match(text)
+        if alt:
+            name = _alternative(text, alt, None if limit is None else limit - column)
+            tail = alt.end() + len(name) - len(alt.group(1))
+            if _entry_rank(text[tail:]):
+                found.append(name)
+    return found
 
 
 def parse_official(text):
     """Parse pdftotext -layout output into a version 2 cache.
 
     Each entry keeps its part of speech: approved words map to their approved
-    parts of speech, and substitution keys have the form "word (pos)".
+    parts of speech, and substitution keys have the form "word (pos)". When an
+    entry has several approved alternatives, the value joins them with "|".
+    A dictionary entry with an STE example wins over a summary-table line.
+    Change-log lines are not entries.
     """
     approved = {}
     word_subs = {}
-    for line in text.splitlines():
+    ranks = {}
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
         m = _HEAD.match(line)
         if not m:
             continue
@@ -52,12 +123,21 @@ def parse_official(text):
             continue
         if not head.islower():
             continue
-        # Not-approved headword: take its first UPPERCASE approved alternative,
-        # skipping the headword's own token region.
         rest = line[m.end():]
         alt = _ALT.search(rest)
-        if alt:
-            word_subs.setdefault(f"{head} ({pos})", alt.group(1).lower())
+        if not alt or rest[:alt.start()].strip():
+            continue
+        alt_column = m.end() + alt.start()
+        limit = _example_column(lines, i, alt_column)
+        name = _alternative(rest, alt, None if limit is None else limit - m.end())
+        rank = _entry_rank(rest[alt.end() + len(name) - len(alt.group(1)):])
+        key = f"{head} ({pos})"
+        if rank == 0 or rank <= ranks.get(key, 0):
+            continue
+        alts = [name]
+        alts += _more_alternatives(lines, i, alt_column, limit)
+        word_subs[key] = "|".join(dict.fromkeys(alts))
+        ranks[key] = rank
     return {
         "version": 2,
         "approved": {w: approved[w] for w in sorted(approved)},

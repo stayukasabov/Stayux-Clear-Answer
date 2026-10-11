@@ -156,5 +156,72 @@ class ImporterCliTests(unittest.TestCase):
             self.assertEqual(data["word_substitutions"]["acceptable (adj)"], "permitted")
 
 
+# Invented words in the real layouts of three parts of the PDF: the change log
+# (before the dictionary), a summary table, and dictionary entries with
+# several approved alternatives on continuation lines.
+LAYOUT_DICT = """\
+blorp (adj)         GLIMMER (v) removed from the approved alternatives.
+quib (adj)          STE and non-STE examples revised.
+ frab (v)                          SNAP (v), HOLD (v)
+blorp (adj)         ONE (TN) MORE             INSTALL ONE MORE      Install a blorp washer
+quib (adj)          AGREE (v)                 MAKE SURE THAT THE    Make sure that the
+                                              VALUES AGREE.         values are quib.
+frab (v)            ATTACH (v)                ATTACH THE PANEL      Frab the panel
+glarb (adj)         ONE (TN) OF THE TWO IF THERE IS WATER      If there is water
+zorg (adv)          ROUGHLY (adv) PUT A BOX
+                                  UNDER THE TANK.
+ plonk (v)                                     PLONK (n)
+glub (adj)          TWO (TN) … NOT            THE TWO UNITS MUST    Glub unit must
+plonk (v)           MAKE SURE (v)             MAKE SURE THAT IT     Plonk that it is safe
+                    EXAMINE (v)               EXAMINE THE PART      Plonk the part
+zink (n)            DIFFERENT (adj)           IF THE TWO            If there is a zink
+                                              VALUES ARE            between the two
+                                              DIFFERENT, STOP.      values, stop.
+                    AGREE (v)                 IF THE TWO            If there is a zink
+                                              VALUES DO NOT         between the two
+                                              AGREE, STOP.          values, stop.
+"""
+
+
+class LayoutTests(unittest.TestCase):
+    def setUp(self):
+        self.subs = ste_import.parse_official(LAYOUT_DICT)["word_substitutions"]
+
+    def test_change_log_line_is_not_an_entry(self):
+        self.assertNotEqual(self.subs.get("blorp (adj)"), "glimmer")
+
+    def test_summary_table_line_is_not_an_entry(self):
+        self.assertEqual(self.subs.get("frab (v)"), "attach")
+
+    def test_dictionary_entry_wins(self):
+        self.assertEqual(self.subs.get("quib (adj)"), "agree")
+
+    def test_entry_with_example_beats_table_line(self):
+        self.assertEqual(self.subs.get("plonk (v)"), "make sure|examine")
+
+    def test_ellipsis_alternative_is_an_entry(self):
+        self.assertEqual(self.subs.get("glub (adj)"), "two … not")
+
+    def test_continuation_is_at_most_three_words(self):
+        # pdftotext can join the alternative and the example with one space.
+        self.assertEqual(self.subs.get("glarb (adj)"), "one of the two")
+
+    def test_alternative_stops_at_the_example_column(self):
+        # The next line shows where the example column starts.
+        self.assertEqual(self.subs.get("zorg (adv)"), "roughly")
+
+    def test_alternative_continues_after_its_tag(self):
+        self.assertEqual(self.subs.get("blorp (adj)"), "one more")
+
+    def test_all_alternatives_are_kept(self):
+        self.assertEqual(self.subs.get("zink (n)"), "different|agree")
+
+    def test_linter_names_every_alternative(self):
+        cache = {"version": 2, "approved": {}, "word_substitutions": self.subs,
+                 "phrase_substitutions": {}}
+        r = ste_lint.lint("Find the zink.", cache=cache, custom={})
+        self.assertIn("'zink' as a noun: use 'different' or 'agree'", details(r, "unapproved-word"))
+
+
 if __name__ == "__main__":
     unittest.main()

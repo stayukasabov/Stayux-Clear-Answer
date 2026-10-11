@@ -158,10 +158,12 @@ def _effective_maps(cache, custom=None):
 
 
 def _advice(word, pos, repl):
+    # An imported entry can list several alternatives, joined with "|".
+    options = " or ".join(f"'{r}'" for r in repl.split("|") if r and r != word) if repl else ""
     if pos is None or pos == LEGACY_POS:
-        return f"use '{repl}' instead of '{word}'" if repl else f"'{word}' is not approved"
+        return f"use {options} instead of '{word}'" if options else f"'{word}' is not approved"
     name = POS_NAMES.get(pos, pos)
-    return f"'{word}' as {name}: use '{repl}'" if repl else f"'{word}' as {name} is not approved"
+    return f"'{word}' as {name}: use {options}" if options else f"'{word}' as {name} is not approved"
 
 
 def _word_advice(word, tag, entries, approved_pos):
@@ -422,7 +424,9 @@ def _check_sentence(sentence, cfg, violations, line,
         word_subs, _, approved_pos = _effective_maps(None)
     approved_pos = approved_pos or {}
     words = _words(sentence)
-    tags = ste_pos.tag(words)
+    # Tag each clause on its own: a comma, semicolon, or colon ends a noun
+    # phrase, and an instruction can start after it ("If ..., check the value").
+    tags = [t for clause in re.split(r"[,;:]", sentence) for t in ste_pos.tag(_words(clause))]
     if len(words) > cfg["max_sentence_words"]:
         violations.append(_make(
             "sentence-length", "error",

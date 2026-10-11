@@ -864,5 +864,20 @@ class UnclosedFenceTests(unittest.TestCase):
         self.assertIn("unclosed-code-fence", errors(r))
 
 
+class ClauseTaggingTests(unittest.TestCase):
+    CACHE = {"version": 2, "approved": {}, "phrase_substitutions": {},
+             "word_substitutions": {"zink (n)": "difference", "frob (v)": "examine"}}
+
+    def details(self, text):
+        r = ste_lint.lint(text, cache=self.CACHE, custom={})
+        return [v["detail"] for v in r["violations"] if v["rule"] == "unapproved-word"]
+
+    def test_comma_ends_the_noun_phrase(self):
+        self.assertIn("'zink' as a noun: use 'difference'", self.details("If there is a zink, frob the value."))
+
+    def test_clause_start_is_an_imperative(self):
+        self.assertIn("'frob' as a verb: use 'examine'", self.details("If there is a zink, frob the value."))
+
+
 if __name__ == "__main__":
     unittest.main()
