@@ -729,7 +729,7 @@ class SelfReplacementTests(unittest.TestCase):
 
 class MarkdownHtmlTagTests(unittest.TestCase):
     FOOTER = ('<p align="center">Stayux Clear Answer<br>\n'
-              '<a href="https://stayux.com" target="_blank" rel="noopener noreferrer">stayux.com</a> | '
+              '<a href="https://stayux.com" target="_blank" rel="noopener noreferrer">Stayux.com</a> | '
               '<a href="https://x.com/StayuKasabov" target="_blank" rel="noopener noreferrer">X.com</a></p>')
 
     def test_tag_attributes_are_not_words(self):
@@ -760,6 +760,7 @@ class FooterTests(unittest.TestCase):
         footer = text[text.index("Stayux Clear Answer"):]
         for url in self.LINKS:
             self.assertIn(f'href="{url}" target="_blank" rel="noopener noreferrer"', footer)
+        self.assertIn(">Stayux.com</a>", footer)
         r = ste_lint.lint(text, fmt=fmt)
         self.assertTrue(r["passed"])
         self.assertNotIn("external-request", rules(r))

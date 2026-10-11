@@ -75,7 +75,7 @@ Each file ends with this footer, centered:
 
 ```
 Stayux Clear Answer
-stayux.com | LinkedIn | X.com
+Stayux.com | LinkedIn | X.com
 ```
 
 The links open in a new tab. Some markdown viewers, such as GitHub, remove the
