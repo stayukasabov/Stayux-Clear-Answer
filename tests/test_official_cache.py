@@ -38,6 +38,8 @@ FAKE_DICT = """\
  guarantee (v)         MAKE SURE (v)                GUARANTEE THE FIT    Make sure of the fit
  achieve (v)           DO (v)                       ACHIEVE THE RESULT   Do the result
  quux (n)              Removed from the word list.
+ TEST (n)              A procedure to find        DO A TEST OF THE PUMP
+ test (v)              TEST (n)                   TEST THE PUMP        Do a test of the pump
 """
 
 
@@ -60,24 +62,34 @@ class ParserTests(unittest.TestCase):
         self.assertNotIn("zorp", approved)
         self.assertNotIn("acceptable", approved)
 
-    def test_substitution_uses_first_approved_alternative(self):
+    def test_cache_is_version_2(self):
+        self.assertEqual(self.parsed["version"], 2)
+
+    def test_approved_words_keep_their_part_of_speech(self):
+        approved = self.parsed["approved"]
+        self.assertEqual(approved["about"], ["prep"])
+        self.assertEqual(approved["start"], ["v"])
+        self.assertEqual(approved["test"], ["n"])
+
+    def test_substitution_keys_keep_their_part_of_speech(self):
         subs = self.parsed["word_substitutions"]
-        self.assertEqual(subs.get("zorp"), "start")
-        self.assertEqual(subs.get("acceptable"), "permitted")
-        self.assertEqual(subs.get("enough"), "sufficient")
+        self.assertEqual(subs.get("zorp (v)"), "start")
+        self.assertEqual(subs.get("acceptable (adj)"), "permitted")
+        self.assertEqual(subs.get("enough (adj)"), "sufficient")
+        self.assertEqual(subs.get("test (v)"), "test")
 
     def test_no_substitution_when_no_alternative(self):
         # "quux" has no UPPERCASE alternative on its line.
-        self.assertNotIn("quux", self.parsed["word_substitutions"])
+        self.assertNotIn("quux (n)", self.parsed["word_substitutions"])
 
     def test_multiword_alternative_is_kept_whole(self):
         # "MAKE SURE" must not be truncated to "sure".
-        self.assertEqual(self.parsed["word_substitutions"].get("guarantee"),
+        self.assertEqual(self.parsed["word_substitutions"].get("guarantee (v)"),
                          "make sure")
 
     def test_two_letter_alternative_is_captured(self):
         # Short approved verbs like GO/DO must still be captured.
-        self.assertEqual(self.parsed["word_substitutions"].get("achieve"), "do")
+        self.assertEqual(self.parsed["word_substitutions"].get("achieve (v)"), "do")
 
 
 class CacheRoundTripTests(unittest.TestCase):
@@ -87,7 +99,14 @@ class CacheRoundTripTests(unittest.TestCase):
             path = os.path.join(d, "official.json")
             ste_import.write_cache(path, parsed)
             loaded = ste_lint.load_cache(path)
-            self.assertEqual(loaded["word_substitutions"]["zorp"], "start")
+            self.assertEqual(loaded["word_substitutions"]["zorp (v)"], "start")
+
+    def test_imported_cache_checks_part_of_speech(self):
+        parsed = ste_import.parse_official(FAKE_DICT)
+        noun = ste_lint.lint("Do a test of the pump.", cache=parsed, custom={})
+        verb = ste_lint.lint("Test the pump.", cache=parsed, custom={})
+        self.assertNotIn("unapproved-word", rules(noun))
+        self.assertIn("unapproved-word", rules(verb))
 
     def test_load_missing_cache_returns_none(self):
         self.assertIsNone(ste_lint.load_cache("/no/such/file.json"))
@@ -134,7 +153,7 @@ class ImporterCliTests(unittest.TestCase):
             self.assertEqual(rc, 0)
             with open(out) as f:
                 data = json.load(f)
-            self.assertEqual(data["word_substitutions"]["acceptable"], "permitted")
+            self.assertEqual(data["word_substitutions"]["acceptable (adj)"], "permitted")
 
 
 if __name__ == "__main__":

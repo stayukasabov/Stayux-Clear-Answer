@@ -24,7 +24,7 @@ import subprocess
 import sys
 
 POS = r"(?:n|v|adj|adv|pron|prep|conj|art|abbr|TN|IV)"
-_HEAD = re.compile(rf"^\s*([A-Za-z][A-Za-z\-]*)\s+\({POS}\)")
+_HEAD = re.compile(rf"^\s*([A-Za-z][A-Za-z\-]*)\s+\(({POS})\)")
 # An approved alternative is 1-3 UPPERCASE words joined by single spaces (so
 # "MAKE SURE" stays whole) that sit immediately before a part-of-speech tag.
 # The single-space join stops it from bridging the wide column gaps that
@@ -33,16 +33,22 @@ _ALT = re.compile(rf"([A-Z][A-Z\-]*(?:\s[A-Z][A-Z\-]*){{0,2}})\s*\({POS}\)")
 
 
 def parse_official(text):
-    """Parse pdftotext -layout output into approved words and substitutions."""
-    approved = set()
+    """Parse pdftotext -layout output into a version 2 cache.
+
+    Each entry keeps its part of speech: approved words map to their approved
+    parts of speech, and substitution keys have the form "word (pos)".
+    """
+    approved = {}
     word_subs = {}
     for line in text.splitlines():
         m = _HEAD.match(line)
         if not m:
             continue
-        head = m.group(1)
+        head, pos = m.group(1), m.group(2)
         if head.isupper():
-            approved.add(head.lower())
+            tags = approved.setdefault(head.lower(), [])
+            if pos not in tags:
+                tags.append(pos)
             continue
         if not head.islower():
             continue
@@ -51,9 +57,10 @@ def parse_official(text):
         rest = line[m.end():]
         alt = _ALT.search(rest)
         if alt:
-            word_subs[head] = alt.group(1).lower()
+            word_subs.setdefault(f"{head} ({pos})", alt.group(1).lower())
     return {
-        "approved": sorted(approved),
+        "version": 2,
+        "approved": {w: approved[w] for w in sorted(approved)},
         "word_substitutions": word_subs,
         "phrase_substitutions": {},
     }
