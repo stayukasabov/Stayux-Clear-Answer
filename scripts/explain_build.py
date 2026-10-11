@@ -7,7 +7,11 @@ the HTML page or the Markdown file, with the diagram drawn from the same data.
 The template, the plugin title, and the footer are never linted.
 
 Usage:
-    python3 explain_build.py how-dns-works.clear.txt --to html|md
+    python3 explain_build.py how-dns-works.clear.txt --to html|md [--stdin] [--set "step 3=..."]
+
+With --stdin, the content comes from stdin and is saved to the content file.
+--set replaces one blank before the build. So Claude writes and fixes the
+content with shell commands only, and the dialogue shows no file diffs.
 
 Prints JSON: {"passed", "file", "errors": [{"where", "rule", "severity",
 "detail", "text"}], "warnings": <count>}. Writes the output file only when there
@@ -26,17 +30,18 @@ import ste_lint      # noqa: E402
 
 SECTION_NAMES = ("Example", "Common mistakes", "Safety")
 SINGLE = ("title", "answer", "diagram", "caption", "limits")
-MAX_ACTORS, MAX_MESSAGES, MAX_NODES, MAX_SECTIONS = 5, 12, 5, 2
+REQUIRED = ("title", "answer", "caption", "limits")
+MAX_ACTORS, MAX_MESSAGES, MAX_SECTIONS = 5, 12, 2
 MAX_BOX_WORDS = 3
 MESSAGE_RE = re.compile(r"^(\w+)\s*(-->|->)\s*(\w+)\s*:\s*(.+)$")
 ACTOR_RE = re.compile(r"^actor\s+(\w+)\s*:\s*(.+)$")
-BLANK_RE = re.compile(r"^(title|answer|diagram|caption|limits|part|step|section|node)\s*:\s*(.*)$")
+BLANK_RE = re.compile(r"^(title|answer|diagram|caption|limits|part|step|section)\s*:\s*(.*)$")
 CODE_RE = re.compile(r"`([^`]+)`")
 WIDTH = 760
 
 
 def parse(text):
-    doc = {"actors": [], "messages": [], "nodes": [], "parts": [], "steps": [],
+    doc = {"actors": [], "messages": [], "parts": [], "steps": [],
            "sections": [], "unknown": [], "twice": []}
     for n, raw in enumerate(text.splitlines(), 1):
         line = raw.strip()
@@ -60,8 +65,6 @@ def parse(text):
             if key in doc:
                 doc["twice"].append(key)
             doc[key] = value
-        elif key == "node":
-            doc["nodes"].append(value)
         elif key == "step":
             doc["steps"].append(value)
         else:  # part, section: "name | text"
@@ -80,7 +83,7 @@ def _structure(doc):
         out.append(_problem(f"line {n}", "structure", "not a known blank"))
     for key in doc["twice"]:
         out.append(_problem(key, "structure", f"'{key}' appears more than once"))
-    for key in SINGLE:
+    for key in REQUIRED:
         if not doc.get(key):
             out.append(_problem(key, "structure", f"'{key}' is missing"))
     if doc.get("answer") and len(ste_lint._split_sentences(doc["answer"])) > 3:
@@ -98,31 +101,26 @@ def _structure(doc):
     if len(doc["sections"]) > MAX_SECTIONS:
         out.append(_problem("section", "structure", f"use at most {MAX_SECTIONS} sections"))
 
-    kind = doc.get("diagram")
-    if kind == "sequence":
-        ids = [a for a, _ in doc["actors"]]
-        if not 2 <= len(ids) <= MAX_ACTORS:
-            out.append(_problem("diagram", "structure", f"use 2 to {MAX_ACTORS} actors"))
-        if not 1 <= len(doc["messages"]) <= MAX_MESSAGES:
-            out.append(_problem("diagram", "structure", f"use 1 to {MAX_MESSAGES} messages"))
-        for a, label in doc["actors"]:
-            if len(ste_lint.WORD_RE.findall(label)) > MAX_BOX_WORDS:
-                out.append(_problem(f"actor {a}", "structure",
-                                    f"use {MAX_BOX_WORDS} words or fewer", label))
-        for i, (src, dst, _, label) in enumerate(doc["messages"], 1):
-            if src not in ids or dst not in ids:
-                out.append(_problem(f"message {i}", "structure", "uses an actor that is not defined", label))
-            elif src == dst:
-                out.append(_problem(f"message {i}", "structure", "a message must go to another actor", label))
-    elif kind == "flow":
-        if not 2 <= len(doc["nodes"]) <= MAX_NODES:
-            out.append(_problem("diagram", "structure", f"use 2 to {MAX_NODES} nodes"))
-        for i, label in enumerate(doc["nodes"], 1):
-            if len(ste_lint.WORD_RE.findall(label)) > MAX_BOX_WORDS:
-                out.append(_problem(f"node {i}", "structure",
-                                    f"use {MAX_BOX_WORDS} words or fewer", label))
-    elif kind:
-        out.append(_problem("diagram", "structure", "use 'sequence' or 'flow'", kind))
+    # One diagram type for every topic: actors that send messages (lanes in
+    # HTML, a sequence diagram in Markdown). A process becomes actors that
+    # hand the work to the next one.
+    if doc.get("diagram", "sequence") != "sequence":
+        out.append(_problem("diagram", "structure",
+                            "only sequence diagrams: use actor and message lines", doc["diagram"]))
+    ids = [a for a, _ in doc["actors"]]
+    if not 2 <= len(ids) <= MAX_ACTORS:
+        out.append(_problem("diagram", "structure", f"use 2 to {MAX_ACTORS} actors"))
+    if not 1 <= len(doc["messages"]) <= MAX_MESSAGES:
+        out.append(_problem("diagram", "structure", f"use 1 to {MAX_MESSAGES} messages"))
+    for a, label in doc["actors"]:
+        if len(ste_lint.WORD_RE.findall(label)) > MAX_BOX_WORDS:
+            out.append(_problem(f"actor {a}", "structure",
+                                f"use {MAX_BOX_WORDS} words or fewer", label))
+    for i, (src, dst, _, label) in enumerate(doc["messages"], 1):
+        if src not in ids or dst not in ids:
+            out.append(_problem(f"message {i}", "structure", "uses an actor that is not defined", label))
+        elif src == dst:
+            out.append(_problem(f"message {i}", "structure", "a message must go to another actor", label))
     return out
 
 
@@ -135,8 +133,6 @@ def _blanks(doc):
         yield f"actor {a}", label, True
     for i, (_, _, _, label) in enumerate(doc["messages"], 1):
         yield f"message {i}", label, True
-    for i, label in enumerate(doc["nodes"], 1):
-        yield f"node {i}", label, True
     for i, (name, body) in enumerate(doc["parts"], 1):
         yield f"part {i}", name, True
         yield f"part {i}", body, False
@@ -159,17 +155,32 @@ def check(doc, cache=None, custom=None):
 
 # --- Markdown -------------------------------------------------------------
 
+# Mermaid theme in the Stayux design system colors (hex values from
+# design-system.css), so the Markdown diagram matches the HTML page.
+MERMAID_THEME = {
+    "theme": "base",
+    "themeVariables": {
+        "fontFamily": "Arial",
+        "actorBkg": "#FAF7F0", "actorBorder": "#C7C2BA", "actorTextColor": "#1A0F2D",
+        "actorLineColor": "#C7C2BA", "signalColor": "#571FFF", "signalTextColor": "#2A201B",
+        "sequenceNumberColor": "#FFFFFF", "noteBkgColor": "#F4EBFF",
+        "noteBorderColor": "#DCC3FF", "noteTextColor": "#1A0F2D",
+    },
+    # Sequence diagrams take their fonts from these keys, not from fontFamily.
+    # One font name only: a list with commas falls back to a serif font in
+    # mermaid-cli 12.
+    "sequence": {"actorFontFamily": "Arial",
+                 "messageFontFamily": "Arial",
+                 "noteFontFamily": "Arial"},
+}
+
+
 def _mermaid(doc):
-    lines = ['%%{init: {"theme": "neutral"}}%%']
-    if doc["diagram"] == "sequence":
-        lines += ["sequenceDiagram", "    autonumber"]
-        lines += [f"    participant {a} as {label}" for a, label in doc["actors"]]
-        for src, dst, kind, label in doc["messages"]:
-            arrow = "-->>" if kind == "reply" else "->>"
-            lines.append(f"    {src}{arrow}{dst}: {label.replace(';', ',')}")
-    else:
-        nodes = [f'N{i}["{label.replace(chr(34), chr(39))}"]' for i, label in enumerate(doc["nodes"], 1)]
-        lines += ["flowchart LR", "    " + " --> ".join(nodes)]
+    lines = ["%%{init: " + json.dumps(MERMAID_THEME) + "}%%", "sequenceDiagram", "    autonumber"]
+    lines += [f"    participant {a} as {label}" for a, label in doc["actors"]]
+    for src, dst, kind, label in doc["messages"]:
+        arrow = "-->>" if kind == "reply" else "->>"
+        lines.append(f"    {src}{arrow}{dst}: {label.replace(';', ',')}")
     return "\n".join(lines)
 
 
@@ -214,17 +225,8 @@ def _lanes(doc):
     return height, parts
 
 
-def _row(doc):
-    n = len(doc["nodes"])
-    left = (WIDTH - (180 * n - 30)) // 2 + 75
-    xs = [left + 180 * i for i in range(n)]
-    parts = [_box(x, 40, 150, 56, label) for x, label in zip(xs, doc["nodes"])]
-    parts += [f'<path class="edge" d="M {a + 77} 68 H {b - 77}"/>' for a, b in zip(xs, xs[1:])]
-    return 136, parts
-
-
 def render_html(doc):
-    height, shapes = _lanes(doc) if doc["diagram"] == "sequence" else _row(doc)
+    height, shapes = _lanes(doc)
     svg = (f'<svg viewBox="0 0 {WIDTH} {height}" role="img" aria-label="{html.escape(doc["caption"])}">\n    '
            + "\n    ".join(shapes) + "\n  </svg>")
     body = [f"<h1>{_inline(doc['title'])}</h1>",
@@ -246,14 +248,72 @@ def output_path(src, to):
     return f"{base}.{to}"
 
 
+SET_RE = re.compile(r"^(title|answer|caption|limits|step|part|section|actor|message)(?:\s+(\w+))?$")
+
+
+def set_blank(text, where, value):
+    """Replace the value of one blank, named as in the build output: "answer",
+    "step 3", "part 2", "section 1", "actor B", or "message 4". A message
+    value is the whole line: "B -> R: Ask for the address"."""
+    m = SET_RE.match(where.strip())
+    if not m:
+        raise KeyError(where)
+    key, ref = m.group(1), m.group(2)
+    lines = text.splitlines()
+    count = 0
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if key == "actor":
+            hit = ACTOR_RE.match(stripped)
+            if hit and hit.group(1) == ref:
+                lines[i] = f"actor {ref}: {value}"
+                break
+        elif key == "message":
+            if MESSAGE_RE.match(stripped):
+                count += 1
+                if str(count) == ref:
+                    lines[i] = value
+                    break
+        else:
+            hit = BLANK_RE.match(stripped)
+            if hit and hit.group(1) == key:
+                count += 1
+                if ref is None or str(count) == ref:
+                    lines[i] = f"{key}: {value}"
+                    break
+    else:
+        raise KeyError(where)
+    return "\n".join(lines) + "\n"
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Build an explain file from filled blanks")
     ap.add_argument("content", help="the content file, such as how-dns-works.clear.txt")
     ap.add_argument("--to", choices=("html", "md"), required=True)
+    ap.add_argument("--stdin", action="store_true",
+                    help="read the content from stdin and save it to the content file")
+    ap.add_argument("--set", action="append", default=[], metavar="BLANK=VALUE",
+                    help='replace one blank before the build, such as "step 3=New text"')
     args = ap.parse_args(argv)
 
-    with open(args.content) as f:
-        doc = parse(f.read())
+    if args.stdin:
+        text = sys.stdin.read()
+    else:
+        with open(args.content) as f:
+            text = f.read()
+    for item in args.set:
+        where, _, value = item.partition("=")
+        try:
+            text = set_blank(text, where, value.strip())
+        except KeyError:
+            print(json.dumps({"passed": False, "file": None, "errors": [
+                _problem(where.strip(), "set", "no such blank in the content file")], "warnings": 0}))
+            return 2
+    if args.stdin or args.set:
+        with open(args.content, "w") as f:
+            f.write(text)
+
+    doc = parse(text)
     result = check(doc)
     out = None
     if result["passed"]:

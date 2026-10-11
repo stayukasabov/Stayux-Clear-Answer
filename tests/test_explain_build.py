@@ -35,19 +35,6 @@ section: Example | You type `www.example.com` in the browser.
 limits: The resolver keeps a copy for a set time.
 """
 
-FLOW = """title: How a build works
-answer: A build turns source code into a program.
-diagram: flow
-node: Write the code
-node: Compile it
-node: Run the tests
-caption: Each stage starts when the stage before it ends.
-part: Compiler | Turns the code into a program.
-step: Write the code.
-limits: A build does not show that the program is correct.
-"""
-
-
 def wheres(result, rule=None):
     return [p["where"] for p in result["problems"] if rule is None or p["rule"] == rule]
 
@@ -72,10 +59,6 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(len(self.doc["steps"]), 2)
         self.assertEqual(self.doc["sections"], [("Example", "You type `www.example.com` in the browser.")])
 
-    def test_flow_nodes(self):
-        doc = explain_build.parse(FLOW)
-        self.assertEqual(doc["nodes"], ["Write the code", "Compile it", "Run the tests"])
-
 
 class StructureTests(unittest.TestCase):
     def problems(self, text):
@@ -86,7 +69,6 @@ class StructureTests(unittest.TestCase):
 
     def test_valid_files_have_no_structure_problems(self):
         self.assertEqual(self.structure(SEQUENCE), [])
-        self.assertEqual(self.structure(FLOW), [])
 
     def test_missing_title(self):
         self.assertIn("title", self.structure(SEQUENCE.replace("title: How DNS works\n", "")))
@@ -116,8 +98,11 @@ class StructureTests(unittest.TestCase):
     def test_unknown_line(self):
         self.assertIn("line 3", self.structure("title: X\nanswer: Open it.\nfoo bar\n"))
 
-    def test_unknown_diagram_kind(self):
-        self.assertIn("diagram", self.structure(SEQUENCE.replace("diagram: sequence", "diagram: pie")))
+    def test_only_sequence_diagrams(self):
+        self.assertIn("diagram", self.structure(SEQUENCE.replace("diagram: sequence", "diagram: flow")))
+
+    def test_diagram_line_is_optional(self):
+        self.assertEqual(self.structure(SEQUENCE.replace("diagram: sequence\n", "")), [])
 
 
 class LintTests(unittest.TestCase):
@@ -156,8 +141,14 @@ class MarkdownTests(unittest.TestCase):
                                             "## The steps", "## Example", "## Limits", "Stayux Clear Answer")]
         self.assertEqual(order, sorted(order))
 
+    def test_mermaid_uses_the_design_system_colors(self):
+        init = self.md[self.md.index("%%{init:"):self.md.index("}%%")]
+        self.assertIn('"theme": "base"', init)
+        for color in ("#571FFF", "#FAF7F0"):  # primary violet, paper
+            self.assertIn(color, init)
+
     def test_mermaid_sequence(self):
-        self.assertIn('%%{init: {"theme": "neutral"}}%%\nsequenceDiagram\n    autonumber', self.md)
+        self.assertIn('}%%\nsequenceDiagram\n    autonumber', self.md)
         self.assertIn("    participant B as Browser", self.md)
         self.assertIn("    B->>R: Ask for the address", self.md)
         self.assertIn("    N-->>R: Send the address", self.md)
@@ -168,11 +159,6 @@ class MarkdownTests(unittest.TestCase):
 
     def test_steps_numbered(self):
         self.assertIn("1. The browser asks the resolver for the address.", self.md)
-
-    def test_mermaid_flow(self):
-        md = explain_build.render_md(explain_build.parse(FLOW))
-        self.assertIn("flowchart LR", md)
-        self.assertIn('N1["Write the code"] --> N2["Compile it"]', md)
 
 
 class HtmlTests(unittest.TestCase):
@@ -208,11 +194,6 @@ class HtmlTests(unittest.TestCase):
     def test_boxes_use_the_design_system_radius(self):
         self.assertIn('rx="4"', self.page)
         self.assertNotIn('rx="8"', self.page)
-
-    def test_flow_row(self):
-        page = explain_build.render_html(explain_build.parse(FLOW))
-        self.assertEqual(len(re.findall(r'<g class="node">', page)), 3)
-        self.assertEqual(len(re.findall(r'<path class="edge" d="M \d+ 68 H \d+"/>', page)), 2)
 
     def test_page_passes_the_page_linter(self):
         import ste_lint
@@ -253,6 +234,50 @@ class CliTests(unittest.TestCase):
         self.assertEqual(out["errors"][0]["where"], "part 2")
         self.assertGreaterEqual(out["warnings"], 1)
         self.assertNotIn("problems", out)
+
+    def run_script(self, *args, stdin=None):
+        return subprocess.run([sys.executable, os.path.join(SKILL_ROOT, "scripts", "explain_build.py"),
+                               *args], input=stdin, capture_output=True, text=True)
+
+    def test_stdin_saves_the_content_file_and_builds(self):
+        d = tempfile.mkdtemp()
+        src = os.path.join(d, "how-dns-works.clear.txt")
+        p = self.run_script(src, "--to", "html", "--stdin", stdin=SEQUENCE)
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        with open(src) as f:
+            self.assertEqual(f.read(), SEQUENCE)
+        self.assertTrue(os.path.exists(os.path.join(d, "how-dns-works.html")))
+
+    def test_set_replaces_one_blank(self):
+        bad = SEQUENCE.replace("Keeps the records", "Has kept the records")
+        d = tempfile.mkdtemp()
+        src = os.path.join(d, "how-dns-works.clear.txt")
+        self.assertEqual(self.run_script(src, "--to", "md", "--stdin", stdin=bad).returncode, 1)
+        p = self.run_script(src, "--to", "md", "--set", "part 2=Name server | Keeps the records for a domain.")
+        self.assertEqual(p.returncode, 0, p.stdout)
+        with open(src) as f:
+            self.assertIn("part: Name server | Keeps the records for a domain.", f.read())
+
+    def test_set_other_blanks(self):
+        d = tempfile.mkdtemp()
+        src = os.path.join(d, "x.clear.txt")
+        self.run_script(src, "--to", "md", "--stdin", stdin=SEQUENCE)
+        p = self.run_script(src, "--to", "md", "--set", "step 2=The resolver asks a name server.",
+                            "--set", "actor N=Name host", "--set", "message 1=B -> R: Ask for an address",
+                            "--set", "answer=DNS turns a name into an address.")
+        self.assertEqual(p.returncode, 0, p.stdout)
+        with open(src) as f:
+            text = f.read()
+        for line in ("step: The resolver asks a name server.", "actor N: Name host",
+                     "B -> R: Ask for an address", "answer: DNS turns a name into an address."):
+            self.assertIn(line, text)
+
+    def test_set_unknown_blank_is_an_error(self):
+        d = tempfile.mkdtemp()
+        src = os.path.join(d, "x.clear.txt")
+        self.run_script(src, "--to", "md", "--stdin", stdin=SEQUENCE)
+        p = self.run_script(src, "--to", "md", "--set", "step 9=Nothing.")
+        self.assertEqual(p.returncode, 2)
 
     def test_error_writes_no_file(self):
         p, d = self.build(SEQUENCE.replace("Keeps the records", "Has kept the records"), "html")

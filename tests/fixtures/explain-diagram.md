@@ -3,7 +3,7 @@
 A content delivery network (CDN) keeps copies of your files on servers near your users. A user gets a file from a near server, not from your main server. The page loads faster, and your main server gets less traffic.
 
 ```mermaid
-%%{init: {"theme": "neutral"}}%%
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Arial", "actorBkg": "#FAF7F0", "actorBorder": "#C7C2BA", "actorTextColor": "#1A0F2D", "actorLineColor": "#C7C2BA", "signalColor": "#571FFF", "signalTextColor": "#2A201B", "sequenceNumberColor": "#FFFFFF", "noteBkgColor": "#F4EBFF", "noteBorderColor": "#DCC3FF", "noteTextColor": "#1A0F2D"}, "sequence": {"actorFontFamily": "Arial", "messageFontFamily": "Arial", "noteFontFamily": "Arial"}}}%%
 sequenceDiagram
     autonumber
     participant U as User
