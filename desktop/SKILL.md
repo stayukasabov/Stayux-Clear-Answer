@@ -60,20 +60,19 @@ The unapproved-word warning suggests an approved replacement. Apply it.
 
 ## Diagrams and HTML pages
 
-When the user asks to explain something with a diagram or as a web page, follow
-`explain.md` in the skill files. It has the content structure, the Mermaid and
-SVG rules, and examples. In short:
+When the user asks to explain something with a diagram or as a web page,
+follow `explain-html.md` in the skill files. It describes the content file and
+its blanks. In short:
 
-1. Plan the content silently. Write the file once: a `.md` file with a Mermaid
-   diagram, or a `.html` file with only the body content and an SVG diagram.
-2. Add the fixed frame (page head, CSS, and footer):
-   `python3 explain_page.py <file>`.
-3. Lint the file: `python3 ste_lint.py --pretty < file.md`, or
-   `python3 ste_lint.py --format html --pretty < page.html`.
-4. If `passed` is false, change only the flagged lines. Never write the whole
-   file again.
-5. Do not show the file content or the linter output. Reply with one sentence
-   and a link to the file, such as "The diagram is ready: <link>".
+1. Plan the content silently. Write the content file `<topic-slug>.clear.txt`
+   once. Fill only the blanks. Do not write HTML, Markdown, Mermaid, or SVG.
+2. Build the file. Use `--to html` for a page, `--to md` for a Markdown file
+   with a Mermaid diagram:
+   `python3 explain_build.py <topic-slug>.clear.txt --to html`.
+3. If `passed` is false, change only the blanks named in `problems`, and build
+   again.
+4. Do not show the content file or the build output. Reply with one sentence
+   and a link to the file, such as "The page is ready: <link>".
 
 ## The rules you write by
 
