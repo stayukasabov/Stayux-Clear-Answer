@@ -91,7 +91,7 @@ _DEFAULT_CUSTOM = load_custom_dict()
 # Part-of-speech key for an entry from a version 1 cache, which has no part of
 # speech: it applies to every use except a noun or a noun modifier.
 LEGACY_POS = "legacy"
-POS_NAMES = {"n": "noun", "v": "verb", "adj": "adjective", "adv": "adverb"}
+POS_NAMES = {"n": "a noun", "v": "a verb", "adj": "an adjective", "adv": "an adverb"}
 
 
 def _add_entries(words, subs, legacy=False, overrides=False):
@@ -151,7 +151,7 @@ def _word_advice(word, tag, entries, approved_pos):
     """Return the unapproved-word detail for one use of a word, or None."""
     if tag is not None:
         if tag in entries:
-            return f"'{word}' as a {POS_NAMES.get(tag, tag)}: use '{entries[tag]}'"
+            return f"'{word}' as {POS_NAMES.get(tag, tag)}: use '{entries[tag]}'"
         if None in entries:
             return f"use '{entries[None]}' instead of '{word}'"
         if LEGACY_POS in entries and tag not in ("n", "adj"):
@@ -167,7 +167,7 @@ def _word_advice(word, tag, entries, approved_pos):
         return f"use '{entries[LEGACY_POS]}' instead of '{word}'"
     pos = next(p for p in ("v", "adj", "adv", "n") if p in entries) if any(
         p in entries for p in ("v", "adj", "adv", "n")) else next(iter(entries))
-    return f"'{word}' as a {POS_NAMES.get(pos, pos)}: use '{entries[pos]}'"
+    return f"'{word}' as {POS_NAMES.get(pos, pos)}: use '{entries[pos]}'"
 
 PROFILES = {
     # STE distinguishes procedures (<=20 words) from descriptions (<=25).

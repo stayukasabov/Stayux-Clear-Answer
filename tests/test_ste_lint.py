@@ -700,5 +700,12 @@ class PartOfSpeechTests(unittest.TestCase):
         self.assertEqual(self.unapproved(self.lint("Use a tool to file the edge.", custom=custom)), [])
 
 
+class PartOfSpeechWordingTests(unittest.TestCase):
+    def test_adjective_takes_an(self):
+        r = ste_lint.lint("Open the main valve.", cache={}, custom={})
+        details = [v["detail"] for v in r["violations"] if v["rule"] == "unapproved-word"]
+        self.assertIn("'main' as an adjective: use 'primary'", details)
+
+
 if __name__ == "__main__":
     unittest.main()

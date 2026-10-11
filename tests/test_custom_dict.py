@@ -92,7 +92,7 @@ class LintTests(unittest.TestCase):
         self.assertIn("use 'by' instead of 'as per'", details(r))
 
     def test_no_custom_behaves_as_seed(self):
-        r = ste_lint.lint("We utilize the tool.")
+        r = ste_lint.lint("We utilize the tool.", cache={}, custom={})
         self.assertIn("use 'use' instead of 'utilize'", details(r))
 
 

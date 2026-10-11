@@ -137,7 +137,7 @@ class LintWithCacheTests(unittest.TestCase):
                       details(r, "unapproved-word"))
 
     def test_no_cache_behaves_as_seed(self):
-        r = ste_lint.lint("We utilize the tool.")
+        r = ste_lint.lint("We utilize the tool.", cache={}, custom={})
         self.assertIn("use 'use' instead of 'utilize'",
                       details(r, "unapproved-word"))
 
