@@ -329,6 +329,14 @@ ways:
   4. [Rewrite a document](docs/tutorials/04-rewrite-a-document.md)
   5. [Repo and Desktop setup](docs/tutorials/05-init-and-desktop.md)
   6. [Add your own words with a project dictionary](docs/tutorials/06-custom-dictionary.md)
+  7. [Codex CLI](docs/tutorials/07-codex.md) (untested)
+  8. [Cursor](docs/tutorials/08-cursor.md) (untested)
+  9. [Gemini CLI](docs/tutorials/09-gemini-cli.md) (untested)
+  10. [VS Code with GitHub Copilot](docs/tutorials/10-vscode-copilot.md) (untested)
+- **Other agents:** [`prompts/AGENTS.md`](prompts/AGENTS.md) is the gated
+  instructions file for agents that run shell commands.
+  [`prompts/system-prompt.md`](prompts/system-prompt.md) has the same rules
+  without the gate, for tools that cannot run Python.
 - **Claude Desktop guide**: [`desktop/README.md`](desktop/README.md)
 - **STE rule reference**: [`references/writing-rules.md`](references/writing-rules.md)
 - **The skill**: [`skills/clear-write/SKILL.md`](skills/clear-write/SKILL.md)

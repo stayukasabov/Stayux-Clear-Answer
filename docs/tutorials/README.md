@@ -17,6 +17,17 @@ example you can run.
 5. [Set up a repo, and use Clear Answer on Desktop](05-init-and-desktop.md)
 6. [Add your own words with a project dictionary](06-custom-dictionary.md)
 
+Other agents (untested, see the note in each page):
+
+7. [Codex CLI](07-codex.md)
+8. [Cursor](08-cursor.md)
+9. [Gemini CLI](09-gemini-cli.md)
+10. [VS Code with GitHub Copilot](10-vscode-copilot.md)
+
+For a chat tool or an API call that cannot run Python, use
+[`prompts/system-prompt.md`](../../prompts/system-prompt.md). It has the rules
+but no gate.
+
 ## Example file
 
 [`examples/sample-procedure.md`](examples/sample-procedure.md) is a short, unclear
