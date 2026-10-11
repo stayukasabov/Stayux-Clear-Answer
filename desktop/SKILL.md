@@ -58,6 +58,18 @@ Warnings (passive-voice, phrasal-verb, unapproved-word, removed-word, and the
 chat format warnings) do not fail the gate, but prefer to fix them too. They usually make the text clearer.
 The unapproved-word warning suggests an approved replacement. Apply it.
 
+## Diagrams and HTML pages
+
+When the user asks to explain something with a diagram or as a web page:
+
+- **Diagram:** write a short explanation and one ```mermaid block (a flowchart
+  or a sequence diagram). Keep each label to 8 words or fewer. Lint the full
+  reply as above. The linter checks the labels too.
+- **HTML page:** write one self-contained HTML file. Put all CSS in a `<style>`
+  element. Draw the diagram as inline SVG. Do not load anything from a URL.
+  Lint the visible text with the code execution tool:
+  `python3 ste_lint.py --format html --pretty < page.html`.
+
 ## The rules you write by
 
 - One instruction per sentence. Keep sentences <= 25 words (chat).

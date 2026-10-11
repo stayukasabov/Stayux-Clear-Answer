@@ -27,6 +27,9 @@ gate.
   rewrite.
 - `/clear-answer:rewrite` — rewrite text into plain English with a before/after.
 - `/clear-answer:init` — add the Clear Answer rules to the project's CLAUDE.md.
+- `/clear-answer:explain [--format text|diagram|html]` — explain a topic as text,
+  a Mermaid diagram, or a self-contained HTML page. The gate checks every
+  visible word, including diagram labels.
 
 It also loads automatically when you ask for a clear answer, plain English, or STE.
 
@@ -147,7 +150,16 @@ Advisory (warnings that never fail the gate):
 - Noun-only words used as verbs (`Test the software` becomes `Do a test of the
   software`, Issue 9)
 
-Text inside code fences and inline code is skipped.
+Text inside code fences and inline code is skipped, except Mermaid diagrams.
+
+Diagrams and HTML pages:
+- Mermaid labels (nodes, edges, sequence messages) get the word rules, and a
+  label of more than 8 words is an error (`label-length`). The limit of 8 is our
+  own number.
+- `ste_lint.py --format html` checks only the visible text of a page. It skips
+  the head, scripts, styles, and code. SVG `<text>` is checked as labels.
+- A page that loads a script, style, font, or image from the network fails
+  (`external-request`). Links to other pages are fine.
 
 Chat format warnings (prose mode only). These are not STE rules. Each one has a
 style-guide source:
@@ -190,6 +202,8 @@ Commands, all under the `/clear-answer:` namespace:
 - `/clear-answer:check`: check a file or text and report the violations.
 - `/clear-answer:rewrite`: rewrite text with a before and after.
 - `/clear-answer:init`: add the rules to the project's CLAUDE.md.
+- `/clear-answer:explain [--format text|diagram|html]`: explain a topic as text,
+  a diagram, or an HTML page.
 
 The plugin also loads automatically when you ask for a clear answer, plain
 English, or STE. See the skill at

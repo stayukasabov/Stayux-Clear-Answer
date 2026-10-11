@@ -42,3 +42,5 @@ All commands live under the `/clear-answer:` namespace.
 - `/clear-answer:check`: check a file or text and report the violations.
 - `/clear-answer:rewrite`: rewrite text into plain English with a before and after.
 - `/clear-answer:init`: add the rules to the project's CLAUDE.md.
+- `/clear-answer:explain [--format text|diagram|html]`: explain a topic as text,
+  a diagram, or an HTML page.

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How a CDN works</title>
+<style>
+  body { font: 16px/1.5 system-ui, sans-serif; max-width: 42rem; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+  h1 { font-size: 1.6rem; }
+  svg { width: 100%; height: auto; }
+  .box { fill: #eef3ff; stroke: #3b5bdb; }
+  .label { font: 14px system-ui, sans-serif; text-anchor: middle; }
+  ol li { margin-bottom: 0.4rem; }
+</style>
+</head>
+<body>
+<h1>How a CDN works</h1>
+<p>A content delivery network (CDN) keeps copies of your files on servers near your users. A user gets the files from a near server, not from your main server. The page loads faster, and your main server gets less traffic.</p>
+
+<h2>The flow</h2>
+<svg viewBox="0 0 640 120" role="img" aria-label="Request flow">
+  <rect class="box" x="10" y="35" width="160" height="50" rx="8"/>
+  <text class="label" x="90" y="65">User</text>
+  <rect class="box" x="240" y="35" width="160" height="50" rx="8"/>
+  <text class="label" x="320" y="65">Near CDN server</text>
+  <rect class="box" x="470" y="35" width="160" height="50" rx="8"/>
+  <text class="label" x="550" y="65">Main server</text>
+  <line x1="170" y1="60" x2="240" y2="60" stroke="#3b5bdb" marker-end="url(#arrow)"/>
+  <line x1="400" y1="60" x2="470" y2="60" stroke="#3b5bdb" stroke-dasharray="4"/>
+  <text class="label" x="435" y="30">Only if there is no copy</text>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#3b5bdb"/></marker></defs>
+</svg>
+
+<h2>Step by step</h2>
+<ol>
+  <li>The user asks for a file, such as an image.</li>
+  <li>The request goes to the nearest CDN server.</li>
+  <li>If that server has a copy, it sends the copy to the user.</li>
+  <li>If it has no copy, it gets the file from the main server. It keeps a copy for the next request.</li>
+</ol>
+
+<h2>Limits</h2>
+<p>A CDN helps most with files that do not change often. For data that changes for each user, the CDN must ask the main server each time.</p>
+</body>
+</html>

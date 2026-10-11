@@ -6,7 +6,8 @@ description: >
   clear answer, plain English, short replies, to write or rewrite in STE, to
   check STE compliance, apply ASD-STE100, or simplify technical documentation.
   Commands: /clear-answer:on, /clear-answer:off, /clear-answer:mode,
-  /clear-answer:check, /clear-answer:rewrite, /clear-answer:init.
+  /clear-answer:check, /clear-answer:rewrite, /clear-answer:init,
+  /clear-answer:explain.
 ---
 
 # Simplified Technical English (STE)
@@ -28,6 +29,8 @@ cost no model-context tokens.
 - `/clear-answer:check`: check a file or text and report the violations.
 - `/clear-answer:rewrite`: rewrite text with a before and after.
 - `/clear-answer:init`: add the rules to the project's CLAUDE.md.
+- `/clear-answer:explain [--format text|diagram|html]`: explain a topic as text,
+  a Mermaid diagram, or a self-contained HTML page.
 
 ## When the user asks for STE without a command
 

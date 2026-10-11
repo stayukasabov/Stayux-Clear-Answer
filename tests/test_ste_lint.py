@@ -615,5 +615,14 @@ class HtmlCliTests(unittest.TestCase):
         self.assertIn("progressive-tense", p.stdout)
 
 
+class ExplainPageFixtureTests(unittest.TestCase):
+    # The page format that /clear-answer:explain --format html asks for.
+    def test_sample_page_passes(self):
+        with open(os.path.join(SKILL_ROOT, "tests", "fixtures", "explain-page.html")) as f:
+            r = ste_lint.lint(f.read(), fmt="html")
+        self.assertTrue(r["passed"], [v for v in r["violations"] if v["severity"] == "error"])
+        self.assertNotIn("external-request", rules(r))
+
+
 if __name__ == "__main__":
     unittest.main()
