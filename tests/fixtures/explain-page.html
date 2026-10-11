@@ -5,45 +5,85 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How a CDN works</title>
 <style>
-  :root {
-    --ca-bg: #ffffff; --ca-text: #1f2328; --ca-muted: #59636e; --ca-line: #d1d9e0;
-    --ca-box: #f6f8fa; --ca-accent: #3b5bdb; --ca-code: #eff2f5;
-    --ca-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    --ca-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* Colors, type, and spacing from the Stayux design system (design-system.css).
+     The page follows the system theme. data-theme="light" or "dark" on <html>
+     overrides it. The SX fonts show when installed, else the system font. */
+  :root, [data-theme="light"] {
+    --ca-bg: oklch(0.984 0.007 87);               /* paper-35 */
+    --ca-heading: oklch(0.140 0.006 280);         /* n900 */
+    --ca-text: oklch(0.300 0.006 280);            /* n700 */
+    --ca-muted: oklch(0.380 0.006 280);           /* n600 */
+    --ca-line: oklch(0.910 0.006 280);            /* n200 */
+    --ca-box: oklch(0.503 0.287 280 / 2.5%);      /* node-bg */
+    --ca-box-line: oklch(0.840 0.006 280);        /* n300 */
+    --ca-accent: oklch(0.503 0.287 280);          /* primary */
+    --ca-link: oklch(0.436 0.237 280);            /* primary-shade-200 */
+    --ca-link-hover: oklch(0.588 0.213 9);        /* secondary-shade-100 */
+    --ca-code: oklch(0.503 0.287 280 / 7%);       /* code-bg */
   }
   @media (prefers-color-scheme: dark) {
-    :root {
-      --ca-bg: #0d1117; --ca-text: #e6edf3; --ca-muted: #9198a1; --ca-line: #3d444d;
-      --ca-box: #151b23; --ca-accent: #7c97ff; --ca-code: #1f2630;
+    :root:not([data-theme="light"]) {
+      --ca-bg: oklch(0.100 0.006 280);            /* n950 */
+      --ca-heading: #ffffff;
+      --ca-text: #ffffff;
+      --ca-muted: oklch(0.840 0.006 280);         /* n300 */
+      --ca-line: oklch(0.503 0.287 280 / 18%);    /* border */
+      --ca-box: oklch(0.503 0.287 280 / 3.5%);    /* node-bg */
+      --ca-box-line: oklch(0.503 0.287 280 / 38%); /* border-hover */
+      --ca-accent: oklch(0.676 0.196 297);        /* primary-tint-600 */
+      --ca-link: oklch(0.858 0.086 304);          /* primary-tint-200 */
+      --ca-link-hover: oklch(0.676 0.196 297);    /* primary-tint-600 */
+      --ca-code: oklch(0.160 0.012 280 / 50%);    /* code-bg */
     }
   }
+  [data-theme="dark"] {
+    --ca-bg: oklch(0.100 0.006 280);
+    --ca-heading: #ffffff;
+    --ca-text: #ffffff;
+    --ca-muted: oklch(0.840 0.006 280);
+    --ca-line: oklch(0.503 0.287 280 / 18%);
+    --ca-box: oklch(0.503 0.287 280 / 3.5%);
+    --ca-box-line: oklch(0.503 0.287 280 / 38%);
+    --ca-accent: oklch(0.676 0.196 297);
+    --ca-link: oklch(0.858 0.086 304);
+    --ca-link-hover: oklch(0.676 0.196 297);
+    --ca-code: oklch(0.160 0.012 280 / 50%);
+  }
+  :root {
+    --ca-font: 'SX', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --ca-title: 'SX-Title', 'SX', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --ca-mono: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+    --ca-radius: 4px;                             /* radius-lg */
+  }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--ca-bg); color: var(--ca-text); font: 17px/1.6 var(--ca-font); }
-  .ca-page { max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 2rem; }
-  h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 1rem; }
-  h2 { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; }
-  p, li, dd { color: var(--ca-text); }
-  .ca-answer { font-size: 1.1rem; }
-  code { font: 0.9em var(--ca-mono); background: var(--ca-code); padding: 0.1em 0.35em; border-radius: 4px; }
+  body { margin: 0; background: var(--ca-bg); color: var(--ca-text); font: 400 1.08rem/1.6 var(--ca-font); }
+  .ca-page { max-width: 740px; margin: 0 auto; padding: 3rem 1rem 2rem; }
+  h1, h2, dt { color: var(--ca-heading); }
+  h1 { font: 400 2.441rem/1.2 var(--ca-title); letter-spacing: -0.025em; margin: 0 0 1.5rem; }
+  h2 { font: 500 1.5625rem/1.2 var(--ca-title); letter-spacing: -0.025em; margin: 3rem 0 1rem; }
+  .ca-answer { font-size: 1.25rem; line-height: 1.5; }
+  a { color: var(--ca-link); }
+  a:hover, a:focus-visible { color: var(--ca-link-hover); }
+  code { font: 0.9em var(--ca-mono); background: var(--ca-code); padding: 0.1em 0.35em; border-radius: var(--ca-radius); }
   ol, ul { padding-left: 1.5rem; }
-  li { margin-bottom: 0.4rem; }
+  li { margin-bottom: 0.5rem; }
   dl { margin: 0; }
-  dt { font-weight: 600; margin-top: 0.9rem; }
-  dd { margin: 0.2rem 0 0 0; }
+  dt { font-weight: 600; margin-top: 1rem; }
+  dd { margin: 0.25rem 0 0 0; }
   .ca-diagram { margin: 2rem 0; }
   .ca-diagram svg { display: block; width: 100%; height: auto; }
-  .ca-diagram figcaption { margin-top: 0.5rem; text-align: center; color: var(--ca-muted); font-size: 0.95rem; }
-  .node rect { fill: var(--ca-box); stroke: var(--ca-line); stroke-width: 1.5; }
-  .node text { fill: var(--ca-text); font: 600 14px var(--ca-font); text-anchor: middle; dominant-baseline: middle; }
-  .edge { fill: none; stroke: var(--ca-accent); stroke-width: 1.75; marker-end: url(#ca-arrow); }
+  .ca-diagram figcaption { margin-top: 0.5rem; text-align: center; color: var(--ca-muted); font-size: 0.9rem; }
+  .node rect { fill: var(--ca-box); stroke: var(--ca-box-line); stroke-width: 1; }
+  .node text { fill: var(--ca-heading); font: 600 14px var(--ca-font); text-anchor: middle; dominant-baseline: middle; }
+  .edge { fill: none; stroke: var(--ca-accent); stroke-width: 1.5; marker-end: url(#ca-arrow); }
   .edge.reply { stroke-dasharray: 5 4; }
   .step { fill: var(--ca-muted); font: 13px var(--ca-font); text-anchor: middle; }
   .lifeline { fill: none; stroke: var(--ca-line); stroke-width: 1.5; stroke-dasharray: 2 4; }
   #ca-arrow path { fill: var(--ca-accent); }
-  .ca-footer { margin-top: 3rem; text-align: center; font: 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .ca-footer { margin-top: 4rem; text-align: center; font: 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ca-muted); }
   .ca-footer p { margin: 0.25rem 0; }
   .ca-footer a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
-  .ca-footer a:hover, .ca-footer a:focus-visible { color: #3b5bdb; text-decoration-thickness: 2px; }
+  .ca-footer a:hover, .ca-footer a:focus-visible { color: var(--ca-link-hover); text-decoration-thickness: 2px; }
 </style>
 </head>
 <body>
@@ -60,9 +100,9 @@
 <p class="ca-answer">A content delivery network (CDN) keeps copies of your files on servers near your users. A user gets a file from a near server, not from your main server. The page loads faster, and your main server gets less traffic.</p>
 <figure class="ca-diagram">
   <svg viewBox="0 0 760 248" role="img" aria-label="The CDN server asks the main server only when it has no copy.">
-    <g class="node"><rect x="160" y="10" width="140" height="48" rx="8"/><text x="230" y="34">User</text></g>
-    <g class="node"><rect x="310" y="10" width="140" height="48" rx="8"/><text x="380" y="34">CDN server</text></g>
-    <g class="node"><rect x="460" y="10" width="140" height="48" rx="8"/><text x="530" y="34">Main server</text></g>
+    <g class="node"><rect x="160" y="10" width="140" height="48" rx="4"/><text x="230" y="34">User</text></g>
+    <g class="node"><rect x="310" y="10" width="140" height="48" rx="4"/><text x="380" y="34">CDN server</text></g>
+    <g class="node"><rect x="460" y="10" width="140" height="48" rx="4"/><text x="530" y="34">Main server</text></g>
     <path class="lifeline" d="M 230 58 V 238"/>
     <path class="lifeline" d="M 380 58 V 238"/>
     <path class="lifeline" d="M 530 58 V 238"/>

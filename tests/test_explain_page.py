@@ -127,5 +127,31 @@ class FixtureTests(unittest.TestCase):
         with open(os.path.join(SKILL_ROOT, "tests", "fixtures", "explain-diagram.md")) as f:
             self.assertEqual(f.read(), explain_build.render_md(doc))
 
+class DesignSystemTests(unittest.TestCase):
+    # Tokens from the Stayux design system (design-system.css).
+    def setUp(self):
+        self.page = explain_page.wrap_html(BODY)
+
+    def test_light_theme_tokens(self):
+        self.assertIn("oklch(0.984 0.007 87)", self.page)   # paper-35 background
+        self.assertIn("oklch(0.503 0.287 280)", self.page)  # primary
+
+    def test_dark_theme_tokens(self):
+        self.assertIn("oklch(0.100 0.006 280)", self.page)  # n950 background
+
+    def test_theme_follows_system_and_data_theme(self):
+        self.assertIn("prefers-color-scheme: dark", self.page)
+        self.assertIn('[data-theme="dark"]', self.page)
+        self.assertIn('[data-theme="light"]', self.page)
+
+    def test_fonts_fall_back_to_system(self):
+        self.assertIn("'SX', system-ui", self.page)
+        self.assertNotIn("@font-face", self.page)
+
+    def test_text_column_and_radius(self):
+        self.assertIn("max-width: 740px", self.page)
+        self.assertIn("--ca-radius: 4px", self.page)
+
+
 if __name__ == "__main__":
     unittest.main()

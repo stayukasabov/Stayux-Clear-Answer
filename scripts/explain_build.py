@@ -194,7 +194,7 @@ def _inline(text):
 
 def _box(cx, top, width, height, label):
     return (f'<g class="node"><rect x="{cx - width // 2}" y="{top}" width="{width}" '
-            f'height="{height}" rx="8"/><text x="{cx}" y="{top + height // 2}">{_inline(label)}</text></g>')
+            f'height="{height}" rx="4"/><text x="{cx}" y="{top + height // 2}">{_inline(label)}</text></g>')
 
 
 def _lanes(doc):

@@ -205,6 +205,10 @@ class HtmlTests(unittest.TestCase):
         labels = re.findall(r'<text class="step" x="\d+" y="(\d+)">', self.page)
         self.assertEqual([int(y) for y in labels], [90, 130, 170, 210])
 
+    def test_boxes_use_the_design_system_radius(self):
+        self.assertIn('rx="4"', self.page)
+        self.assertNotIn('rx="8"', self.page)
+
     def test_flow_row(self):
         page = explain_build.render_html(explain_build.parse(FLOW))
         self.assertEqual(len(re.findall(r'<g class="node">', page)), 3)
