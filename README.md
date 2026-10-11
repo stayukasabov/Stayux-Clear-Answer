@@ -27,11 +27,16 @@ gate.
   rewrite.
 - `/clear-answer:rewrite` — rewrite text into plain English with a before/after.
 - `/clear-answer:init` — add the Clear Answer rules to the project's CLAUDE.md.
-- `/clear-answer:explain [--format text|diagram|html]` — explain a topic as text,
-  a Mermaid diagram file (`.md`), or a self-contained HTML page. The gate checks
-  every visible word, including diagram labels. For a diagram or a page, the
-  dialogue shows only a link to the file, and the file ends with a Stayux Clear
-  Answer footer.
+- `/clear-answer:explain` — explain a topic as one plain-English reply.
+- `/clear-answer:explain:diagram` — explain a topic as a Markdown file with a
+  Mermaid diagram.
+- `/clear-answer:explain:html` — explain a topic as a self-contained HTML page
+  in the Stayux design system, light and dark.
+
+  For the two file commands, Claude fills named blanks in a small content file
+  (`<topic>.clear.txt`). `scripts/explain_build.py` checks each blank with the
+  linter and builds the file, the diagram, and the Stayux Clear Answer footer.
+  The dialogue shows only a link to the file.
 
 It also loads automatically when you ask for a clear answer, plain English, or STE.
 
@@ -205,8 +210,9 @@ Commands, all under the `/clear-answer:` namespace:
 - `/clear-answer:check`: check a file or text and report the violations.
 - `/clear-answer:rewrite`: rewrite text with a before and after.
 - `/clear-answer:init`: add the rules to the project's CLAUDE.md.
-- `/clear-answer:explain [--format text|diagram|html]`: explain a topic as text,
-  a diagram, or an HTML page.
+- `/clear-answer:explain`, `/clear-answer:explain:diagram`,
+  `/clear-answer:explain:html`: explain a topic as a reply, a diagram file, or
+  an HTML page.
 
 The plugin also loads automatically when you ask for a clear answer, plain
 English, or STE. See the skill at

@@ -14,7 +14,7 @@ needs. Only the sentences change.
 
 1. Plan the content silently. Then write the content file
    `<topic-slug>.clear.txt` once, in the working directory, for example
-   `how-dns-works.clear.txt`. Fill only the blanks below. Write in plain
+   `how-a-cdn-works.clear.txt`. Fill only the blanks below. Write in plain
    English from the start. Do not write HTML, Markdown, Mermaid, or SVG.
 2. Build the file:
    ```bash
@@ -27,7 +27,7 @@ needs. Only the sentences change.
    same edit, you can also fix a warning with a one-word change. Then build
    again.
 5. Reply with exactly one sentence and the path in `file`:
-   "The diagram is ready: /absolute/path/how-dns-works.md". Do not show the content file,
+   "The diagram is ready: /absolute/path/how-a-cdn-works.md". Do not show the content file,
    the build output, or the linter output.
 
 <!-- content-format:start -->
@@ -36,23 +36,24 @@ needs. Only the sentences change.
 Write one blank on each line. A line that starts with `#` is a comment.
 
 ```text
-title: How DNS works
-answer: DNS turns a name, such as `example.com`, into an IP address. Your computer asks a resolver for it.
+title: How a CDN works
+answer: A content delivery network (CDN) keeps copies of your files on servers near your users. A user gets a file from a near server, not from your main server. The page loads faster, and your main server gets less traffic.
 diagram: sequence
-actor B: Browser
-actor R: Resolver
-actor N: Name server
-B -> R: Ask for the address
-R -> N: Ask the name server
-N --> R: Send the address
-R --> B: Send the address
-caption: The resolver finds the address for the browser.
-part: Resolver | Finds the address for your computer.
-part: Name server | Keeps the records for a domain.
-step: The browser asks the resolver for the address.
-step: The resolver asks the name server and sends the address back.
-section: Example | You type `www.example.com` in the browser.
-limits: The resolver keeps a copy for a set time.
+actor U: User
+actor C: CDN server
+actor M: Main server
+U -> C: Ask for a file
+C -> M: Ask if no copy
+M --> C: Send the file
+C --> U: Send the file
+caption: The CDN server asks the main server only when it has no copy.
+part: CDN server | A server near the user that keeps copies of your files.
+part: Main server | Your own server. It has the original files.
+step: The user asks for a file, such as an image.
+step: The request goes to the nearest CDN server.
+step: If that server has a copy, it sends the copy to the user.
+step: If it has no copy, it gets the file from the main server. It keeps a copy for the next request.
+limits: A CDN helps most with files that do not change often. For data that changes for each user, the CDN must ask the main server each time.
 ```
 
 The blanks:
@@ -74,4 +75,7 @@ The blanks:
 - `limits`: one short paragraph.
 
 Put code, names of files, and addresses in backticks: `example.com`.
+
+The example is about a different topic. Do not copy its actors, messages, or
+steps. Use the real parts and steps of your topic.
 <!-- content-format:end -->
