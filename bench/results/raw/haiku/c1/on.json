@@ -1,0 +1,211 @@
+{
+  "model": "haiku",
+  "task": "c1",
+  "condition": "on",
+  "prompt": "What is the difference between a process and a thread?",
+  "setup": {
+    "duration_api_ms": 3606,
+    "stop_reason": "end_turn",
+    "session_id": "1732a54c-7dd5-4bb9-b6f8-6038074d24b7",
+    "total_cost_usd": 0.00269578,
+    "usage": {
+      "input_tokens": 4,
+      "cache_creation_input_tokens": 7843,
+      "cache_read_input_tokens": 82728,
+      "output_tokens": 599,
+      "output_tokens_details": {
+        "thinking_tokens": 324
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 7843,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 59,
+          "cache_read_input_tokens": 44864,
+          "cache_creation_input_tokens": 843,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 843
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "modelUsage": {
+      "claude-haiku-5-5": {
+        "inputTokens": 4,
+        "outputTokens": 599,
+        "cacheReadInputTokens": 82728,
+        "cacheCreationInputTokens": 7843,
+        "webSearchRequests": 0,
+        "costUSD": 0.00269578,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "thinkingTokens": 324,
+        "canonicalModel": "claude-haiku-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "safety_stops": 0,
+    "is_error": false,
+    "num_turns": 2,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Clear Answer mode is on. All replies use plain English and short sentences. I check each reply with the linter before I send it. To turn the mode off, enter /clear-answer:off.",
+    "ttft_ms": 2106,
+    "type": "result",
+    "duration_ms": 4138,
+    "uuid": "f0333419-52f4-4b02-8ce0-fdad43ebf0e6",
+    "ttft_stream_ms": 747,
+    "time_to_request_ms": 60,
+    "first_content_frame_ms": 747,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "cli": {
+    "duration_api_ms": 8298,
+    "stop_reason": "end_turn",
+    "session_id": "1732a54c-7dd5-4bb9-b6f8-6038074d24b7",
+    "total_cost_usd": 0.0046500099999999996,
+    "usage": {
+      "input_tokens": 4,
+      "cache_creation_input_tokens": 2940,
+      "cache_read_input_tokens": 91983,
+      "output_tokens": 892,
+      "output_tokens_details": {
+        "thinking_tokens": 349
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 2940,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 313,
+          "cache_read_input_tokens": 46276,
+          "cache_creation_input_tokens": 2371,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 2371
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "modelUsage": {
+      "claude-haiku-5-5": {
+        "inputTokens": 8,
+        "outputTokens": 1491,
+        "thinkingTokens": 673,
+        "cacheReadInputTokens": 174711,
+        "cacheCreationInputTokens": 10783,
+        "webSearchRequests": 0,
+        "costUSD": 0.0046500099999999996,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "canonicalModel": "claude-haiku-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "safety_stops": 0,
+    "is_error": false,
+    "num_turns": 2,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "A process is a running instance of a program. It has its own memory space, and the operating system keeps it separate from other processes.\n\nA thread is a path of execution inside a process. One process can have many threads. Threads in the same process share memory. Each thread has its own stack and its own register values.\n\nCreating a process costs more than creating a thread. Switching between threads is also faster than switching between processes.\n\nA crash in one process usually does not affect other processes. A crash in one thread can stop the whole process.\n\nThreads that share data need synchronization, such as locks. Processes need inter-process communication, such as pipes, sockets, or shared memory, to exchange data.",
+    "ttft_ms": 1833,
+    "type": "result",
+    "duration_ms": 5216,
+    "uuid": "f292202a-c508-4cd1-b336-b36537354e41",
+    "ttft_stream_ms": 703,
+    "time_to_request_ms": 53,
+    "first_content_frame_ms": 704,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "metrics": {
+    "words": 122,
+    "errors_per_100": 0.0,
+    "warnings_per_100": 0.0,
+    "format_defects": 0,
+    "rules": []
+  }
+}

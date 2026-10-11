@@ -1,0 +1,121 @@
+{
+  "model": "haiku",
+  "task": "d1",
+  "condition": "off",
+  "prompt": "Write a procedure for rotating an API key in production without downtime.",
+  "setup": null,
+  "cli": {
+    "duration_api_ms": 10158,
+    "stop_reason": "end_turn",
+    "session_id": "e8b4e558-4d47-4d72-9edc-5101d705febd",
+    "total_cost_usd": 0.00149605,
+    "usage": {
+      "input_tokens": 2,
+      "cache_creation_input_tokens": 2983,
+      "cache_read_input_tokens": 535,
+      "output_tokens": 1530,
+      "output_tokens_details": {
+        "thinking_tokens": 0
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 2983,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1530,
+          "cache_read_input_tokens": 535,
+          "cache_creation_input_tokens": 2983,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 2983
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "modelUsage": {
+      "claude-haiku-5-5": {
+        "inputTokens": 1186,
+        "outputTokens": 1551,
+        "cacheReadInputTokens": 535,
+        "cacheCreationInputTokens": 2983,
+        "webSearchRequests": 0,
+        "costUSD": 0.00149605,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "safety_stops": 0,
+    "is_error": false,
+    "num_turns": 1,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "# Rotating an API Key in Production Without Downtime\n\nThe core idea is **overlap**: the new key becomes valid everywhere before the old key is revoked, so no request ever sees an invalid credential.\n\n## Prerequisites\n\n- Confirm the key is used by the services you expect. Search configs, secrets managers, CI/CD, and cron jobs. Check your provider's dashboard for last-used timestamps if available.\n- Confirm the provider supports multiple active keys per account or service. If it does not, you will need a brief dual-credential shim (see Step 2b).\n- Have a rollback plan: the old key stays valid until Step 6.\n\n## Procedure\n\n### 1. Generate the new key\n\n- Create the new key in the provider's console or via its API.\n- Store it immediately in your secrets manager (e.g., AWS Secrets Manager, Vault, GCP Secret Manager) under a **new version or new secret name**. Do not overwrite the old value yet.\n- Record the key's ID, creation time, and owner in your change log. Never paste the secret into tickets, chat, or logs.\n\n### 2. Make the application accept both keys (if needed)\n\nPreferred: the provider allows multiple active keys, so skip to Step 3.\n\nIf it does not:\n\n- **2a.** Deploy code that accepts a list of keys (`API_KEYS=[new, old]`) for verification, while still sending the old key outbound. Deploy and verify across all instances.\n- **2b.** Switch outbound calls to the new key via a config flag or secret version pointer. Keep inbound verification accepting both.\n\nEach deploy must be rolling, with health checks passing before the next batch.\n\n### 3. Roll out the new key to consumers\n\n- Update the secret reference (version pointer or environment variable) for one canary instance or a small percentage of traffic.\n- Verify: check success rates, error logs for 401/403, and provider-side usage for the new key ID.\n- Expand the rollout in stages (e.g., 5% → 25% → 100%), pausing at each stage for a defined window (commonly 15–30 minutes, longer for batch jobs).\n- Use rolling restarts or hot-reload, not a full-fleet restart, so capacity stays up.\n\n### 4. Confirm no traffic uses the old key\n\n- Check provider metrics: requests authenticated with the old key should drop to zero or to a known background set.\n- Find stragglers: serverless functions with cached secrets, long-running workers, cron jobs, third-party integrations, developer machines. Each one needs updating before revocation.\n- Wait at least one full cycle of your longest-running job or your longest secret cache TTL.\n\n### 5. Verify the new key end to end\n\n- Run smoke tests and critical-path checks against production using the new key.\n- Confirm monitoring and alerting still show healthy error rates.\n- Get sign-off from the owning team if the key serves multiple services.\n\n### 6. Revoke the old key\n\n- Only after Step 4 is clean and Step 5 passes, disable the old key first (if the provider supports disable, which is safer than delete).\n- Watch error rates for a monitoring window (e.g., 30–60 minutes). If any 401/403 spikes appear, re-enable the old key immediately and return to Step 4.\n- After the window is clean, delete the old key and mark its secret version as deprecated or destroyed.\n\n### 7. Clean up and document\n\n- Update the change log with the rotation date, key IDs (not values), and any stragglers found.\n- Set a reminder for the next rotation.\n- If the old key may have been exposed, treat the revocation as an incident and follow your incident process.\n\n## Checklist\n\n- [ ] New key generated and stored in the secrets manager\n- [ ] Application supports both keys (or provider supports multiple active keys)\n- [ ] Rollout staged and verified at each stage\n- [ ] No remaining old-key traffic\n- [ ] New key validated end to end\n- [ ] Old key disabled, monitored, then deleted\n- [ ] Change log updated\n\n## Common pitfalls\n\n- **Cached secrets:** SDKs and sidecars often cache credentials for minutes to hours. Account for TTLs.\n- **Hardcoded keys:** Search the codebase and config repos for literal values, not just references.\n- **Forgotten consumers:** Batch jobs, scheduled tasks, and partner integrations often run less frequently and surface only after revocation.\n- **Revoking too early:** Revocation is the only step that causes downtime. Rushing it is the main way rotations fail.\n- **Mixed-version deploys:** During the overlap, make sure old and new code versions both handle the key scheme you're using.",
+    "ttft_ms": 9639,
+    "type": "result",
+    "duration_ms": 9658,
+    "uuid": "0db0f11b-a728-446c-a092-20d0cc3b69b2",
+    "ttft_stream_ms": 1067,
+    "time_to_request_ms": 404,
+    "first_content_frame_ms": 1067,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "metrics": {
+    "words": 674,
+    "errors_per_100": 0.74,
+    "warnings_per_100": 1.19,
+    "format_defects": 0,
+    "rules": [
+      "contraction",
+      "passive-voice",
+      "perfect-tense",
+      "progressive-tense",
+      "removed-word",
+      "sentence-length",
+      "unapproved-word"
+    ]
+  }
+}

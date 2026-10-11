@@ -1,0 +1,20 @@
+{
+  "writer": "sonnet",
+  "judge": "opus",
+  "task": "c1",
+  "order": {
+    "a": "off",
+    "b": "on"
+  },
+  "off": {
+    "score": 5,
+    "lost": []
+  },
+  "on": {
+    "score": 4,
+    "lost": [
+      "Does not say when to use each one: processes for isolation, security and fault tolerance (for example, browser tabs, or Python worker pools to get around the GIL); threads for sharing data closely with low overhead"
+    ]
+  },
+  "raw": "{\"a\": {\"score\": 5, \"lost\": []}, \"b\": {\"score\": 4, \"lost\": [\"Does not say when to use each one: processes for isolation, security and fault tolerance (for example, browser tabs, or Python worker pools to get around the GIL); threads for sharing data closely with low overhead\"]}}"
+}

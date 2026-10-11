@@ -1,0 +1,215 @@
+{
+  "model": "sonnet",
+  "task": "c1",
+  "condition": "on",
+  "prompt": "What is the difference between a process and a thread?",
+  "setup": {
+    "duration_api_ms": 4416,
+    "stop_reason": "end_turn",
+    "session_id": "09e5e12b-965c-4eed-a4fa-52036a0df2fc",
+    "total_cost_usd": 0.039012700000000004,
+    "usage": {
+      "input_tokens": 4,
+      "cache_creation_input_tokens": 6690,
+      "cache_read_input_tokens": 81947,
+      "output_tokens": 405,
+      "output_tokens_details": {
+        "thinking_tokens": 123
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 6690,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 74,
+          "cache_read_input_tokens": 44083,
+          "cache_creation_input_tokens": 471,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 471
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "modelUsage": {
+      "claude-sonnet-5-5": {
+        "inputTokens": 4,
+        "outputTokens": 405,
+        "cacheReadInputTokens": 81947,
+        "cacheCreationInputTokens": 6690,
+        "webSearchRequests": 0,
+        "costUSD": 0.039012700000000004,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "thinkingTokens": 123,
+        "canonicalModel": "claude-sonnet-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "safety_stops": 0,
+    "is_error": false,
+    "num_turns": 2,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Clear Answer mode is on. I will now write all replies in plain English with short sentences. I will keep all facts, steps, and warnings. Use `/clear-answer:off` to turn the mode off. What do you want to work on?",
+    "ttft_ms": 2351,
+    "type": "result",
+    "duration_ms": 5012,
+    "uuid": "f626fe5c-8118-4716-9041-8485d446ff98",
+    "ttft_stream_ms": 933,
+    "time_to_request_ms": 63,
+    "first_content_frame_ms": 933,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "cli": {
+    "duration_api_ms": 10742,
+    "stop_reason": "end_turn",
+    "session_id": "09e5e12b-965c-4eed-a4fa-52036a0df2fc",
+    "total_cost_usd": 0.07164390000000001,
+    "usage": {
+      "input_tokens": 4,
+      "cache_creation_input_tokens": 3766,
+      "cache_read_input_tokens": 89692,
+      "output_tokens": 859,
+      "output_tokens_details": {
+        "thinking_tokens": 20
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 3766,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 376,
+          "cache_read_input_tokens": 45138,
+          "cache_creation_input_tokens": 3182,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 3182
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "modelUsage": {
+      "claude-sonnet-5-5": {
+        "inputTokens": 8,
+        "outputTokens": 1264,
+        "thinkingTokens": 143,
+        "cacheReadInputTokens": 171639,
+        "cacheCreationInputTokens": 10456,
+        "webSearchRequests": 0,
+        "costUSD": 0.07164390000000001,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "canonicalModel": "claude-sonnet-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "safety_stops": 0,
+    "is_error": false,
+    "num_turns": 2,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "A process is a running program. A thread is a unit of work inside a process.\n\nA process has its own memory space. It has its own code, data, heap, and stack. It also has its own open files and other resources. The operating system keeps each process apart from the others. One process cannot read the memory of another process by default.\n\nA thread shares the memory of its process. All threads of one process use the same heap, code, and open files. Each thread has its own stack and its own set of CPU registers. Each thread also has its own program counter.\n\nThese differences cause these effects:\n\n- **Cost:** It is slower to create a process than a thread. A context switch between processes is also slower.\n- **Communication:** Threads can share data directly through memory. Processes must use inter-process communication, for example pipes, sockets, or shared memory.\n- **Safety:** A crash in one process does not usually stop other processes. A crash in one thread can stop the whole process.\n- **Risk:** Threads that share data can cause race conditions. You must use locks or other tools to protect shared data.\n\nA process always has at least one thread. This thread is the main thread. A process can start more threads to do work at the same time.",
+    "ttft_ms": 3896,
+    "type": "result",
+    "duration_ms": 6825,
+    "uuid": "9ec86deb-1713-42ce-a7c1-f910992129c5",
+    "ttft_stream_ms": 779,
+    "time_to_request_ms": 37,
+    "first_content_frame_ms": 780,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "metrics": {
+    "words": 218,
+    "errors_per_100": 0.0,
+    "warnings_per_100": 1.38,
+    "format_defects": 1,
+    "rules": [
+      "bold-overuse",
+      "removed-word",
+      "unapproved-word"
+    ]
+  }
+}

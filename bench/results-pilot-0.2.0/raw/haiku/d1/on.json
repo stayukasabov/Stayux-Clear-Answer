@@ -1,0 +1,211 @@
+{
+  "model": "haiku",
+  "task": "d1",
+  "condition": "on",
+  "prompt": "Write a procedure for rotating an API key in production without downtime.",
+  "setup": {
+    "duration_api_ms": 6538,
+    "stop_reason": "end_turn",
+    "session_id": "235a1c05-5b2c-4e04-bcbc-d5dd6b25629f",
+    "total_cost_usd": 0.00428726,
+    "usage": {
+      "input_tokens": 8,
+      "cache_creation_input_tokens": 9551,
+      "cache_read_input_tokens": 185376,
+      "output_tokens": 1045,
+      "output_tokens_details": {
+        "thinking_tokens": 464
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 9551,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 70,
+          "cache_read_input_tokens": 49391,
+          "cache_creation_input_tokens": 460,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 460
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "modelUsage": {
+      "claude-haiku-5-5": {
+        "inputTokens": 8,
+        "outputTokens": 1045,
+        "cacheReadInputTokens": 185376,
+        "cacheCreationInputTokens": 9551,
+        "webSearchRequests": 0,
+        "costUSD": 0.00428726,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "thinkingTokens": 464,
+        "canonicalModel": "claude-haiku-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "safety_stops": 0,
+    "is_error": false,
+    "num_turns": 4,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Clear Answer mode is now on, at the strict level. All sentences have 20 words or fewer. I will write each reply in short, plain English until you change the mode.\n\nTo change the mode, send off, prose, or strict.",
+    "ttft_ms": 1621,
+    "type": "result",
+    "duration_ms": 7139,
+    "uuid": "c0646d6a-316e-4bb0-9667-6e3ef7360e2c",
+    "ttft_stream_ms": 808,
+    "time_to_request_ms": 49,
+    "first_content_frame_ms": 809,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "cli": {
+    "duration_api_ms": 18124,
+    "stop_reason": "end_turn",
+    "session_id": "235a1c05-5b2c-4e04-bcbc-d5dd6b25629f",
+    "total_cost_usd": 0.00783768,
+    "usage": {
+      "input_tokens": 6,
+      "cache_creation_input_tokens": 4121,
+      "cache_read_input_tokens": 152312,
+      "output_tokens": 2405,
+      "output_tokens_details": {
+        "thinking_tokens": 1174
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 4121,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 415,
+          "cache_read_input_tokens": 52493,
+          "cache_creation_input_tokens": 1479,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 1479
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "modelUsage": {
+      "claude-haiku-5-5": {
+        "inputTokens": 14,
+        "outputTokens": 3450,
+        "thinkingTokens": 1638,
+        "cacheReadInputTokens": 337688,
+        "cacheCreationInputTokens": 13672,
+        "webSearchRequests": 0,
+        "costUSD": 0.00783768,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "canonicalModel": "claude-haiku-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "safety_stops": 0,
+    "is_error": false,
+    "num_turns": 3,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Use an overlap window. The server accepts two keys at the same time. Clients then move to the new key one at a time.\n\nBefore you start, make sure that the API server accepts more than one active key. If it does not, add that support first.\n\n1. Make the new key. Keep the old key active.\n2. Keep the new key in your secret manager. Use a version label, such as v2.\n3. Configure the server to accept the two keys. Deploy the server change. Check that the two keys succeed.\n4. Update the clients to read the new key. Use a rolling deploy. Update one batch at a time.\n5. Check the logs for requests that stay on the old key. Wait until the old key has no traffic. For most systems, wait 24 hours.\n6. Revoke the old key.\n7. Remove the old key from the secret manager and the config files.\n8. Record the change. Record the date, the key IDs, and the owner.\n\nIf clients fail after step 4, set them back to the old key. Do not revoke the old key until step 6 finishes.",
+    "ttft_ms": 4054,
+    "type": "result",
+    "duration_ms": 12179,
+    "uuid": "71561edf-9a7d-41ed-942c-6ac237ba8968",
+    "ttft_stream_ms": 706,
+    "time_to_request_ms": 58,
+    "first_content_frame_ms": 706,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "metrics": {
+    "words": 180,
+    "errors_per_100": 0.0,
+    "warnings_per_100": 0.0,
+    "format_defects": 0,
+    "rules": []
+  }
+}

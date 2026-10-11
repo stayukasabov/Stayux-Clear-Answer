@@ -1,0 +1,116 @@
+{
+  "model": "haiku",
+  "task": "c1",
+  "condition": "off",
+  "prompt": "What is the difference between a process and a thread?",
+  "setup": null,
+  "cli": {
+    "duration_api_ms": 3918,
+    "stop_reason": "end_turn",
+    "session_id": "1b77018d-6250-45f3-87fd-79e07534db33",
+    "total_cost_usd": 0.00097705,
+    "usage": {
+      "input_tokens": 2,
+      "cache_creation_input_tokens": 2974,
+      "cache_read_input_tokens": 535,
+      "output_tokens": 501,
+      "output_tokens_details": {
+        "thinking_tokens": 0
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 2974,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 501,
+          "cache_read_input_tokens": 535,
+          "cache_creation_input_tokens": 2974,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 2974
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "modelUsage": {
+      "claude-haiku-5-5": {
+        "inputTokens": 1179,
+        "outputTokens": 518,
+        "cacheReadInputTokens": 535,
+        "cacheCreationInputTokens": 2974,
+        "webSearchRequests": 0,
+        "costUSD": 0.00097705,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "safety_stops": 0,
+    "is_error": false,
+    "num_turns": 1,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "A **process** is an independent running program. The operating system gives each process its own memory space (code, data, heap, stack), file descriptors, and security context. One process generally can't read or write another process's memory without explicit mechanisms like IPC (pipes, sockets, shared memory). Creating a process is relatively expensive, and context switching between processes is heavier because the OS must switch memory mappings.\n\nA **thread** is a unit of execution *within* a process. Threads in the same process share its memory and resources (heap, global variables, open files), but each has its own stack, registers, and program counter. Because they share memory, threads communicate cheaply, but that also means they need synchronization (mutexes, semaphores, etc.) to avoid race conditions. Creating and switching threads is lighter than doing the same with processes.\n\nKey differences:\n\n| | Process | Thread |\n|---|---|---|\n| Memory | Separate address space | Shares its process's address space |\n| Creation cost | Higher | Lower |\n| Context switch cost | Higher | Lower |\n| Communication | IPC (pipes, sockets, shared memory) | Direct via shared memory |\n| Isolation | Crash or fault usually contained | A bad thread can take down the whole process |\n| Synchronization | Mostly handled by IPC design | Required for shared data |\n\nRule of thumb: use separate processes when you need isolation or stability (e.g., browser tabs, web server workers). Use threads when tasks need to share data closely and be lightweight (e.g., a UI thread plus background workers).",
+    "ttft_ms": 3446,
+    "type": "result",
+    "duration_ms": 3470,
+    "uuid": "a697e21d-9ea4-45ee-a755-395a45622c03",
+    "ttft_stream_ms": 1052,
+    "time_to_request_ms": 380,
+    "first_content_frame_ms": 1052,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "metrics": {
+    "words": 229,
+    "errors_per_100": 0.44,
+    "warnings_per_100": 0.44,
+    "format_defects": 0,
+    "rules": [
+      "contraction",
+      "unapproved-word"
+    ]
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "model": "haiku",
+  "task": "d1",
+  "condition": "off",
+  "prompt": "Write a procedure for rotating an API key in production without downtime.",
+  "setup": null,
+  "cli": {
+    "duration_api_ms": 13322,
+    "stop_reason": "end_turn",
+    "session_id": "78cf59d1-f2e0-4b83-b9b8-63b2508b3c4c",
+    "total_cost_usd": 0.00284315,
+    "usage": {
+      "input_tokens": 2,
+      "cache_creation_input_tokens": 6044,
+      "cache_read_input_tokens": 35975,
+      "output_tokens": 2290,
+      "output_tokens_details": {
+        "thinking_tokens": 132
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 6044,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 2290,
+          "cache_read_input_tokens": 35975,
+          "cache_creation_input_tokens": 6044,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 6044
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "modelUsage": {
+      "claude-haiku-5-5": {
+        "inputTokens": 1186,
+        "outputTokens": 2312,
+        "cacheReadInputTokens": 35975,
+        "cacheCreationInputTokens": 6044,
+        "webSearchRequests": 0,
+        "costUSD": 0.00284315,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "thinkingTokens": 132,
+        "canonicalModel": "claude-haiku-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "safety_stops": 0,
+    "is_error": false,
+    "num_turns": 1,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "# Zero-Downtime API Key Rotation Procedure\n\nThis procedure assumes the service accepts more than one valid key at a time. Most providers allow this, and so should your own services. If yours doesn't, see the note at the end.\n\n## Principle\n\nNever replace a key in place. Run old and new keys in parallel, move every consumer to the new key, confirm the old key is no longer used, then revoke it.\n\n## Before you start\n\n1. **Inventory consumers.** List every system that uses the key: services, CI jobs, cron tasks, serverless functions, third-party integrations, developer machines, and mobile or desktop clients. Search the code, secret managers, and deployment configs. Forgotten consumers are the most common cause of rotation outages.\n2. **Confirm multi-key support.** Verify the provider lets you create a second active key. If it doesn't, you can't rotate without downtime. Plan a short maintenance window or add a proxy layer that holds the credential.\n3. **Enable usage visibility.** Make sure you can see which key each request uses, through per-key metrics, audit logs, or a log field that records a key fingerprint (never the key itself). You'll need this for verification.\n4. **Pick a window.** Prefer low-traffic hours, but this procedure shouldn't need a window. Have an owner and a rollback contact available.\n5. **Record the current state**: key ID, creation date, and the list of consumers.\n\n## Procedure\n\n### Phase 1: Create the new key\n\n1. Generate a new key in the provider's console or API. Give it a name that identifies its purpose and creation date, such as `prod-payments-2026-10`.\n2. Store it in the secret manager (for example, Vault, AWS Secrets Manager, or GCP Secret Manager) under a **new version or new secret name**. Don't overwrite the old value yet.\n3. Set the new key's permissions and scopes to match the old key exactly. Compare them field by field.\n4. Check that the new key works against a non-production endpoint or a read-only health check.\n\nAt this point, both keys are valid and nothing has changed for consumers.\n\n### Phase 2: Distribute the new key without activating it\n\n5. Update consumers so they can **read** the new key but still **use** the old one. Options:\n   - Add the new secret reference to each deployment config alongside the old one.\n   - Deploy code that tries the new key first and falls back to the old key on authentication failure. Remove the fallback after Phase 4.\n6. Roll out in stages: one canary instance, then a small percentage, then the rest. Watch error rates after each stage.\n7. Confirm all consumers have the new secret available. Check the config or environment on each running instance, not just the deployment manifest.\n\n### Phase 3: Switch consumers to the new key\n\n8. Change the active key setting in each consumer to the new key. Use a feature flag or config value so you can switch back without a redeploy.\n9. Switch in stages, the same way as Phase 2:\n   - One canary instance first. Confirm requests succeed with the new key.\n   - Then roll out the rest in batches, pausing between batches.\n10. Keep the old key valid during this phase. Consumers still on the old key keep working, which gives you a safety net.\n\n### Phase 4: Verify the old key is unused\n\n11. Monitor per-key usage for a period long enough to cover all normal traffic patterns. Include batch jobs and scheduled tasks, which may run hourly, daily, or monthly. **A common rule is at least one full business cycle, typically 7 to 30 days,** depending on what the key supports.\n12. Confirm the old key shows zero or near-zero requests, and that any remaining requests come from a known source you can account for.\n13. Look for consumers that are still using the old key. For each one you find, update it and go back to Phase 3 for that consumer.\n14. Remove any fallback logic added in Phase 2, so consumers use only the new key.\n\n### Phase 5: Revoke the old key\n\n15. Take a final snapshot of the old key's metadata (ID, creation date, scopes) for your audit record. Don't store the key value itself.\n16. **Disable the old key first, rather than deleting it.** Disabling is reversible. Watch for errors for a defined period, such as 24 to 48 hours.\n17. If no errors appear, delete the old key and remove its secret version from the secret manager. If errors appear, re-enable it, find the consumer, and repeat from Phase 4.\n\n### Phase 6: Close out\n\n18. Update the rotation log: date, old key ID, new key ID, owner, and any issues found.\n19. Update the key's recorded rotation date so the next rotation is scheduled.\n20. Check that your monitoring alerts reference the new key, if they were keyed to the old one.\n\n## Rollback\n\n- **During Phases 2 and 3:** Switch the active-key setting back to the old key. The old key is still valid, so this is immediate.\n- **During Phase 5 (old key disabled):** Re-enable the old key. Recovery is immediate if the provider supports re-enabling. If it doesn't, you'll need to have kept the old key in the secret manager until the revocation is final.\n- **After deletion:** You can't roll back to the old key. Recovery means issuing another new key and repeating the procedure. This is why deletion comes last, after a waiting period.\n\n## Checklist\n\n- [ ] Consumers inventoried\n- [ ] Provider supports two active keys\n- [ ] Per-key usage is visible\n- [ ] New key created with matching scopes\n- [ ] New key stored in the secret manager\n- [ ] Consumers can read the new key\n- [ ] Canary switched and verified\n- [ ] All consumers switched\n- [ ] Old key shows no usage for a full business cycle\n- [ ] Fallback logic removed\n- [ ] Old key disabled, then monitored\n- [ ] Old key deleted\n- [ ] Audit log and rotation schedule updated\n\n## If the service only supports one key\n\nUse one of these alternatives:\n\n- **Proxy or gateway:** Put a component you control between consumers and the provider. Rotate the key in the proxy only. Consumers never see the key.\n- **Short maintenance window:** Schedule a brief, announced outage. Keep it as short as possible, and rotate in a single change.\n- **Client-side token exchange:** If the provider supports short-lived tokens issued from a long-lived credential, rotate the long-lived credential behind the token service.\n\nFor the long term, prefer short-lived, automatically issued credentials over manually rotated static keys. Rotating a static key on a schedule is a fallback, not a goal.",
+    "ttft_ms": 1634,
+    "type": "result",
+    "duration_ms": 12523,
+    "uuid": "18630442-6df2-4e74-9791-c28082e13104",
+    "ttft_stream_ms": 924,
+    "time_to_request_ms": 26,
+    "first_content_frame_ms": 924,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "metrics": {
+    "words": 1018,
+    "errors_per_100": 1.87,
+    "warnings_per_100": 0.59,
+    "format_defects": 0,
+    "rules": [
+      "contraction",
+      "passive-voice",
+      "perfect-tense",
+      "progressive-tense",
+      "removed-word",
+      "sentence-length",
+      "unapproved-word"
+    ]
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "model": "haiku",
+  "task": "c1",
+  "condition": "off",
+  "prompt": "What is the difference between a process and a thread?",
+  "setup": null,
+  "cli": {
+    "duration_api_ms": 8367,
+    "stop_reason": "end_turn",
+    "session_id": "609290d6-91c6-4409-9e0c-c53a6b6725d1",
+    "total_cost_usd": 0.00199095,
+    "usage": {
+      "input_tokens": 2,
+      "cache_creation_input_tokens": 6039,
+      "cache_read_input_tokens": 35975,
+      "output_tokens": 594,
+      "output_tokens_details": {
+        "thinking_tokens": 0
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 6039,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 594,
+          "cache_read_input_tokens": 35975,
+          "cache_creation_input_tokens": 6039,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 6039
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "modelUsage": {
+      "claude-haiku-5-5": {
+        "inputTokens": 1179,
+        "outputTokens": 611,
+        "cacheReadInputTokens": 35975,
+        "cacheCreationInputTokens": 6039,
+        "webSearchRequests": 0,
+        "costUSD": 0.00199095,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "safety_stops": 0,
+    "is_error": false,
+    "num_turns": 1,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "A **process** is an independent running program. The operating system gives each process its own address space (memory), file handles, and resources, so one process generally can't touch another's memory without explicit inter-process communication (pipes, sockets, shared memory).\n\nA **thread** is a unit of execution inside a process. All threads in a process share that process's memory and resources, but each has its own stack, registers, and program counter.\n\nKey differences:\n\n| | Process | Thread |\n|---|---|---|\n| Memory | Separate address space | Shared with other threads in the same process |\n| Creation cost | Higher (new address space, resources) | Lower |\n| Context switch cost | Higher (switching address spaces, TLB flush) | Lower |\n| Communication | IPC (pipes, sockets, shared memory, etc.) | Direct via shared memory, but needs synchronization (locks, mutexes) |\n| Isolation | Crash or bug in one process usually doesn't affect others | A bad memory access in one thread can crash the whole process |\n| Resource ownership | Owns files, sockets, memory | Shares the process's resources |\n\n**Analogy:** A process is like a house, and threads are the people living in it. The people share the kitchen and the furniture (shared memory), but each has their own tasks and place they're currently standing (their own stack and registers).\n\n**Practical implications:**\n- Use **processes** when you need isolation or stability, such as running a browser tab in its own process so a crash doesn't take down the whole browser.\n- Use **threads** when tasks need to share a lot of data or work closely together, such as a web server handling concurrent requests, or a UI staying responsive while a background task runs.\n- Threads bring concurrency hazards like race conditions and deadlocks, because shared data can be modified simultaneously. Processes avoid most of these by not sharing memory by default.",
+    "ttft_ms": 7550,
+    "type": "result",
+    "duration_ms": 7579,
+    "uuid": "4020175b-2ce8-49cd-8b66-6a699910cf9f",
+    "ttft_stream_ms": 4521,
+    "time_to_request_ms": 24,
+    "first_content_frame_ms": 4521,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "metrics": {
+    "words": 282,
+    "errors_per_100": 2.84,
+    "warnings_per_100": 1.06,
+    "format_defects": 1,
+    "rules": [
+      "bold-overuse",
+      "contraction",
+      "passive-voice",
+      "sentence-length",
+      "unapproved-word"
+    ]
+  }
+}

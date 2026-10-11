@@ -1,0 +1,25 @@
+{
+  "writer": "haiku",
+  "judge": "opus",
+  "task": "c1",
+  "order": {
+    "a": "on",
+    "b": "off"
+  },
+  "on": {
+    "score": 2,
+    "lost": [
+      "Each thread has its own stack, registers, and program counter",
+      "Threads that share memory need synchronization (mutexes, semaphores) to avoid race conditions",
+      "Processes must use explicit IPC (pipes, sockets, shared memory) to communicate",
+      "Context switching between threads costs less than switching between processes",
+      "Fault isolation: a process crash is usually contained, but a faulty thread can bring down its whole process",
+      "Processes also have their own file descriptors and security context"
+    ]
+  },
+  "off": {
+    "score": 5,
+    "lost": []
+  },
+  "raw": "{\"a\": {\"score\": 2, \"lost\": [\"Each thread has its own stack, registers, and program counter\", \"Threads that share memory need synchronization (mutexes, semaphores) to avoid race conditions\", \"Processes must use explicit IPC (pipes, sockets, shared memory) to communicate\", \"Context switching between threads costs less than switching between processes\", \"Fault isolation: a process crash is usually contained, but a faulty thread can bring down its whole process\", \"Processes also have their own file descriptors and security context\"]}, \"b\": {\"score\": 5, \"lost\": []}}"
+}

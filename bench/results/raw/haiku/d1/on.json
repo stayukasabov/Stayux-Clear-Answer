@@ -1,0 +1,213 @@
+{
+  "model": "haiku",
+  "task": "d1",
+  "condition": "on",
+  "prompt": "Write a procedure for rotating an API key in production without downtime.",
+  "setup": {
+    "duration_api_ms": 3265,
+    "stop_reason": "end_turn",
+    "session_id": "396251fa-c045-4894-90b3-7c0d202b06c6",
+    "total_cost_usd": 0.00264655,
+    "usage": {
+      "input_tokens": 4,
+      "cache_creation_input_tokens": 7791,
+      "cache_read_input_tokens": 82795,
+      "output_tokens": 520,
+      "output_tokens_details": {
+        "thinking_tokens": 232
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 7791,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 87,
+          "cache_read_input_tokens": 44931,
+          "cache_creation_input_tokens": 724,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 724
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "modelUsage": {
+      "claude-haiku-5-5": {
+        "inputTokens": 4,
+        "outputTokens": 520,
+        "cacheReadInputTokens": 82795,
+        "cacheCreationInputTokens": 7791,
+        "webSearchRequests": 0,
+        "costUSD": 0.00264655,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "thinkingTokens": 232,
+        "canonicalModel": "claude-haiku-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "safety_stops": 0,
+    "is_error": false,
+    "num_turns": 2,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Clear Answer mode is set to strict. Replies now use the full profile: sentences of 20 words or fewer. Every fact, step, check, and warning stays in the answer. The mode stays on until you change it with `/clear-answer:mode off` or `prose`.",
+    "ttft_ms": 1936,
+    "type": "result",
+    "duration_ms": 3768,
+    "uuid": "d0e7b6c2-63d0-499b-9590-984122817073",
+    "ttft_stream_ms": 761,
+    "time_to_request_ms": 50,
+    "first_content_frame_ms": 761,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "cli": {
+    "duration_api_ms": 11336,
+    "stop_reason": "end_turn",
+    "session_id": "396251fa-c045-4894-90b3-7c0d202b06c6",
+    "total_cost_usd": 0.005108990000000001,
+    "usage": {
+      "input_tokens": 4,
+      "cache_creation_input_tokens": 3967,
+      "cache_read_input_tokens": 91914,
+      "output_tokens": 1499,
+      "output_tokens_details": {
+        "thinking_tokens": 496
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 3967,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 713,
+          "cache_read_input_tokens": 46259,
+          "cache_creation_input_tokens": 3363,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 3363
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "modelUsage": {
+      "claude-haiku-5-5": {
+        "inputTokens": 8,
+        "outputTokens": 2019,
+        "thinkingTokens": 728,
+        "cacheReadInputTokens": 174709,
+        "cacheCreationInputTokens": 11758,
+        "webSearchRequests": 0,
+        "costUSD": 0.005108990000000001,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "canonicalModel": "claude-haiku-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "safety_stops": 0,
+    "is_error": false,
+    "num_turns": 2,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Before you start, make sure the service accepts two active keys at once. Do not start if it accepts only one key. Without that support, interchanging keys causes downtime.\n\n1. Make the new key. Keep the remaining key active. Do not revoke the remaining key yet.\n2. Keep the new key in your secret manager as a new version. Keep the previous version too.\n3. Deploy the new key to one canary instance. Check that requests succeed with the new key. Check the error rate and logs for 10 minutes.\n4. Roll out the new key to the rest of the fleet, one batch at a time. Use a rolling deploy with health checks between batches.\n5. Make sure no instance still sends the previous key. Check the provider's usage dashboard for the previous key. Wait until its request count is zero for a full cycle of your longest work.\n6. Revoke the previous key. Monitor for 15 minutes. No authentication errors are possible.\n7. Turn the rotation date and the new key version into a record in your runbook.\n\nWarning: Revoking the previous key too soon causes immediate 401 errors. Do not skip step 5.\nWarning: Never paste a key into a chat, ticket, or commit. Keep keys only in the secret manager.\nRollback: If errors increase after step 4, redeploy the previous key version. Do not revoke the previous key until the rollout is complete.",
+    "ttft_ms": 2076,
+    "type": "result",
+    "duration_ms": 8611,
+    "uuid": "25763a69-b53a-4ebe-a48c-a1ce8d3881ce",
+    "ttft_stream_ms": 793,
+    "time_to_request_ms": 52,
+    "first_content_frame_ms": 793,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "metrics": {
+    "words": 225,
+    "errors_per_100": 0.0,
+    "warnings_per_100": 0.44,
+    "format_defects": 0,
+    "rules": [
+      "unapproved-word"
+    ]
+  }
+}

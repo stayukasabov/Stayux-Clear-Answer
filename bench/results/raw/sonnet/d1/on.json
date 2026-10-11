@@ -1,0 +1,213 @@
+{
+  "model": "sonnet",
+  "task": "d1",
+  "condition": "on",
+  "prompt": "Write a procedure for rotating an API key in production without downtime.",
+  "setup": {
+    "duration_api_ms": 5445,
+    "stop_reason": "end_turn",
+    "session_id": "5bad3149-b326-42c2-8d19-d5f590e8d9c4",
+    "total_cost_usd": 0.17831829999999999,
+    "usage": {
+      "input_tokens": 4,
+      "cache_creation_input_tokens": 42920,
+      "cache_read_input_tokens": 15203,
+      "output_tokens": 511,
+      "output_tokens_details": {
+        "thinking_tokens": 161
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 42920,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 106,
+          "cache_read_input_tokens": 8422,
+          "cache_creation_input_tokens": 38096,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 38096
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "modelUsage": {
+      "claude-sonnet-5-5": {
+        "inputTokens": 4,
+        "outputTokens": 511,
+        "cacheReadInputTokens": 15203,
+        "cacheCreationInputTokens": 42920,
+        "webSearchRequests": 0,
+        "costUSD": 0.17831829999999999,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "thinkingTokens": 161,
+        "canonicalModel": "claude-sonnet-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "safety_stops": 0,
+    "is_error": false,
+    "num_turns": 2,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "Clear Answer mode is now on with the strict profile. Each sentence has 20 words or fewer. All replies keep all facts, steps, checks, and warnings. The mode stays on until you change it. Use /clear-answer:off to leave the mode. Use /clear-answer:mode prose for the lenient chat profile.",
+    "ttft_ms": 2212,
+    "type": "result",
+    "duration_ms": 5971,
+    "uuid": "b65ba777-daba-4cf8-a82e-64f71b2141b1",
+    "ttft_stream_ms": 1028,
+    "time_to_request_ms": 33,
+    "first_content_frame_ms": 1028,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "cli": {
+    "duration_api_ms": 16725,
+    "stop_reason": "end_turn",
+    "session_id": "5bad3149-b326-42c2-8d19-d5f590e8d9c4",
+    "total_cost_usd": 0.2240082,
+    "usage": {
+      "input_tokens": 4,
+      "cache_creation_input_tokens": 5354,
+      "cache_read_input_tokens": 93659,
+      "output_tokens": 1490,
+      "output_tokens_details": {
+        "thinking_tokens": 131
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 5354,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 720,
+          "cache_read_input_tokens": 47141,
+          "cache_creation_input_tokens": 4731,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 4731
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "modelUsage": {
+      "claude-sonnet-5-5": {
+        "inputTokens": 8,
+        "outputTokens": 2001,
+        "thinkingTokens": 292,
+        "cacheReadInputTokens": 108862,
+        "cacheCreationInputTokens": 48274,
+        "webSearchRequests": 0,
+        "costUSD": 0.2240082,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "canonicalModel": "claude-sonnet-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "safety_stops": 0,
+    "is_error": false,
+    "num_turns": 2,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "This procedure rotates an API key with no downtime. The method is to run the old key and the new key together for a short time. Do not revoke the old key until all traffic uses the new key.\n\n## Before you start\n\n1. Confirm that the provider allows two active keys at the same time. If it does not, stop and ask the provider for a rotation method.\n2. Find every service, job, and person that uses the key.\n3. Confirm that your services read the key from a secret store or an environment variable. Do not rotate a key that you wrote in the code.\n4. Make sure that you can roll back. Keep the old key active until step 9.\n\n## Procedure\n\n1. Create a new key at the provider. Give the new key a name that shows the date.\n2. Store the new key in the secret store. Do not overwrite the old key.\n3. Test the new key with one read-only request. Check that the response is successful.\n4. Deploy the new key to a small part of production, for example one instance. Use a canary or a rolling deploy.\n5. Watch the error rate and the authentication failures for 15 minutes. If the errors rise, put the old key back and stop.\n6. Deploy the new key to all instances. Do this in small batches.\n7. Check the provider dashboard. Confirm that the old key has no more requests.\n8. Wait one full cycle of your longest job. This lets cron jobs and long sessions finish with the old key.\n9. Revoke the old key at the provider.\n10. Watch the error rate for another 30 minutes. If a service fails, find the service that still uses the old key. Then create a replacement key and deploy it at once.\n11. Delete the old key from the secret store.\n12. Record the date, the key name, and the person who did the rotation.\n\n## Warnings\n\n- Never write the key in a ticket, a chat, or a log.\n- Never revoke the old key before step 7 is complete.\n- Rotate on a fixed schedule. Rotate at once if you suspect a leak.",
+    "ttft_ms": 1421,
+    "type": "result",
+    "duration_ms": 11807,
+    "uuid": "4d7dbe4e-f652-4c00-92b0-1775212722f7",
+    "ttft_stream_ms": 1138,
+    "time_to_request_ms": 36,
+    "first_content_frame_ms": 1139,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "metrics": {
+    "words": 343,
+    "errors_per_100": 0.0,
+    "warnings_per_100": 0.58,
+    "format_defects": 0,
+    "rules": [
+      "unapproved-word"
+    ]
+  }
+}

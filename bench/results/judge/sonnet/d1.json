@@ -1,0 +1,28 @@
+{
+  "writer": "sonnet",
+  "judge": "opus",
+  "task": "d1",
+  "order": {
+    "a": "on",
+    "b": "off"
+  },
+  "on": {
+    "score": 2,
+    "lost": [
+      "Does not say to create the new key with the same scopes and permissions as the old key",
+      "Gives no option for providers that allow only one active key, such as a proxy that holds the key or a temporary grace window; it only says to stop and ask the provider",
+      "Gives no emergency procedure for a suspected leak, such as revoking the old key right after rollout and checking audit logs for misuse; it only says to rotate at once",
+      "Does not suggest disabling the old key before revoking it, so a missed consumer causes a failure that can be undone",
+      "Does not list consumers outside the main services, such as CI pipelines, serverless functions and third parties, and does not say to remove key copies from CI variables, .env files and docs",
+      "Does not say to set up 401/403 and auth-failure monitoring before starting, or to announce the rotation window to the owning teams",
+      "Step 10 gives a misleading fix: after a failure caused by revocation, it says to create a replacement key, when the failing service only needs the new key deployed"
+    ]
+  },
+  "off": {
+    "score": 4,
+    "lost": [
+      "Has no general warning against putting the key value in tickets, chats or logs; it only says not to record key values in the rotation record"
+    ]
+  },
+  "raw": "```json\n{\"a\": {\"score\": 2, \"lost\": [\"Does not say to create the new key with the same scopes and permissions as the old key\", \"Gives no option for providers that allow only one active key, such as a proxy that holds the key or a temporary grace window; it only says to stop and ask the provider\", \"Gives no emergency procedure for a suspected leak, such as revoking the old key right after rollout and checking audit logs for misuse; it only says to rotate at once\", \"Does not suggest disabling the old key before revoking it, so a missed consumer causes a failure that can be undone\", \"Does not list consumers outside the main services, such as CI pipelines, serverless functions and third parties, and does not say to remove key copies from CI variables, .env files and docs\", \"Does not say to set up 401/403 and auth-failure monitoring before starting, or to announce the rotation window to the owning teams\", \"Step 10 gives a misleading fix: after a failure caused by revocation, it says to create a replacement key, when the failing service only needs the new key deployed\"]}, \"b\": {\"score\": 4, \"lost\": [\"Has no general warning against putting the key value in tickets, chats or logs; it only says not to record key values in the rotation record\"]}}\n```"
+}

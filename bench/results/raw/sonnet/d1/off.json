@@ -1,0 +1,133 @@
+{
+  "model": "sonnet",
+  "task": "d1",
+  "condition": "off",
+  "prompt": "Write a procedure for rotating an API key in production without downtime.",
+  "setup": null,
+  "cli": {
+    "duration_api_ms": 14005,
+    "stop_reason": "end_turn",
+    "session_id": "8874f244-0285-4cee-a7ce-0f88abfcc15d",
+    "total_cost_usd": 0.040042400000000006,
+    "usage": {
+      "input_tokens": 2,
+      "cache_creation_input_tokens": 5268,
+      "cache_read_input_tokens": 35975,
+      "output_tokens": 1524,
+      "output_tokens_details": {
+        "thinking_tokens": 0
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 5268,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1524,
+          "cache_read_input_tokens": 35975,
+          "cache_creation_input_tokens": 5268,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 5268
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "modelUsage": {
+      "claude-haiku-5-5": {
+        "inputTokens": 1184,
+        "outputTokens": 21,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "webSearchRequests": 0,
+        "costUSD": 0.00012890000000000002,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-haiku-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      },
+      "claude-sonnet-5-5": {
+        "inputTokens": 2,
+        "outputTokens": 1524,
+        "cacheReadInputTokens": 35975,
+        "cacheCreationInputTokens": 5268,
+        "webSearchRequests": 0,
+        "costUSD": 0.039913500000000005,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "thinkingTokens": 0,
+        "canonicalModel": "claude-sonnet-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": [],
+    "terminal_reason": "completed",
+    "fast_mode_state": "off",
+    "fast_mode_disabled_reason": "sdk_opt_in_required",
+    "subagent_stats": {
+      "spawned": 0,
+      "requested": {
+        "background": 0,
+        "foreground": 0,
+        "unset": 0
+      },
+      "started_in_background": 0,
+      "max_depth": 0,
+      "spawned_by_subagents": 0,
+      "completed": 0,
+      "failed": 0,
+      "killed": {
+        "parent": 0,
+        "user": 0,
+        "system": 0
+      },
+      "refused": {
+        "depth_limit": 0,
+        "concurrency_limit": 0,
+        "budget": 0
+      },
+      "by_type": {}
+    },
+    "safety_stops": 0,
+    "is_error": false,
+    "num_turns": 1,
+    "subtype": "success",
+    "api_error_status": null,
+    "result": "# Zero-Downtime API Key Rotation in Production\n\n## Principle\n\nNever replace a key in place. **Add the new key, move all consumers to it, verify, then revoke the old key.** At every step, both keys are valid, so any consumer on either one keeps working.\n\n## Prerequisites\n\n- The provider (or your own service) supports **two active keys at once**. If it supports only one, see \"Single-key providers\" below.\n- You know every consumer of the key (services, jobs, CI, serverless functions, partner integrations). Check the secrets manager access logs, the repo, and deploy configs.\n- Secrets are read from a secrets manager or config source, not baked into images.\n- You have a rollback path and a named owner for the rotation window.\n\n## Procedure\n\n### 1. Prepare\n1. Inventory consumers and where the key is stored (secrets manager, env vars, CI variables, Helm values, `.env` files).\n2. Confirm the provider's key-limit and revocation semantics (is revocation immediate? any grace period?).\n3. Confirm monitoring is in place: error rate for 401/403 from the upstream, plus auth-failure logs.\n4. Announce the rotation window to the owning teams.\n\n### 2. Create the new key\n1. Generate the new key at the provider with the **same scopes/permissions** as the old key. Don't broaden them.\n2. Store it in the secrets manager as a new version (e.g. `API_KEY_V2`), without removing the old one.\n3. Smoke test it directly: one authenticated request from a trusted machine.\n\n### 3. Make consumers able to use the new key\nPick one:\n\n- **Hot reload:** the app re-reads the secret periodically or on signal, so updating the secret propagates without a restart.\n- **Rolling restart:** update the secret reference, then deploy with a rolling or blue/green strategy so capacity is never reduced.\n- **Dual-key support (for services you own that *validate* keys):** deploy a change that accepts both old and new keys first, then move callers.\n\n### 4. Roll out gradually\n1. Switch a **canary** (one instance, or ~5% of traffic) to the new key.\n2. Watch for 10–15 minutes: auth errors, latency, upstream success rate.\n3. If healthy, proceed in stages (25% → 50% → 100%), pausing at each to check metrics.\n4. Include non-service consumers: cron jobs, workers, CI pipelines, serverless, and any third parties you hand the key to.\n\n**Rollback:** point the canary/fleet back at the old secret version. The old key is still valid, so this is instant.\n\n### 5. Verify old key is unused\n1. Wait at least one full cycle of your longest scheduled job (daily/weekly batch, etc.).\n2. Check the provider's usage/audit logs for requests still using the **old** key.\n3. Investigate and migrate any stragglers. Don't revoke while there is traffic.\n\n### 6. Revoke the old key\n1. Optionally **disable** (not delete) first if the provider supports it, and wait 24 hours. This turns any missed consumer into a quick, recoverable failure.\n2. Delete/revoke the old key at the provider.\n3. Remove the old secret version from the secrets manager and any copies (CI variables, local `.env`, docs).\n\n### 7. Close out\n1. Record the rotation: date, who, reason, key IDs (never key values).\n2. Update the next rotation date (e.g. every 90 days).\n3. Capture any missed consumers and update the inventory.\n\n## Single-key providers\n\nIf the provider allows only one active key at a time:\n\n1. Put a **proxy or wrapper** you control in front of the upstream, holding the key centrally, so consumers authenticate to you and only one place changes.\n2. Rotate the key in that one place, with retry-on-401 logic that re-fetches the secret to cover the switch moment.\n3. Or request a temporary second key / grace window from the provider.\n\n## Emergency rotation (suspected leak)\n\nSame steps, compressed: create the new key, roll out fast, then **revoke the old key immediately after rollout**, accepting a short, deliberate risk of errors over continued exposure. Also review audit logs for misuse from the time of the suspected leak.\n\n## Checklist\n\n- [ ] Consumers inventoried\n- [ ] New key created with matching scopes\n- [ ] New key stored as separate secret version\n- [ ] Canary healthy\n- [ ] Full rollout complete\n- [ ] Old key shows zero usage\n- [ ] Old key disabled, then revoked\n- [ ] Old secret copies purged\n- [ ] Rotation recorded",
+    "ttft_ms": 13137,
+    "type": "result",
+    "duration_ms": 13167,
+    "uuid": "14c69085-f1e3-4002-a2e3-f15e5db213ae",
+    "ttft_stream_ms": 758,
+    "time_to_request_ms": 26,
+    "first_content_frame_ms": 758,
+    "queued_turn_count": 0,
+    "result_index": 0
+  },
+  "metrics": {
+    "words": 647,
+    "errors_per_100": 0.77,
+    "warnings_per_100": 1.24,
+    "format_defects": 0,
+    "rules": [
+      "contraction",
+      "passive-voice",
+      "removed-word",
+      "sentence-length",
+      "unapproved-word"
+    ]
+  }
+}

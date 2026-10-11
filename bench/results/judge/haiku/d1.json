@@ -1,0 +1,27 @@
+{
+  "writer": "haiku",
+  "judge": "opus",
+  "task": "d1",
+  "order": {
+    "a": "on",
+    "b": "off"
+  },
+  "on": {
+    "score": 2,
+    "lost": [
+      "False statement in step 6: it says 'No authentication errors are possible' after revocation. Revoking a key can still cause errors from consumers that were missed, which is why monitoring is needed.",
+      "No step to list every consumer of the key, such as CI jobs, cron tasks, serverless functions, third-party integrations, developer machines and clients. Missed consumers are the most common cause of outages during rotation, and the fleet rollout alone does not cover them.",
+      "Does not say to give the new key the same permissions and scopes as the old key.",
+      "Does not say to disable the old key before deleting it. Disabling can be reversed, so it allows a rollback after revocation.",
+      "Does not say to set up per-key usage visibility (metrics, audit logs or key fingerprints) before starting. Step 5 depends on it.",
+      "Gives no option for services that accept only one key, such as a proxy or gateway, a maintenance window, or short-lived tokens. It only says not to start."
+    ]
+  },
+  "off": {
+    "score": 4,
+    "lost": [
+      "Does not clearly warn against pasting the key into chats, tickets or commits. It only says not to log or store the key value in the audit record."
+    ]
+  },
+  "raw": "{\"a\": {\"score\": 2, \"lost\": [\"False statement in step 6: it says 'No authentication errors are possible' after revocation. Revoking a key can still cause errors from consumers that were missed, which is why monitoring is needed.\", \"No step to list every consumer of the key, such as CI jobs, cron tasks, serverless functions, third-party integrations, developer machines and clients. Missed consumers are the most common cause of outages during rotation, and the fleet rollout alone does not cover them.\", \"Does not say to give the new key the same permissions and scopes as the old key.\", \"Does not say to disable the old key before deleting it. Disabling can be reversed, so it allows a rollback after revocation.\", \"Does not say to set up per-key usage visibility (metrics, audit logs or key fingerprints) before starting. Step 5 depends on it.\", \"Gives no option for services that accept only one key, such as a proxy or gateway, a maintenance window, or short-lived tokens. It only says not to start.\"]}, \"b\": {\"score\": 4, \"lost\": [\"Does not clearly warn against pasting the key into chats, tickets or commits. It only says not to log or store the key value in the audit record.\"]}}"
+}

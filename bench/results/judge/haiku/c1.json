@@ -1,0 +1,24 @@
+{
+  "writer": "haiku",
+  "judge": "opus",
+  "task": "c1",
+  "order": {
+    "a": "on",
+    "b": "off"
+  },
+  "on": {
+    "score": 4,
+    "lost": [
+      "Does not say that each process owns its own resources, such as file handles and sockets, or that threads share the process's resources",
+      "Does not name concurrency hazards such as race conditions and deadlocks; it says only that synchronization is needed",
+      "Does not say that each thread has its own program counter",
+      "Does not explain why switching between processes costs more (address-space switch, TLB flush)",
+      "Gives no guidance on when to use processes (isolation, stability) and when to use threads (sharing data, responsiveness)"
+    ]
+  },
+  "off": {
+    "score": 5,
+    "lost": []
+  },
+  "raw": "{\"a\": {\"score\": 4, \"lost\": [\"Does not say that each process owns its own resources, such as file handles and sockets, or that threads share the process's resources\", \"Does not name concurrency hazards such as race conditions and deadlocks; it says only that synchronization is needed\", \"Does not say that each thread has its own program counter\", \"Does not explain why switching between processes costs more (address-space switch, TLB flush)\", \"Gives no guidance on when to use processes (isolation, stability) and when to use threads (sharing data, responsiveness)\"]}, \"b\": {\"score\": 5, \"lost\": []}}"
+}

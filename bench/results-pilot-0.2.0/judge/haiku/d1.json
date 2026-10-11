@@ -1,0 +1,28 @@
+{
+  "writer": "haiku",
+  "judge": "opus",
+  "task": "d1",
+  "order": {
+    "a": "on",
+    "b": "off"
+  },
+  "on": {
+    "score": 2,
+    "lost": [
+      "No step to find every consumer of the key (configs, CI/CD, cron jobs, provider last-used timestamps) before rotation",
+      "No canary or staged rollout with checks for 401/403 errors and new-key usage at each stage",
+      "No handling of cached secrets and TTLs, or of stragglers such as serverless functions, long-running workers, batch jobs and partner integrations; uses a fixed 24-hour wait instead of the longest job cycle or cache TTL",
+      "No end-to-end smoke test of the new key before revocation",
+      "No step to disable the old key before deleting it, to watch error rates after revocation, or to re-enable the old key if errors appear",
+      "No warning to keep secret values out of tickets, chat and logs",
+      "No incident process if the old key may have been exposed"
+    ]
+  },
+  "off": {
+    "score": 4,
+    "lost": [
+      "Does not state that the old key must be removed from config files; it says only to mark the secret version deprecated or destroyed. The fallback in Prerequisites and Step 2 is also inconsistent: it points to Step 2b for a 'dual-credential shim' but describes application-side dual-key acceptance, which does not help when the provider itself cannot hold two active keys"
+    ]
+  },
+  "raw": "{\"a\": {\"score\": 2, \"lost\": [\"No step to find every consumer of the key (configs, CI/CD, cron jobs, provider last-used timestamps) before rotation\", \"No canary or staged rollout with checks for 401/403 errors and new-key usage at each stage\", \"No handling of cached secrets and TTLs, or of stragglers such as serverless functions, long-running workers, batch jobs and partner integrations; uses a fixed 24-hour wait instead of the longest job cycle or cache TTL\", \"No end-to-end smoke test of the new key before revocation\", \"No step to disable the old key before deleting it, to watch error rates after revocation, or to re-enable the old key if errors appear\", \"No warning to keep secret values out of tickets, chat and logs\", \"No incident process if the old key may have been exposed\"]}, \"b\": {\"score\": 4, \"lost\": [\"Does not state that the old key must be removed from config files; it says only to mark the secret version deprecated or destroyed. The fallback in Prerequisites and Step 2 is also inconsistent: it points to Step 2b for a 'dual-credential shim' but describes application-side dual-key acceptance, which does not help when the provider itself cannot hold two active keys\"]}}"
+}
