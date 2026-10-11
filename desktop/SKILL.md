@@ -60,19 +60,20 @@ The unapproved-word warning suggests an approved replacement. Apply it.
 
 ## Diagrams and HTML pages
 
-When the user asks to explain something with a diagram or as a web page:
+When the user asks to explain something with a diagram or as a web page, follow
+`explain.md` in the skill files. It has the content structure, the Mermaid and
+SVG rules, and examples. In short:
 
-- **Diagram:** write a `.md` file with a title, a short explanation, and one
-  ```mermaid block (a flowchart or a sequence diagram). Keep each label to 8
-  words or fewer. Lint the file: `python3 ste_lint.py --pretty < file.md`.
-- **HTML page:** write one self-contained `.html` file. Put all CSS in a
-  `<style>` element. Draw the diagram as inline SVG. Do not load anything from
-  a URL. Lint the visible text:
-  `python3 ste_lint.py --format html --pretty < page.html`.
-- **Footer:** end each file with the Stayux Clear Answer footer. Use the
-  markdown or HTML footer from `explain.md` exactly.
-- **Reply:** do not show the file content or the linter output. Reply with one
-  sentence and a link to the file, such as "The diagram is ready: <link>".
+1. Plan the content silently. Write the file once: a `.md` file with a Mermaid
+   diagram, or a `.html` file with only the body content and an SVG diagram.
+2. Add the fixed frame (page head, CSS, and footer):
+   `python3 explain_page.py <file>`.
+3. Lint the file: `python3 ste_lint.py --pretty < file.md`, or
+   `python3 ste_lint.py --format html --pretty < page.html`.
+4. If `passed` is false, change only the flagged lines. Never write the whole
+   file again.
+5. Do not show the file content or the linter output. Reply with one sentence
+   and a link to the file, such as "The diagram is ready: <link>".
 
 ## The rules you write by
 
