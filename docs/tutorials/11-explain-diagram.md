@@ -46,8 +46,9 @@ sequenceDiagram
 The certificate proves who the server is. The secret key never crosses the network. An attacker who reads the traffic sees only scrambled data.
 ````
 
-GitHub, many editors, and Claude Desktop show the diagram as a picture. The
-Mermaid CLI (`mmdc`) gave this image:
+The diagram shows as a picture only in a viewer that supports Mermaid, such as
+Obsidian or GitHub. MacDown shows the Mermaid code instead. The Mermaid CLI
+(`mmdc`) gave this image:
 
 ![The HTTPS sequence diagram](examples/explain-https-diagram.png)
 
