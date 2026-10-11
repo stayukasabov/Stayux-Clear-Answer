@@ -95,7 +95,7 @@ class CacheRoundTripTests(unittest.TestCase):
 
 class LintWithCacheTests(unittest.TestCase):
     def test_cache_adds_new_substitution(self):
-        cache = {"approved": [], "word_substitutions": {"widget": "gadget"},
+        cache = {"version": 2, "approved": {}, "word_substitutions": {"widget": "gadget"},
                  "phrase_substitutions": {}}
         r = ste_lint.lint("Install the widget.", cache=cache)
         self.assertIn("unapproved-word", rules(r))

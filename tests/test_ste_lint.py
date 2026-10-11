@@ -641,5 +641,64 @@ class LongFenceTests(unittest.TestCase):
         self.assertNotIn("semicolon", rules(r))
 
 
+class PartOfSpeechTests(unittest.TestCase):
+    CACHE = {"version": 2,
+             "approved": {"test": ["n"]},
+             "word_substitutions": {"file (v)": "remove", "branch (v)": "divide",
+                                    "request (v)": "tell", "main (adj)": "primary"},
+             "phrase_substitutions": {}}
+
+    def lint(self, text, cache=None, custom=None):
+        return ste_lint.lint(text, cache=self.CACHE if cache is None else cache,
+                             custom=custom or {})
+
+    def unapproved(self, r):
+        return [v["detail"] for v in r["violations"] if v["rule"] == "unapproved-word"]
+
+    def test_noun_use_is_not_flagged(self):
+        self.assertEqual(self.unapproved(self.lint("Open the file. Merge the branch.")), [])
+
+    def test_verb_use_is_flagged_with_pos(self):
+        details = self.unapproved(self.lint("Use a tool to file the edge."))
+        self.assertEqual(details, ["'file' as a verb: use 'remove'"])
+
+    def test_imperative_verb_is_flagged(self):
+        self.assertTrue(self.unapproved(self.lint("Request the parts.")))
+
+    def test_adjective_entry_flags_adjective_use(self):
+        self.assertTrue(self.unapproved(self.lint("Open the main valve.")))
+
+    def test_noun_modifier_without_adjective_entry_passes(self):
+        self.assertEqual(self.unapproved(self.lint("Open the file menu.")), [])
+
+    def test_unknown_tag_still_warns_and_names_the_pos(self):
+        details = self.unapproved(self.lint("Files open slowly, file them."))
+        self.assertIn("'file' as a verb: use 'remove'", details)
+
+    def test_unknown_tag_with_approved_pos_is_silent(self):
+        self.assertEqual(self.unapproved(self.lint("Test results show a leak.")), [])
+
+    def test_seed_entries_without_pos_apply_to_all_uses(self):
+        self.assertTrue(self.unapproved(self.lint("Utilize the tool.", cache={})))
+
+    def test_version_1_cache_skips_noun_use(self):
+        v1 = {"approved": [], "word_substitutions": {"file": "remove"}, "phrase_substitutions": {}}
+        self.assertEqual(self.unapproved(self.lint("Open the file.", cache=v1)), [])
+        self.assertTrue(self.unapproved(self.lint("Use a tool to file the edge.", cache=v1)))
+
+    def test_custom_entry_with_pos(self):
+        custom = ste_lint.parse_custom_dict("deploy (v) = install\n")
+        self.assertTrue(self.unapproved(self.lint("You must deploy the app.", custom=custom)))
+        self.assertEqual(self.unapproved(self.lint("Check the deploy log.", custom=custom)), [])
+
+    def test_custom_approval_with_pos(self):
+        custom = ste_lint.parse_custom_dict("file (v)\n")
+        self.assertEqual(self.unapproved(self.lint("Use a tool to file the edge.", custom=custom)), [])
+
+    def test_custom_approval_without_pos_approves_all(self):
+        custom = ste_lint.parse_custom_dict("+file\n")
+        self.assertEqual(self.unapproved(self.lint("Use a tool to file the edge.", custom=custom)), [])
+
+
 if __name__ == "__main__":
     unittest.main()

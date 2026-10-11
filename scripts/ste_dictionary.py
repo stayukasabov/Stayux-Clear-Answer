@@ -24,19 +24,23 @@ All swaps are advisory warnings only; they never fail the gate.
 
 WORD_SUBSTITUTIONS = {
     # --- [Issue 9] verified against your BYO official copy ---
-    "require": "necessary",      # require (v) -> NECESSARY (adj)
-    "substance": "material",     # substance (n) -> MATERIAL (n)
-    "acceptable": "permitted",   # acceptable (adj) -> PERMITTED (adj)
-    "alternate": "alternative",  # alternate (adj) -> ALTERNATIVE (adj)
-    "avoid": "prevent",          # avoid (v) -> PREVENT (v)
-    "ensure": "make sure",       # ensure (v) -> MAKE SURE (v)
-    "main": "primary",           # main (adj) -> PRIMARY (adj)
-    "complete": "completed",     # complete (adj) -> COMPLETED (adj) [verb COMPLETE is approved]
-    "activity": "task",          # activity (n) -> TASK (n) / PROCEDURE (n)
-    "action": "task",            # action (n) -> STEP (n) / TASK (n)
-    "abandon": "go",             # abandon (v) -> GO (v) / STOP (v)
-    "assistance": "help",        # assistance (n) -> AID (n) / HELP (v)
-    "blank": "seal",             # blank (v) -> SEAL (v)
+    # A key may name its part of speech, "word (pos)". Then the entry applies
+    # only to that use of the word (see ste_pos.py). A key without one applies
+    # to every use.
+    "require (v)": "necessary",      # require (v) -> NECESSARY (adj)
+    "substance (n)": "material",     # substance (n) -> MATERIAL (n)
+    "acceptable (adj)": "permitted", # acceptable (adj) -> PERMITTED (adj)
+    "alternate (adj)": "alternative",  # alternate (adj) -> ALTERNATIVE (adj)
+    "avoid (v)": "prevent",          # avoid (v) -> PREVENT (v)
+    "ensure (v)": "make sure",       # ensure (v) -> MAKE SURE (v)
+    "main (adj)": "primary",         # main (adj) -> PRIMARY (adj)
+    "complete (adj)": "completed",   # complete (adj) -> COMPLETED (adj) [verb COMPLETE is approved]
+    "activity (n)": "task",          # activity (n) -> TASK (n) / PROCEDURE (n)
+    "action (n)": "task",            # action (n) -> STEP (n) / TASK (n)
+    "abandon (v)": "go",             # abandon (v) -> GO (v) / STOP (v)
+    "assistance (n)": "help",        # assistance (n) -> AID (n) / HELP (v)
+    "blank (v)": "seal",             # blank (v) -> SEAL (v)
+    "test (v)": "do a test of",      # test (v) -> TEST (n): "Do a test of the software"
     # NOTE: "subsequently" is an APPROVED word in Issue 9. Do not add it here.
 
     # --- [Google style] Google Developer Documentation Style Guide (CC BY 4.0) ---
@@ -199,10 +203,12 @@ CONTRACTIONS = {
     "you've": "you have",
 }
 
-# Verbs that Issue 9 approves only as nouns. A sentence that starts with one
-# (optionally after an -ly adverb) uses it as an imperative verb. [Issue 9]
-NOUN_ONLY_VERBS = {
-    "test": "do a test of",
+# Parts of speech that Issue 9 approves for words that also have an entry
+# above. When the tagger cannot decide the part of speech of such a word, the
+# linter stays silent. [Issue 9]
+APPROVED_POS = {
+    "test": ["n"],
+    "complete": ["v"],
 }
 
 # Chat filler at the start or the end of a reply. [plain-English] original

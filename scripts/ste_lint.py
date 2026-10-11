@@ -20,8 +20,9 @@ from html.parser import HTMLParser
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ste_dictionary import (  # noqa: E402
     WORD_SUBSTITUTIONS, PHRASE_SUBSTITUTIONS, WORDINESS_PHRASES, REMOVED_TERMS,
-    CONTRACTIONS, FILLER_OPENERS, FILLER_CLOSERS, NOUN_ONLY_VERBS,
+    CONTRACTIONS, FILLER_OPENERS, FILLER_CLOSERS, APPROVED_POS,
 )
+import ste_pos  # noqa: E402
 
 # Optional local cache built from the user's own official copy (never shipped).
 # See ste_import.py. Read from disk, so it costs no model-context tokens.
@@ -49,7 +50,9 @@ def parse_custom_dict(text):
     """Parse a `.ste-dict.txt` word list into approved words and substitutions.
 
     - `term = replacement` -> a substitution (word, or phrase if multiword).
+      A word may name its part of speech: `file (v) = remove`.
     - a bare `word` (optional leading `+`) -> an approved word, never flagged.
+      `word (pos)` approves only that part of speech.
     - `#` starts a comment (whole-line or inline); blank lines are ignored.
     Keys are lowercased.
     """
@@ -65,7 +68,8 @@ def parse_custom_dict(text):
             term, repl = term.strip().lower(), repl.strip()
             if not term or not repl:
                 continue
-            (phrases if " " in term else words)[term] = repl
+            word, _ = ste_pos.split_key(term)
+            (phrases if " " in word else words)[term] = repl
         else:
             approved.add(line.lstrip("+").strip().lower())
     return {"approved": sorted(approved),
@@ -84,21 +88,86 @@ def load_custom_dict(path=DEFAULT_CUSTOM_PATH):
 _DEFAULT_CUSTOM = load_custom_dict()
 
 
+# Part-of-speech key for an entry from a version 1 cache, which has no part of
+# speech: it applies to every use except a noun or a noun modifier.
+LEGACY_POS = "legacy"
+POS_NAMES = {"n": "noun", "v": "verb", "adj": "adjective", "adv": "adverb"}
+
+
+def _add_entries(words, subs, legacy=False, overrides=False):
+    """Add entries. With overrides, a word's entries from an earlier layer give
+    way: a new entry replaces an earlier one for every use."""
+    for key, repl in subs.items():
+        word, pos = ste_pos.split_key(key.lower())
+        entries = words.setdefault(word, {})
+        if overrides:
+            entries.pop(None, None)
+        entries[LEGACY_POS if legacy else pos] = repl
+
+
+def _approvals(layer):
+    """Yield (word, pos) approvals. pos None approves every use."""
+    approved = layer.get("approved", ())
+    if isinstance(approved, dict):  # version 2 cache: {word: [pos, ...]}
+        for word, tags in approved.items():
+            for pos in tags or [None]:
+                yield word, pos
+    else:
+        for key in approved:
+            yield ste_pos.split_key(key.lower())
+
+
 def _effective_maps(cache, custom=None):
     """Merge the seed with the official cache and the custom list, in that order
-    of precedence (custom wins). Any word marked approved by the cache or the
-    custom list is dropped from the word map (false-positive suppression).
+    of precedence (custom wins).
+
+    Returns (words, phrases, approved_pos). words maps a word to
+    {pos: replacement}, where pos None means every use. An approval removes the
+    entry for its part of speech, or every entry if it names none.
     """
-    words = dict(WORD_SUBSTITUTIONS)
+    words = {}
+    _add_entries(words, WORD_SUBSTITUTIONS)
     phrases = dict(PHRASE_SUBSTITUTIONS)
+    approved_pos = {w: set(p) for w, p in APPROVED_POS.items()}
     for layer in (cache, custom):
         if not layer:
             continue
-        words.update(layer.get("word_substitutions", {}))
+        legacy = layer is cache and "version" not in layer
+        _add_entries(words, layer.get("word_substitutions", {}), legacy, overrides=True)
         phrases.update(layer.get("phrase_substitutions", {}))
-        for w in layer.get("approved", ()):
-            words.pop(w, None)
-    return words, phrases
+        for word, pos in _approvals(layer):
+            entries = words.get(word, {})
+            if pos is None:
+                words.pop(word, None)
+            else:
+                entries.pop(pos, None)
+                approved_pos.setdefault(word, set()).add(pos)
+                if not entries:
+                    words.pop(word, None)
+    return words, phrases, approved_pos
+
+
+def _word_advice(word, tag, entries, approved_pos):
+    """Return the unapproved-word detail for one use of a word, or None."""
+    if tag is not None:
+        if tag in entries:
+            return f"'{word}' as a {POS_NAMES.get(tag, tag)}: use '{entries[tag]}'"
+        if None in entries:
+            return f"use '{entries[None]}' instead of '{word}'"
+        if LEGACY_POS in entries and tag not in ("n", "adj"):
+            return f"use '{entries[LEGACY_POS]}' instead of '{word}'"
+        return None
+    # Unknown part of speech: warn as before, unless the word is approved for
+    # another part of speech.
+    if None in entries:
+        return f"use '{entries[None]}' instead of '{word}'"
+    if approved_pos.get(word):
+        return None
+    if LEGACY_POS in entries:
+        return f"use '{entries[LEGACY_POS]}' instead of '{word}'"
+    pos = next(p for p in ("v", "adj", "adv", "n") if p in entries) if any(
+        p in entries for p in ("v", "adj", "adv", "n")) else next(iter(entries))
+    return f"'{word}' as a {POS_NAMES.get(pos, pos)}: use '{entries[pos]}'"
 
 PROFILES = {
     # STE distinguishes procedures (<=20 words) from descriptions (<=25).
@@ -132,7 +201,6 @@ PHRASAL_VERBS = {
     ("check", "out"), ("find", "out"), ("go", "through"), ("hold", "on"),
 }
 
-DETERMINERS = {"the", "a", "an", "all", "each", "this", "that", "these", "those"}
 
 # Common technical imperative verbs. Used only to detect two instructions
 # joined by "and"/"then" in one sentence (the one-instruction rule).
@@ -314,8 +382,12 @@ def _make(rule, severity, detail, text, line=None):
 
 
 def _check_sentence(sentence, cfg, violations, line,
-                    word_subs=WORD_SUBSTITUTIONS, phrase_subs=PHRASE_SUBSTITUTIONS):
+                    word_subs=None, phrase_subs=PHRASE_SUBSTITUTIONS, approved_pos=None):
+    if word_subs is None:
+        word_subs, _, approved_pos = _effective_maps(None)
+    approved_pos = approved_pos or {}
     words = _words(sentence)
+    tags = ste_pos.tag(words)
     if len(words) > cfg["max_sentence_words"]:
         violations.append(_make(
             "sentence-length", "error",
@@ -346,24 +418,14 @@ def _check_sentence(sentence, cfg, violations, line,
                 "phrasal-verb", "warning",
                 f"'{w} {lower[i + 1]}' is a phrasal verb", sentence[:60], line))
         if w in word_subs:
-            violations.append(_make(
-                "unapproved-word", "warning",
-                f"use '{word_subs[w]}' instead of '{w}'", sentence[:60], line))
+            advice = _word_advice(w, tags[i], word_subs[w], approved_pos)
+            if advice:
+                violations.append(_make("unapproved-word", "warning", advice,
+                                        sentence[:60], line))
         if w in CONTRACTIONS:
             violations.append(_make(
                 "contraction", "error",
                 f"use '{CONTRACTIONS[w]}' instead of '{w}'", sentence[:60], line))
-
-    # A noun-only word used as an imperative verb ("Test the software",
-    # "Functionally test the software"). A determiner must follow, so a noun
-    # subject ("Test results show ...") is not flagged.
-    k = 1 if len(lower) > 2 and lower[0].endswith("ly") else 0
-    if (len(lower) > k + 1 and lower[k] in NOUN_ONLY_VERBS
-            and lower[k + 1] in DETERMINERS):
-        violations.append(_make(
-            "unapproved-word", "warning",
-            f"'{lower[k]}' is a noun only: use '{NOUN_ONLY_VERBS[lower[k]]}'",
-            sentence[:60], line))
 
     # One instruction per sentence: flag an imperative sentence that joins a
     # second action verb with "and" or "then" (for example "Open X and close Y").
@@ -563,14 +625,14 @@ def _check_external(source, violations):
                 source[m.start():m.start() + 60], source[:m.start()].count("\n") + 1))
 
 
-def _check_label(label, line, cfg, violations, word_subs, phrase_subs):
+def _check_label(label, line, cfg, violations, word_subs, phrase_subs, approved_pos):
     words = len(WORD_RE.findall(label))
     if words > MAX_LABEL_WORDS:
         violations.append(_make(
             "label-length", "error",
             f"{words} words in a diagram label (max {MAX_LABEL_WORDS})", label[:60], line))
     _check_sentence(label, dict(cfg, max_sentence_words=float("inf")), violations,
-                    line, word_subs, phrase_subs)
+                    line, word_subs, phrase_subs, approved_pos)
 
 
 def lint(text, profile="chat", cache=None, custom=None, fmt="markdown"):
@@ -579,7 +641,7 @@ def lint(text, profile="chat", cache=None, custom=None, fmt="markdown"):
         cache = _DEFAULT_CACHE
     if custom is None:
         custom = _DEFAULT_CUSTOM
-    word_subs, phrase_subs = _effective_maps(cache, custom)
+    word_subs, phrase_subs, approved_pos = _effective_maps(cache, custom)
     violations = []
 
     # Normalize curly apostrophes so contractions match regardless of source.
@@ -595,7 +657,7 @@ def lint(text, profile="chat", cache=None, custom=None, fmt="markdown"):
         text = _strip_code(text)
         format_rules = cfg["format_rules"]
     for label, line in labels:
-        _check_label(label, line, cfg, violations, word_subs, phrase_subs)
+        _check_label(label, line, cfg, violations, word_subs, phrase_subs, approved_pos)
 
     body = []
     if ";" in text:
@@ -613,7 +675,7 @@ def lint(text, profile="chat", cache=None, custom=None, fmt="markdown"):
                 f"{len(sentences)} sentences (max {cfg['max_paragraph_sentences']})",
                 chunk[:60], line))
         for sentence in sentences:
-            _check_sentence(sentence, cfg, body, line, word_subs, phrase_subs)
+            _check_sentence(sentence, cfg, body, line, word_subs, phrase_subs, approved_pos)
 
     if format_rules:
         _check_format(text, body)
