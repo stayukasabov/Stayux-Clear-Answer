@@ -14,6 +14,13 @@ would give without it. Only the sentences change.
 
 Treat the mode as sticky across turns until the user changes it.
 
+When the mode turns on, check once for a second copy of the skill:
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/scripts/ste_dupcheck.py"
+```
+If it prints a message, show the message to the user. If it prints nothing,
+say nothing about it.
+
 ## For every reply while Clear Answer mode is on
 
 1. Write the full answer that you would give without Clear Answer. Do not
