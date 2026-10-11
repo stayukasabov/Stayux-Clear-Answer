@@ -62,13 +62,17 @@ The unapproved-word warning suggests an approved replacement. Apply it.
 
 When the user asks to explain something with a diagram or as a web page:
 
-- **Diagram:** write a short explanation and one ```mermaid block (a flowchart
-  or a sequence diagram). Keep each label to 8 words or fewer. Lint the full
-  reply as above. The linter checks the labels too.
-- **HTML page:** write one self-contained HTML file. Put all CSS in a `<style>`
-  element. Draw the diagram as inline SVG. Do not load anything from a URL.
-  Lint the visible text with the code execution tool:
+- **Diagram:** write a `.md` file with a title, a short explanation, and one
+  ```mermaid block (a flowchart or a sequence diagram). Keep each label to 8
+  words or fewer. Lint the file: `python3 ste_lint.py --pretty < file.md`.
+- **HTML page:** write one self-contained `.html` file. Put all CSS in a
+  `<style>` element. Draw the diagram as inline SVG. Do not load anything from
+  a URL. Lint the visible text:
   `python3 ste_lint.py --format html --pretty < page.html`.
+- **Footer:** end each file with the Stayux Clear Answer footer. Use the
+  markdown or HTML footer from `explain.md` exactly.
+- **Reply:** do not show the file content or the linter output. Reply with one
+  sentence and a link to the file, such as "The diagram is ready: <link>".
 
 ## The rules you write by
 

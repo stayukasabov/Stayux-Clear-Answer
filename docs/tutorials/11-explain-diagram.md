@@ -1,7 +1,9 @@
 # 11. Explain a topic with a diagram
 
-`/clear-answer:explain --format diagram` gives a short explanation and one
-Mermaid diagram. The linter checks the text and every label in the diagram.
+`/clear-answer:explain --format diagram` writes a markdown file with a short
+explanation, one Mermaid diagram, and the Stayux Clear Answer footer. The linter
+checks the text and every label in the diagram. The dialogue shows only a link
+to the file.
 
 ## Run it
 
@@ -13,8 +15,16 @@ Mermaid diagram. The linter checks the text and every label in the diagram.
 
 ## What you get
 
-This is a real reply from Claude Sonnet, saved in
-[`examples/explain-https-diagram.md`](examples/explain-https-diagram.md):
+Claude replies with one sentence and the path of the file:
+
+```
+The diagram is ready: /Users/you/project/how-https-keeps-a-connection-private.md
+```
+
+The file has a title, the explanation, the diagram, and the footer. This is the
+real text from Claude Sonnet, saved in
+[`examples/explain-https-diagram.md`](examples/explain-https-diagram.md),
+without the title and the footer:
 
 ````markdown
 HTTPS keeps a connection private with encryption. The browser and the server first agree on a secret key. Then they use that key to lock all data.
@@ -50,13 +60,26 @@ Mermaid CLI (`mmdc`) gave this image:
 - The linter reads `flowchart`, `graph`, and `sequenceDiagram` diagrams. In
   other diagram types, it does not read the labels.
 
-Check a reply yourself:
+Check the file yourself:
 
 ```bash
 python3 scripts/ste_lint.py --profile chat --pretty < docs/tutorials/examples/explain-https-diagram.md
 ```
 
-The result is `"passed": true` with no violations.
+The result is `"passed": true`. The footer links are HTML, and the linter
+skips HTML tags in markdown.
+
+## The footer
+
+Each file ends with this footer, centered:
+
+```
+Stayux Clear Answer
+stayux.com | LinkedIn | X.com
+```
+
+The links open in a new tab. Some markdown viewers, such as GitHub, remove the
+`target` attribute and the styles, so there the links open in the same tab.
 
 ## What the gate does not check
 

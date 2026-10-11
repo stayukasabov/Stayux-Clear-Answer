@@ -11,8 +11,11 @@ The linter checks every word that a reader sees.
    ```
    /clear-answer:explain --format html How do Git branches and merges work?
    ```
-3. Claude writes the file, for example `git-branches-and-merges.html`, and
-   replies with its path.
+3. Claude writes the file, for example `git-branches-and-merges.html`. The
+   dialogue shows only one sentence and the path:
+   ```
+   The page is ready: /Users/you/project/git-branches-and-merges.html
+   ```
 
 ## What you get
 
@@ -24,6 +27,11 @@ page in a browser with the network blocked:
 
 All styles are in the page. The diagram is inline SVG, so the page needs no
 script and no network.
+
+The page ends with the Stayux Clear Answer footer. It is centered, in a 14 px
+system font. The links are underlined, change color on hover, and open in a new
+tab. The
+footer links are normal links, so they do not count as network requests.
 
 ## What the gate checks
 

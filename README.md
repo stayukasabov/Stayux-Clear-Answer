@@ -28,8 +28,10 @@ gate.
 - `/clear-answer:rewrite` — rewrite text into plain English with a before/after.
 - `/clear-answer:init` — add the Clear Answer rules to the project's CLAUDE.md.
 - `/clear-answer:explain [--format text|diagram|html]` — explain a topic as text,
-  a Mermaid diagram, or a self-contained HTML page. The gate checks every
-  visible word, including diagram labels.
+  a Mermaid diagram file (`.md`), or a self-contained HTML page. The gate checks
+  every visible word, including diagram labels. For a diagram or a page, the
+  dialogue shows only a link to the file, and the file ends with a Stayux Clear
+  Answer footer.
 
 It also loads automatically when you ask for a clear answer, plain English, or STE.
 

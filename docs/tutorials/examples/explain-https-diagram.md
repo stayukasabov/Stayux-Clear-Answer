@@ -1,3 +1,5 @@
+# How HTTPS keeps a connection private
+
 HTTPS keeps a connection private with encryption. The browser and the server first agree on a secret key. Then they use that key to lock all data.
 
 ```mermaid
@@ -15,3 +17,8 @@ sequenceDiagram
 ```
 
 The certificate proves who the server is. The secret key never crosses the network. An attacker who reads the traffic sees only scrambled data.
+
+---
+
+<p align="center">Stayux Clear Answer<br>
+<a href="https://stayux.com" target="_blank" rel="noopener noreferrer">stayux.com</a> | <a href="https://www.linkedin.com/in/stayu-kasabov-stayux/" target="_blank" rel="noopener noreferrer">LinkedIn</a> | <a href="https://x.com/StayuKasabov" target="_blank" rel="noopener noreferrer">X.com</a></p>

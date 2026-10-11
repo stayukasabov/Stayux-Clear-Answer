@@ -750,5 +750,45 @@ class PosNameTests(unittest.TestCase):
         self.assertEqual(details, ["'past' as a preposition: use 'after'"])
 
 
+class FooterTests(unittest.TestCase):
+    LINKS = ("https://stayux.com", "https://www.linkedin.com/in/stayu-kasabov-stayux/",
+             "https://x.com/StayuKasabov")
+
+    def check(self, path, fmt):
+        with open(os.path.join(SKILL_ROOT, path)) as f:
+            text = f.read()
+        footer = text[text.index("Stayux Clear Answer"):]
+        for url in self.LINKS:
+            self.assertIn(f'href="{url}" target="_blank" rel="noopener noreferrer"', footer)
+        r = ste_lint.lint(text, fmt=fmt)
+        self.assertTrue(r["passed"])
+        self.assertNotIn("external-request", rules(r))
+
+    def test_sample_page_footer(self):
+        self.check("tests/fixtures/explain-page.html", "html")
+
+    def test_sample_page_footer_style(self):
+        with open(os.path.join(SKILL_ROOT, "tests", "fixtures", "explain-page.html")) as f:
+            css = f.read()
+        for rule in ("font: 14px system-ui", "text-align: center",
+                     "text-decoration: underline", ".ca-footer a:hover"):
+            self.assertIn(rule, css)
+
+    def test_sample_markdown_footer(self):
+        self.check("tests/fixtures/explain-diagram.md", "markdown")
+
+    def test_command_snippets_match_the_tested_samples(self):
+        import re
+        with open(os.path.join(SKILL_ROOT, "commands", "explain.md")) as f:
+            md_footer, html_footer, css = re.findall(r"```(?:html|css)\n(.*?)```", f.read(), re.S)
+        with open(os.path.join(SKILL_ROOT, "tests", "fixtures", "explain-diagram.md")) as f:
+            self.assertIn(md_footer.strip(), f.read())
+        with open(os.path.join(SKILL_ROOT, "tests", "fixtures", "explain-page.html")) as f:
+            page = f.read()
+        self.assertIn(html_footer.strip(), page)
+        for line in css.strip().splitlines():
+            self.assertIn(line.strip(), page)
+
+
 if __name__ == "__main__":
     unittest.main()
