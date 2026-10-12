@@ -8,7 +8,7 @@
 <style>
   /* Colors, type, and spacing from the Stayux design system (design-system.css).
      The page follows the system theme. data-theme="light" or "dark" on <html>
-     overrides it. The SX fonts show when installed, else the system font. */
+     overrides it. Text uses the system font. */
   :root, [data-theme="light"] {
     --ca-bg: oklch(0.984 0.007 87);               /* paper-35 */
     --ca-heading: oklch(0.140 0.006 280);         /* n900 */
@@ -54,8 +54,8 @@
     --ca-toggle: #ffffff;
   }
   :root {
-    --ca-font: 'SX', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    --ca-title: 'SX-Title', 'SX', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --ca-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --ca-title: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --ca-mono: 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
     --ca-radius: 4px;                             /* radius-lg */
   }

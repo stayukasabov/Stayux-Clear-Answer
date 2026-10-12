@@ -145,7 +145,8 @@ class DesignSystemTests(unittest.TestCase):
         self.assertIn('[data-theme="light"]', self.page)
 
     def test_fonts_fall_back_to_system(self):
-        self.assertIn("'SX', system-ui", self.page)
+        self.assertNotIn("SX", self.page)
+        self.assertIn("--ca-font: system-ui", self.page)
         self.assertNotIn("@font-face", self.page)
 
     def test_text_column_and_radius(self):

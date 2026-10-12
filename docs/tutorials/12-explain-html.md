@@ -63,8 +63,8 @@ same:
 - Every page uses this one kind of diagram. The Markdown file shows the same
   diagram as a Mermaid sequence diagram, in the same colors.
 
-The colors, the fonts, and the box corners come from the Stayux design system.
-The SX fonts show when they are installed. Else the page uses the system font.
+The colors and the box corners come from the Stayux design system. The text
+uses the system font.
 
 ## What the gate checks
 
