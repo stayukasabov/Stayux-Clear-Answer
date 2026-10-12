@@ -639,5 +639,14 @@ class MermaidBlockTests(unittest.TestCase):
         self.assertTrue(r["passed"], r["violations"])
 
 
+class CommandGateTests(unittest.TestCase):
+    # A command that says "lint" must contain the linter command itself.
+    # Claude does not follow a pointer to another command file.
+    def test_gated_commands_contain_the_linter_command(self):
+        for name in ("on", "mode", "explain", "rewrite", "check"):
+            with open(os.path.join(SKILL_ROOT, "commands", f"{name}.md")) as f:
+                self.assertIn('${CLAUDE_PLUGIN_ROOT}/scripts/ste_lint.py', f.read(), name)
+
+
 if __name__ == "__main__":
     unittest.main()
