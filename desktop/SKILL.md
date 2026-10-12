@@ -58,21 +58,6 @@ Warnings (passive-voice, phrasal-verb, unapproved-word, removed-word, and the
 chat format warnings) do not fail the gate, but prefer to fix them too. They usually make the text clearer.
 The unapproved-word warning suggests an approved replacement. Apply it.
 
-## Diagrams and HTML pages
-
-When the user asks to explain something with a diagram or as a web page,
-follow `explain-html.md` in the skill files. It describes the content file and
-its blanks. In short:
-
-1. Plan the content silently. Pass the blanks to the build script in one
-   command, with `--stdin`. Do not write HTML, Markdown, Mermaid, or SVG. Use
-   `--to html` for a page, `--to md` for a Markdown file with a Mermaid diagram:
-   `python3 explain_build.py <topic-slug>.clear.txt --to html --stdin`.
-2. If `passed` is false, replace only the blanks named in `errors`, with
-   `--set "step 3=New text"`, and build again.
-3. Do not show the blanks or the build output. Reply with one sentence
-   and a link to the file, such as "The page is ready: <link>".
-
 ## The rules you write by
 
 - One instruction per sentence. Keep sentences <= 25 words (chat).

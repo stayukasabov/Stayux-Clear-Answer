@@ -16,8 +16,6 @@ example you can run.
 4. [Rewrite a document](04-rewrite-a-document.md)
 5. [Set up a repo, and use Clear Answer on Desktop](05-init-and-desktop.md)
 6. [Add your own words with a project dictionary](06-custom-dictionary.md)
-11. [Explain a topic with a diagram](11-explain-diagram.md)
-12. [Explain a topic as an HTML page](12-explain-html.md)
 
 Other agents (untested, see the note in each page):
 
@@ -44,6 +42,4 @@ All commands live under the `/clear-answer:` namespace.
 - `/clear-answer:check`: check a file or text and report the violations.
 - `/clear-answer:rewrite`: rewrite text into plain English with a before and after.
 - `/clear-answer:init`: add the rules to the project's CLAUDE.md.
-- `/clear-answer:explain`, `/clear-answer:explain:diagram`,
-  `/clear-answer:explain:html`: explain a topic as a reply, a diagram file, or
-  an HTML page.
+- `/clear-answer:explain`: explain a topic as one plain-English reply.

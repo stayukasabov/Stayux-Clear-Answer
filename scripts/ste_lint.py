@@ -2,7 +2,7 @@
 """STE linter: deterministic ASD-STE100 checks (v1, dictionary deferred).
 
 Usage:
-    echo "text" | python3 ste_lint.py [--profile chat|full] [--format markdown|html] [--pretty]
+    echo "text" | python3 ste_lint.py [--profile chat|full] [--pretty]
 
 Reads text on stdin, prints a JSON result, exits 1 if any *error* violation.
 `passed` is true when there are no error-severity violations (warnings allowed).
@@ -15,7 +15,6 @@ import json
 import os
 import re
 import sys
-from html.parser import HTMLParser
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ste_dictionary import (  # noqa: E402
@@ -238,7 +237,7 @@ SENTENCE_END_RE = re.compile(r"(?<=[.!?])\s+")
 LIST_RE = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+(.*)$")
 TABLE_RE = re.compile(r"^\s*\|")
 TABLE_SEP_RE = re.compile(r"^[\s|:\-]+$")
-FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})\s*(\w*)")
+FENCE_RE = re.compile(r"^\s*(`{3,}|~{3,})")
 
 
 def _closes(line, fence):
@@ -292,63 +291,6 @@ def _strip_code(text):
         else:
             out.append(HTML_TAG_RE.sub(" ", INLINE_CODE_RE.sub("code", line)))
     return "\n".join(out)
-
-
-# Mermaid labels (PRD F3). Labels get the word rules and a length limit, not
-# the sentence rules. The limit of 8 words is our own number.
-MAX_LABEL_WORDS = 8
-BR_RE = re.compile(r"<br\s*/?>", re.IGNORECASE)
-NODE_RE = re.compile(
-    r'\b\w+\s*(?:\[\[|\[\(|\(\(|\[/|\[\\|\{\{|\[|\(|\{)\s*"?([^\[\](){}"|]*?)"?\s*'
-    r'(?:\]\]|\)\]|\)\)|/\]|\\\]|\}\}|\]|\)|\})')
-EDGE_PIPE_RE = re.compile(r"\|([^|]+)\|")
-EDGE_TEXT_RE = re.compile(r"(?:--|==|-\.)\s+([^-=.>|][^>|]*?)\s+(?:-->|==>|\.->|---)")
-SEQ_ARROW_RE = re.compile(r"-{1,2}(?:>>|>|x|\))")
-SEQ_NOTE_RE = re.compile(r"^\s*note\s", re.IGNORECASE)
-
-
-def _mermaid_blocks(text):
-    """Yield (lines, first_line_no) for each ```mermaid fence in the text."""
-    lines = text.split("\n")
-    i = 0
-    while i < len(lines):
-        m = FENCE_RE.match(lines[i])
-        if not m:
-            i += 1
-            continue
-        fence, lang, start = m.group(1), m.group(2).lower(), i + 1
-        i += 1
-        while i < len(lines) and not _closes(lines[i], fence):
-            i += 1
-        if lang == "mermaid":
-            yield lines[start:i], start + 1
-        i += 1
-
-
-def mermaid_labels(lines, first_line):
-    """Return (label, line_no) for the labels of a flowchart or sequence diagram."""
-    kind = None
-    for line in lines:
-        head = line.strip()
-        if head and not head.startswith("%%"):
-            kind = head.split()[0].rstrip(";")
-            break
-    found = []
-    for n, raw in enumerate(lines, first_line):
-        line = BR_RE.sub(" ", raw)
-        if kind in ("graph", "flowchart"):
-            hits = [(m.start(1), m.group(1)) for r in (NODE_RE, EDGE_PIPE_RE, EDGE_TEXT_RE)
-                    for m in r.finditer(line)]
-        elif kind == "sequenceDiagram" and ":" in line:
-            left, _, right = line.partition(":")
-            hits = [(0, right)] if SEQ_ARROW_RE.search(left) or SEQ_NOTE_RE.match(left) else []
-        else:
-            hits = []
-        for _, label in sorted(hits):
-            label = " ".join(label.split())
-            if label:
-                found.append((label, n))
-    return found
 
 
 def _iter_segments(text):
@@ -567,129 +509,7 @@ def _check_format(text, violations):
                 f"remove '{phrase}'; end with the last fact", last[-1][:60], segments[-1][2]))
 
 
-# HTML pages (PRD F4): only visible text is checked.
-SKIP_TAGS = {"head", "title", "script", "style", "pre", "code", "template", "noscript"}
-BLOCK_TAGS = {"html", "body", "p", "div", "section", "article", "header", "footer",
-              "main", "nav", "aside", "h1", "h2", "h3", "h4", "h5", "h6", "br", "hr",
-              "tr", "ul", "ol", "li", "table", "td", "th", "blockquote", "figure",
-              "figcaption", "dl", "dt", "dd", "form"}
-# A self-contained page loads nothing from the network. Links (<a href>) are fine.
-EXTERNAL_RES = (
-    re.compile(r"""\bsrc\s*=\s*["']?\s*(?:https?:)?//""", re.IGNORECASE),
-    re.compile(r"""<link\b[^>]*\bhref\s*=\s*["']?\s*(?:https?:)?//""", re.IGNORECASE),
-    re.compile(r"""(?:@import\s+|url\(\s*)["']?\s*(?:https?:)?//""", re.IGNORECASE),
-)
-
-
-class _HtmlText(HTMLParser):
-    """Collect visible text as markdown-like lines, with their source lines.
-
-    Each block element starts a paragraph. List items and table cells become
-    list items. Text inside <svg> <text> elements is collected as labels.
-    """
-
-    def __init__(self):
-        super().__init__(convert_charrefs=True)
-        self.lines, self.labels = [], []
-        self.buf, self.buf_line, self.prefix = [], None, ""
-        self.skip = self.svg = self.svg_text = 0
-        self.label, self.label_line = [], None
-
-    def _flush(self):
-        text = " ".join("".join(self.buf).split())
-        if text:
-            self.lines += [("", self.buf_line), (self.prefix + text, self.buf_line)]
-        self.buf, self.buf_line, self.prefix = [], None, ""
-
-    def handle_starttag(self, tag, attrs):
-        if tag in SKIP_TAGS:
-            self.skip += 1
-        elif tag == "svg":
-            self._flush()
-            self.svg += 1
-        elif self.svg and tag == "text":
-            self.svg_text += 1
-        elif tag in BLOCK_TAGS:
-            self._flush()
-            if tag in ("li", "td", "th"):
-                self.prefix = "- "
-
-    def handle_startendtag(self, tag, attrs):
-        if tag in BLOCK_TAGS:
-            self._flush()
-
-    def handle_endtag(self, tag):
-        if tag in SKIP_TAGS:
-            self.skip = max(0, self.skip - 1)
-        elif tag == "svg":
-            self.svg = max(0, self.svg - 1)
-        elif self.svg and tag == "text":
-            self.svg_text = max(0, self.svg_text - 1)
-            label = " ".join("".join(self.label).split())
-            if label:
-                self.labels.append((label, self.label_line))
-            self.label, self.label_line = [], None
-        elif tag in BLOCK_TAGS:
-            self._flush()
-
-    def handle_data(self, data):
-        if self.skip:
-            return
-        line = self.getpos()[0] + data[:len(data) - len(data.lstrip())].count("\n")
-        if self.svg:
-            if self.svg_text:
-                self.label.append(data)
-                self.label_line = self.label_line or line
-            return
-        if data.strip() and self.buf_line is None:
-            self.buf_line = line
-        self.buf.append(data)
-
-
-def _html_to_text(source):
-    """Return (text, line_map, svg_labels). line_map[i] is the source line of
-    text line i + 1."""
-    parser = _HtmlText()
-    parser.feed(source)
-    parser.close()
-    parser._flush()
-    return ("\n".join(t for t, _ in parser.lines),
-            [n or 1 for _, n in parser.lines], parser.labels)
-
-
-def _check_external(source, violations):
-    for pattern in EXTERNAL_RES:
-        for m in pattern.finditer(source):
-            violations.append(_make(
-                "external-request", "error",
-                "the page loads a file from the network; inline it instead",
-                source[m.start():m.start() + 60], source[:m.start()].count("\n") + 1))
-
-
-def _check_label(label, line, cfg, violations, word_subs, phrase_subs, approved_pos):
-    words = len(WORD_RE.findall(label))
-    if words > MAX_LABEL_WORDS:
-        violations.append(_make(
-            "label-length", "error",
-            f"{words} words in a diagram label (max {MAX_LABEL_WORDS})", label[:60], line))
-    _check_sentence(label, dict(cfg, max_sentence_words=float("inf")), violations,
-                    line, word_subs, phrase_subs, approved_pos)
-
-
-def lint_label(label, profile="chat", cache=None, custom=None):
-    """Lint one diagram label: the word rules and the label length limit."""
-    cfg = PROFILES.get(profile, PROFILES["chat"])
-    word_subs, phrase_subs, approved_pos = _effective_maps(
-        _DEFAULT_CACHE if cache is None else cache,
-        _DEFAULT_CUSTOM if custom is None else custom)
-    violations = []
-    _check_label(label.replace("’", "'"), None, cfg, violations,
-                 word_subs, phrase_subs, approved_pos)
-    passed = not any(v["severity"] == "error" for v in violations)
-    return {"passed": passed, "profile": profile, "violations": violations}
-
-
-def lint(text, profile="chat", cache=None, custom=None, fmt="markdown"):
+def lint(text, profile="chat", cache=None, custom=None):
     cfg = PROFILES.get(profile, PROFILES["chat"])
     if cache is None:
         cache = _DEFAULT_CACHE
@@ -700,25 +520,14 @@ def lint(text, profile="chat", cache=None, custom=None, fmt="markdown"):
 
     # Normalize curly apostrophes so contractions match regardless of source.
     text = text.replace("’", "'")
-    line_map = None
-    if fmt == "html":
-        _check_external(text, violations)
-        text, line_map, labels = _html_to_text(text)
-        format_rules = False
-    else:
-        labels = [hit for block, first in _mermaid_blocks(text)
-                  for hit in mermaid_labels(block, first)]
-        open_line = _unclosed_fence(text)
-        if open_line:
-            # The rest of the text would be skipped as code, unchecked.
-            violations.append(_make(
-                "unclosed-code-fence", "error",
-                "this code fence never closes, so the text after it is not checked",
-                text.split("\n")[open_line - 1].strip()[:60], open_line))
-        text = _strip_code(text)
-        format_rules = cfg["format_rules"]
-    for label, line in labels:
-        _check_label(label, line, cfg, violations, word_subs, phrase_subs, approved_pos)
+    open_line = _unclosed_fence(text)
+    if open_line:
+        # The rest of the text would be skipped as code, unchecked.
+        violations.append(_make(
+            "unclosed-code-fence", "error",
+            "this code fence never closes, so the text after it is not checked",
+            text.split("\n")[open_line - 1].strip()[:60], open_line))
+    text = _strip_code(text)
 
     body = []
     if ";" in text:
@@ -738,11 +547,8 @@ def lint(text, profile="chat", cache=None, custom=None, fmt="markdown"):
         for sentence in sentences:
             _check_sentence(sentence, cfg, body, line, word_subs, phrase_subs, approved_pos)
 
-    if format_rules:
+    if cfg["format_rules"]:
         _check_format(text, body)
-    if line_map:
-        for v in body:
-            v["line"] = line_map[v["line"] - 1]
     violations += body
 
     passed = not any(v["severity"] == "error" for v in violations)
@@ -754,12 +560,10 @@ def main(argv=None):
     ap.add_argument("--profile", choices=sorted(PROFILES), default="chat")
     ap.add_argument("--pretty", action="store_true")
     ap.add_argument("--text", help="lint this string instead of stdin")
-    ap.add_argument("--format", choices=("markdown", "html"), default="markdown",
-                    help="html: check only the visible text of a page")
     args = ap.parse_args(argv)
 
     text = args.text if args.text is not None else sys.stdin.read()
-    result = lint(text, profile=args.profile, fmt=args.format)
+    result = lint(text, profile=args.profile)
     print(json.dumps(result, indent=2 if args.pretty else None))
     return 0 if result["passed"] else 1
 

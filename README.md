@@ -28,15 +28,6 @@ gate.
 - `/clear-answer:rewrite` — rewrite text into plain English with a before/after.
 - `/clear-answer:init` — add the Clear Answer rules to the project's CLAUDE.md.
 - `/clear-answer:explain` — explain a topic as one plain-English reply.
-- `/clear-answer:explain:diagram` — explain a topic as a Markdown file with a
-  Mermaid diagram.
-- `/clear-answer:explain:html` — explain a topic as a self-contained HTML page
-  in the Stayux design system, light and dark.
-
-  For the two file commands, Claude fills named blanks in a small content file
-  (`<topic>.clear.txt`). `scripts/explain_build.py` checks each blank with the
-  linter and builds the file, the diagram, and the Stayux Clear Answer footer.
-  The dialogue shows only a link to the file.
 
 It also loads automatically when you ask for a clear answer, plain English, or STE.
 
@@ -158,16 +149,7 @@ Advisory (warnings that never fail the gate):
 - Noun-only words used as verbs (`Test the software` becomes `Do a test of the
   software`, Issue 9)
 
-Text inside code fences and inline code is skipped, except Mermaid diagrams.
-
-Diagrams and HTML pages:
-- Mermaid labels (nodes, edges, sequence messages) get the word rules, and a
-  label of more than 8 words is an error (`label-length`). The limit of 8 is our
-  own number.
-- `ste_lint.py --format html` checks only the visible text of a page. It skips
-  the head, scripts, styles, and code. SVG `<text>` is checked as labels.
-- A page that loads a script, style, font, or image from the network fails
-  (`external-request`). Links to other pages are fine.
+Text inside code fences, inline code, and HTML tags is skipped.
 
 Chat format warnings (prose mode only). These are not STE rules. Each one has a
 style-guide source:
@@ -210,9 +192,7 @@ Commands, all under the `/clear-answer:` namespace:
 - `/clear-answer:check`: check a file or text and report the violations.
 - `/clear-answer:rewrite`: rewrite text with a before and after.
 - `/clear-answer:init`: add the rules to the project's CLAUDE.md.
-- `/clear-answer:explain`, `/clear-answer:explain:diagram`,
-  `/clear-answer:explain:html`: explain a topic as a reply, a diagram file, or
-  an HTML page.
+- `/clear-answer:explain`: explain a topic as one plain-English reply.
 
 The plugin also loads automatically when you ask for a clear answer, plain
 English, or STE. See the skill at
@@ -359,8 +339,6 @@ ways:
   4. [Rewrite a document](docs/tutorials/04-rewrite-a-document.md)
   5. [Repo and Desktop setup](docs/tutorials/05-init-and-desktop.md)
   6. [Add your own words with a project dictionary](docs/tutorials/06-custom-dictionary.md)
-  11. [Explain a topic with a diagram](docs/tutorials/11-explain-diagram.md)
-  12. [Explain a topic as an HTML page](docs/tutorials/12-explain-html.md)
   7. [Codex CLI](docs/tutorials/07-codex.md) (untested)
   8. [Cursor](docs/tutorials/08-cursor.md) (untested)
   9. [Gemini CLI](docs/tutorials/09-gemini-cli.md) (untested)
