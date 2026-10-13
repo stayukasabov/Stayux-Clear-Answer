@@ -4,380 +4,149 @@
 
 # Stayux Clear Answer
 
-**Clear Answer** makes Claude reply in short, plain English, both in the dialogue
-and on your documents. It is a **plain-English and technical-clarity linter**,
-**compatible with Simplified Technical English (ASD-STE100)**. The shipped rules
-and word list are original, aligned with the Google (CC BY 4.0) and Microsoft
-style guides; **bring your own** official ASD-STE100 copy for full conformance. On
-Claude Code it is a bundle of `/clear-answer:` commands plus an auto-loading
-skill; on Desktop it is a single uploaded skill. A fast,
-deterministic, zero-dependency Python linter sits at its core as the pass/fail
-gate.
-
-## Usage
-
-**On Claude Code** (slash commands, all under the `/clear-answer:` namespace):
-
-- `/clear-answer:on` — turn Clear Answer mode on; every reply comes back in short,
-  plain English, gated by the linter.
-- `/clear-answer:off` — turn it off and return to normal prose.
-- `/clear-answer:mode off|prose|strict` — set strictness: `prose` uses the chat
-  profile, `strict` the full document profile.
-- `/clear-answer:check` — check a file or pasted text and report the violations; no
-  rewrite.
-- `/clear-answer:rewrite` — rewrite text into plain English with a before/after.
-- `/clear-answer:init` — add the Clear Answer rules to the project's CLAUDE.md.
-- `/clear-answer:explain` — explain a topic as one plain-English reply.
-
-It also loads automatically when you ask for a clear answer, plain English, or STE.
-
-**On Claude Desktop** (no slash commands; you turn it on and off with words):
-
-- Turn on — say "clear answer on", "reply in STE", or "reply in plain English".
-  Off by default until you ask.
-- Strict document style — ask for the "full" profile (sentences of 20 words or
-  fewer).
-- Turn off — say "clear answer off", "reply in normal prose", or "stop the plain
-  English".
-
-## Two ways to use it
-
-**1. Optimize the model's output, in the dialogue.**
-For product managers, designers, and anyone who wants less verbose answers. Turn
-Clear Answer mode on and Claude writes its replies in short, clear, controlled
-English. One install, then `/clear-answer:on`.
-
-**2. Produce clearer documentation, on your own content.**
-For developers and technical writers. Check, rewrite, and standardize technical
-docs with `/clear-answer:check`, `/clear-answer:rewrite`, and `/clear-answer:init`. A Desktop and API build
-brings the same to non-developers.
-
-Both share one core: a **Claude Code plugin** (the `clear-*` commands) and a
-**zero-dependency Python linter** with a curated dictionary that act as the
-objective pass/fail gate.
+Clear Answer makes Claude write in plain English with short sentences. A Python
+linter checks every answer before you see it, so the rules hold every time. It is
+compatible with Simplified Technical English (ASD-STE100).
 
 > **Unofficial.** Not affiliated with or endorsed by ASD. See [NOTICE](NOTICE).
 > "Simplified Technical English" and "ASD-STE100" are trademarks of ASD
 > (EUTM 017966390). This tool does not include or download ASD's copyrighted
 > dictionary.
 
-## Contents
+## Quick start
 
-- [Usage](#usage): [Claude Code](#usage) commands and [Claude Desktop](#usage)
-- [Two ways to use it](#two-ways-to-use-it)
-- [Why](#why), and the [token economy](#token-economy-measured)
-- [What it checks](#what-it-checks)
-- [Install](#install): [Claude Code](#claude-code-plugin), [Claude Desktop](#claude-desktop-download-the-skill)
-- [Before and after](#before-and-after)
-- [The linter directly](#the-linter-directly)
-- [The dictionary](#the-dictionary)
-- [Documentation](#documentation)
-- [Roadmap](#roadmap)
-- [License](#license)
-
-## Why
-
-Most STE helpers are LLM-only: they load the rule set (and often a dictionary
-reference) into the model's context and reason over it every turn. This project
-moves the deterministic rules **and the substitution dictionary into Python**.
-The model never holds them in context. It calls the linter as a subprocess and
-reads back a small pass/fail result. So the rules and the dictionary cost **no
-model-context tokens**, and the dictionary can grow toward the full standard
-without adding any context cost. The AI layer only handles the judgment rules on
-top.
-
-To be precise about what *does* cost tokens: turning the skill on loads
-`SKILL.md` once. Each lint pass also costs output tokens, because Claude sends
-the full draft to the linter and then sends the final text as the reply. So the
-gate writes the answer at least twice. The part that scales, the rules and the
-~900-word-scale dictionary, stays out of context.
-
-### Token economy (measured)
-
-Context counts use the `o200k_base` BPE tokenizer as a proxy for Claude's, which
-is not public, so treat them as approximate, not exact.
-
-| Item | Tokens | In model context? |
-|---|---:|---|
-| `clear-write` skill body, when it loads | ~900 | yes |
-| Lint result, clean pass | ~50 | yes (per check) |
-| Lint result, many violations | ~270 | yes (per failing check) |
-| Draft sent to the linter | about the length of the answer | yes (output, per check) |
-| Rule engine + dictionary + rules reference | ~3,455 | **no** (read by Python) |
-
-Output tokens per answer, from the benchmark pilot (`docs/benchmark.md`):
-
-| Task | Model | Off | On | Change |
-|---|---|---:|---:|---:|
-| Chat (c1) | Haiku | 594 | 892 | +50% |
-| Chat (c1) | Sonnet | 567 | 859 | +51% |
-| Procedure (d1) | Haiku | 2,290 | 1,499 | -35% |
-| Procedure (d1) | Sonnet | 1,524 | 1,490 | -2% |
-
-The gate costs extra output tokens for each lint pass. Gated answers are also
-more compact, so for long answers the total can stay level or fall. These are
-single runs, so treat them as an indication, not an average.
-
-The last row is the point: that material never enters the context window. An
-LLM-only skill would load and reason over the equivalent every turn.
-
-Claude Code reports its own projection. Run `claude plugin details clear-answer`: it
-shows about 429 tokens always-on for the whole plugin (every command and skill
-description, so Claude knows when to use each), plus an on-invoke cost each time a
-command fires (for example `/clear-answer:on` about 400, `/clear-answer:check` about 320). Those are
-estimates too. They measure a different thing from the table above: the always-on
-figure is all seven descriptions loaded up front, while the table is one flow, a
-skill body plus its lint round-trips.
-
-## What it checks
-
-Deterministic rules (errors fail the gate):
-- Sentence length (chat ≤ 25 words, full ≤ 20)
-- Paragraph length (≤ 6 sentences; lists and table cells parsed separately)
-- Semicolons (banned)
-- Unclosed code fences (the text after one would not be checked)
-- Contractions (`don't` becomes `do not`)
-- Progressive tense (`is running`) and perfect tense (`has done`)
-
-Advisory (warnings that never fail the gate):
-- Passive voice, phrasal verbs
-- Joined imperatives (one instruction per sentence: no `and`/`then`)
-- Unapproved words, with a suggested plain-English swap (curated seed map)
-- Wordiness and filler phrases (for example "it is important to note that"),
-  seeded from the FOSS prose linters write-good and proselint
-- Words removed from the ASD-STE100 word list (Issue 9)
-- Noun-only words used as verbs (`Test the software` becomes `Do a test of the
-  software`, Issue 9)
-
-Text inside code fences, inline code, and HTML tags is skipped.
-
-Chat format warnings (prose mode only). These are not STE rules. Each one has a
-style-guide source:
-
-| Rule | Check | Source |
-|---|---|---|
-| bold-overuse | More than 2 bold spans in a reply | GOV.UK style guide, Google developer style guide. The limit of 2 is our own number. |
-| header-in-short-reply | A header in a reply under 150 words | Microsoft Style Guide, Headings. The 150-word threshold is our own number. |
-| bullet-overuse | A bullet list of 1 item or more than 7 items | Microsoft Style Guide, Lists. Google developer style guide, Lists. |
-| filler-opener | The reply opens with filler ("Great question") | Microsoft Style Guide, "Get to the point fast" |
-| filler-closer | The reply ends with filler ("I hope this helps") | Microsoft Style Guide, "Prune every excess word" |
-
-Prose mode is the "80% STE" that Andrej Karpathy describes: the core STE rules,
-with sentences of up to 25 words. Strict mode is the document standard. Neither
-mode is a score.
-
-## Install
-
-Pick your client. Claude Code installs the plugin; Claude Desktop downloads the
-skill.
-
-### Claude Code (plugin)
-
-The repo doubles as a plugin marketplace:
+In Claude Code:
 
 ```
 /plugin marketplace add stayukasabov/Stayux-Clear-Answer
 /plugin install clear-answer@stayux-clear
 ```
 
-Update later with `/plugin update clear-answer`, then restart Claude Code to apply.
+Then explain a topic, or turn the mode on for the whole conversation:
 
-Commands, all under the `/clear-answer:` namespace:
-
-- `/clear-answer:on`, `/clear-answer:off`: turn Clear Answer dialogue mode on or
-  off. While on, the assistant drafts each reply, gates it through the linter, and
-  rewrites until it passes.
-- `/clear-answer:mode off|prose|strict`: set strictness (prose uses the chat
-  profile, strict uses the full profile).
-- `/clear-answer:check`: check a file or text and report the violations.
-- `/clear-answer:rewrite`: rewrite text with a before and after.
-- `/clear-answer:init`: add the rules to the project's CLAUDE.md.
-- `/clear-answer:explain`: explain a topic as one plain-English reply.
-
-The plugin also loads automatically when you ask for a clear answer, plain
-English, or STE. See the skill at
-[`skills/clear-write/SKILL.md`](skills/clear-write/SKILL.md).
-
-### Claude Desktop (download the skill)
-
-No build needed. You download the ready skill and upload it once:
-
-1. Download `stayux-clear-answer.zip` from the
-   [latest release](https://github.com/stayukasabov/Stayux-Clear-Answer/releases/latest).
-2. In Claude Desktop or claude.ai, open **Settings > Capabilities > Skills** and
-   upload the zip, then enable it.
-3. Ask Claude for a clear answer, for example "reply in plain English" or
-   "reply in STE".
-4. Turn it off with words when you are done: "clear answer off" or "reply in
-   normal prose". Desktop has no slash commands, so on and off are both spoken.
-
-Custom skills need code execution, on the Pro, Max, Team, or Enterprise plans.
-Full notes are in [`desktop/README.md`](desktop/README.md).
-
-## Before and after
-
-The same question, answered with the skill off (Claude's normal prose) and on.
-
-**You:** The API returns 502 sometimes right after a deploy. What should I check?
-
-**Clear Answer off (default):**
-
-> Intermittent 502s just after a deploy usually mean traffic reaches new
-> instances before they are ready to serve it, so the first thing I would look
-> at is your readiness checks and whether they genuinely reflect when the app
-> can handle requests. Beyond that, it is worth confirming that the load
-> balancer drains connections from the old instances gracefully during the
-> rollout, and it can also help to review the logs from the first few seconds
-> after each deploy, since that window is where this kind of race condition
-> tends to show up.
-
-**Clear Answer on:**
-
-> Check three things.
-> 1. Readiness probes. Confirm they pass only when the app can serve requests.
-> 2. Connection draining. Make sure the load balancer removes old pods before it stops them.
-> 3. Deploy timing. Look at the logs from the first 30 seconds after each rollout.
-
-Same information. The Clear Answer reply is shorter, scannable, and faster to act on.
-
-**You:** When should I use a modal instead of a full page for a form?
-
-**Clear Answer off (default):**
-
-> It depends on the length and importance of the task, but the rule of thumb is
-> that modals are best for short, focused interactions where you don't want to
-> lose the context behind them, whereas full pages are better when there's more
-> going on. If the form is only a few fields and the user can finish quickly, a
-> modal keeps them in flow and avoids a jarring navigation. If the form is long,
-> has multiple steps, needs scrolling, or holds work the user could lose, a full
-> page is usually safer, since modals aren't great for anything the user might
-> want to save or come back to. You should also think about mobile, where modals
-> feel cramped, and accessibility, where full pages are more forgiving.
-
-**Clear Answer on:**
-
-> Use a modal for a short task. Use a full page for a long task.
-> 1. Fields. Use a modal for five fields or fewer.
-> 2. Focus. Use a modal when the user does one small task.
-> 3. Context. Use a modal when the user must see the page behind it.
-> 4. Length. Use a full page when the page needs a scroll.
-> 5. Steps. Use a full page when the task has more than one step.
-> 6. Loss. Do not put work the user can lose in a modal.
-> 7. Phone. Use a full page on a small screen.
-
-Same decision, laid out as rules you can check one by one.
-
-## The linter directly
-
-The gate reads text on stdin (or `--text`) and prints a JSON result, exiting 1
-if any error-severity violation is found:
-
-```bash
-echo "Commence the repair prior to the test." | python3 scripts/ste_lint.py --pretty
-python3 scripts/ste_lint.py --profile full --text "Your sentence here."
+```
+/clear-answer:explain How does a CDN work?
+/clear-answer:on
 ```
 
-Run the tests:
+On Claude Desktop or claude.ai, see [Install](#install).
 
-```bash
-python3 -m unittest discover -s tests
-```
+## Commands
 
-## The dictionary
+| Command | What it does |
+|---|---|
+| `/clear-answer:explain <topic>` | Explains a topic in a fixed structure: the answer, the parts, the steps, and the limits. |
+| `/clear-answer:on`, `/clear-answer:off` | Every reply in plain English, checked by the linter, until you turn it off. |
+| `/clear-answer:mode prose\|strict` | `prose` allows sentences of 25 words. `strict` allows 20, for manuals and procedures. |
+| `/clear-answer:check <file>` | Reports the problems in a document. It does not change the file. |
+| `/clear-answer:rewrite <file>` | Rewrites a document and shows the before and after. |
+| `/clear-answer:init` | Adds the Clear Answer rules to the project's `CLAUDE.md`, for the whole team. |
 
-The linter bundles a small, hand-authored **substitution map**
-(`scripts/ste_dictionary.py`). It maps common non-STE words and phrases to plain
-replacements, and lists terms removed from the standard. Every entry is tagged by
-provenance so the seed is auditable: **[Issue 9]** verified against a local
-ASD-STE100 copy, **[Google style]** from the Google Developer Documentation Style
-Guide word list (CC BY 4.0, used with attribution), and **[plain-English]**
-general style advice. The wordiness phrases come from write-good and proselint.
+## Example
 
-It is **not** the official ~900-word list, which is copyrighted. Extend it three
-ways:
-- Drop a **`.ste-dict.txt`** in your project. It is a plain word list the linter
-  reads automatically, no code edit and no dependency:
+`/clear-answer:explain How does a CDN work?` gave this (first part of a real run
+with Claude Sonnet):
 
-  ```
-  # Acme project terms
-  bolt = fastener      # flag "bolt", suggest "fastener"
-  as per = by          # multiword left side is a phrase swap
-  widget               # a bare word is approved: never flag it
-  file (v) = remove    # flag "file" only as a verb, not the noun
-  ```
+> A CDN is a network of servers placed in many places around the world. It keeps
+> copies of your content close to your users. This makes pages load faster and
+> lowers the load on your main server.
+>
+> **The parts**
+>
+> - The origin server holds the original content of the site.
+> - The edge servers are the CDN computers that sit near users and store copies of the content.
+> - The DNS or routing system sends each user to a nearby edge server.
 
-  Custom entries win over the seed and the official cache, so this is where
-  company technical names and verbs go.
-- Add your own entries (including company technical terms) to
-  `scripts/ste_dictionary.py`.
-- Point the importer at **your own** official ASD-STE100 copy:
+Every explanation has the same structure, so readers know where to look. The
+full output is in [tutorial 2](docs/tutorials/02-explain.md).
 
-  ```
-  python3 scripts/ste_import.py path/to/your-ste.pdf
-  ```
+## How it saves effort
 
-  This parses your copy into a git-ignored `cache/official.json` (approved words
-  and substitutions). When that cache is present, the linter uses it: it adds the
-  official substitutions and stops flagging any word the standard actually
-  approves. The official data is read from disk, never shipped or committed, and
-  costs no model-context tokens. Needs `pdftotext` for a PDF, or pass an already
-  extracted `.txt`.
+**For the model.** The rules and the dictionary run in Python, outside Claude's
+context. Claude sends its draft to the linter and reads back a short result.
 
-  The cache keeps the part of speech and every approved alternative of each
-  entry, as the standard does ("use 'make sure' or 'measure' or 'examine'").
-  The importer reads only dictionary entries, not the change log or the summary
-  tables. If you imported your copy before version 0.7.1, run the import again. An older
-  cache still works, but it skips noun uses of its entries.
+| Item | Tokens | In Claude's context? |
+|---|---:|---|
+| Rules, dictionary, word tagger, and rule reference | about 9,700 | **no** |
+| Skill text, when it loads | about 1,000 | yes, once |
+| Lint result | 50 to 270 | yes, per check |
+| Draft sent to the linter | about the length of the answer | yes, per check |
+
+The token counts are estimates (characters divided by 4). Your imported official
+dictionary also stays outside the context.
+
+The check is not free. Claude writes the draft for the linter and then the final
+text. In a real run, the checked answer used about 50% more output tokens than
+the same answer without the check (1,640 against 1,082). For long procedures, the checked answer is
+shorter, so the total can stay level or fall. See [the benchmark](docs/benchmark.md).
+
+**For the people who read it.** In that run, the checked answer had 262 words
+instead of 443, in numbered steps. Clear Answer helps with work in these ways:
+
+- Readers find the answer faster and act on one step at a time.
+- Non-native readers and translation tools read short, simple sentences more
+  easily. That is the purpose of the STE standard.
+- `/clear-answer:init` gives the whole team the same rules in every session.
+- A commit hook or a CI step runs the same linter on your documents, so unclear
+  text does not get in. See [tutorial 7](docs/tutorials/07-team-and-checks.md).
+
+**Why a check is better than a prompt.** A prompt asks the model to remember the
+rules. The linter checks every answer. Published STE cheat sheets have errors,
+and a model that follows them repeats the errors. For example, one cheat sheet
+says that TEST is an approved verb, but ASD-STE100 Issue 9 approves TEST as a
+noun only. The linter has the correct rule, and a test for it
+(`tests/test_cheat_sheet.py`).
+
+## What it checks
+
+| Errors (the answer must be fixed) | Warnings (advice) |
+|---|---|
+| Sentences over 25 words (20 in strict mode) | Passive voice and phrasal verbs |
+| Paragraphs over 6 sentences | Two instructions in one sentence |
+| Semicolons and contractions | Words that STE does not approve, by part of speech, with the approved options |
+| Progressive tense ("is running") and perfect tense ("has done") | Wordy phrases ("in order to") |
+| A code block that does not close | Chat style: too much bold, a header in a short reply, filler openers and closers |
+
+Code, inline code, and HTML tags are not checked. Tables and lists are checked
+item by item. The chat style warnings are not STE rules. Each one comes from a
+public style guide (GOV.UK, Google, Microsoft).
+
+Prose mode is close to the "80% STE" that Andrej Karpathy describes. Strict mode
+follows the document rules of the standard.
+
+## Install
+
+**Claude Code:** see [Quick start](#quick-start). Update later with
+`/plugin update clear-answer`, then start a new session.
+
+**Claude Desktop and claude.ai:** download `stayux-clear-answer.zip` from the
+[latest release](https://github.com/stayukasabov/Stayux-Clear-Answer/releases/latest).
+Upload it in **Settings > Capabilities > Skills**, and turn on code execution.
+Then say "clear answer on" in a chat. See [tutorial 6](docs/tutorials/06-desktop.md).
+
+**Other agents:** Codex, Cursor, Gemini CLI, and Copilot can use the same rules
+and linter. See [tutorial 8](docs/tutorials/08-other-agents.md).
+
+The linter needs Python 3.9 or later. It has no other dependencies.
+
+## Dictionaries
+
+The plugin ships a small word list of its own. It does not include the official
+ASD-STE100 dictionary, which is copyrighted. You can add two more layers:
+
+- Your own words, in a `.ste-dict.txt` file in your project.
+- Your own copy of the official dictionary, imported into a private local cache.
+
+See [tutorial 5](docs/tutorials/05-dictionaries.md).
 
 ## Documentation
 
-- **Tutorials** ([`docs/tutorials/`](docs/tutorials/README.md)), with worked,
-  run-verified examples:
-  1. [Install the plugin](docs/tutorials/01-install.md)
-  2. [Get clear answers in the dialogue](docs/tutorials/02-dialogue-mode.md)
-  3. [Check a document](docs/tutorials/03-check-a-document.md)
-  4. [Rewrite a document](docs/tutorials/04-rewrite-a-document.md)
-  5. [Repo and Desktop setup](docs/tutorials/05-init-and-desktop.md)
-  6. [Add your own words with a project dictionary](docs/tutorials/06-custom-dictionary.md)
-  7. [Codex CLI](docs/tutorials/07-codex.md) (untested)
-  8. [Cursor](docs/tutorials/08-cursor.md) (untested)
-  9. [Gemini CLI](docs/tutorials/09-gemini-cli.md) (untested)
-  10. [VS Code with GitHub Copilot](docs/tutorials/10-vscode-copilot.md) (untested)
-- **Other agents:** [`prompts/AGENTS.md`](prompts/AGENTS.md) is the gated
-  instructions file for agents that run shell commands.
-  [`prompts/system-prompt.md`](prompts/system-prompt.md) has the same rules
-  without the gate, for tools that cannot run Python.
-- **Claude Desktop guide**: [`desktop/README.md`](desktop/README.md)
-- **STE rule reference**: [`references/writing-rules.md`](references/writing-rules.md)
-- **The skill**: [`skills/clear-write/SKILL.md`](skills/clear-write/SKILL.md)
-- **Downloads**: [latest release](https://github.com/stayukasabov/Stayux-Clear-Answer/releases/latest)
-- **Legal**: [LICENSE](LICENSE), [NOTICE](NOTICE)
-
-## Why a gate beats a prompt
-
-A prompt asks the model to remember the rules. A gate checks the output against
-them. The STE cheat sheet shared with Karpathy's post shows the risk. An
-[analysis by Max Nardit](https://max.nardit.com/articles/karpathy-understanding-llm-outputs)
-found errors in it, and a model that follows the cheat sheet repeats them.
-
-| Cheat sheet | ASD-STE100 Issue 9 | Clear Answer linter |
-|---|---|---|
-| "approximately" is not approved | APPROXIMATELY (adv) is approved | No warning |
-| TEST is an approved verb | TEST is a noun only. Write "Do a functional test of the software." | Warns on "Test the software" |
-| "in order to" is a dictionary entry | No such entry | Wordiness advice only, not a dictionary finding |
-| Use the passive "only when it is necessary" | Use the passive only when the agent is unknown | Warns on every passive, and you decide |
-
-The first three rows have tests in `tests/test_cheat_sheet.py`. The article also lists
-outdated Issue 8 terms in the cheat sheet. Clear Answer uses the Issue 9 terms.
-
-## Roadmap
-
-- [x] Custom / project dictionary loading (a `.ste-dict.txt` merged over the seed)
-- [x] Local official-dictionary parsing (bring your own copy) via
-  `scripts/ste_import.py` into a git-ignored cache
-- [x] Part-of-speech checks: a dictionary entry applies only to its part of
-  speech (`file (v)` flags "file the edge", not "open the file")
-- [ ] Multi-word noun rule (the part-of-speech tagger now makes it possible)
+- [Tutorials](docs/tutorials/README.md): install, explain, dialogue mode, check
+  and rewrite, dictionaries, Desktop, team checks, other agents, and build and
+  update.
+- [Rule reference](references/writing-rules.md)
+- [The skill](skills/clear-write/SKILL.md)
+- [Benchmark pilot](docs/benchmark.md)
 
 ## License
 

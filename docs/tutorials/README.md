@@ -1,45 +1,25 @@
 # Tutorials
 
-Step-by-step guides for Stayux Clear Answer. Each one is short and has a worked
-example you can run.
+Short guides for Stayux Clear Answer. Each one has a real example that you can
+run.
 
-## Before you start
+1. [Install](01-install.md)
+2. [Explain a topic](02-explain.md)
+3. [Clear answers in the dialogue](03-dialogue.md)
+4. [Check and rewrite a document](04-check-and-rewrite.md)
+5. [Dictionaries](05-dictionaries.md)
+6. [Claude Desktop and the API](06-desktop.md)
+7. [Team rules and automatic checks](07-team-and-checks.md)
+8. [Other agents](08-other-agents.md) (untested)
+9. [Build and update](09-build-and-update.md) (for maintainers)
 
-- Claude Code with the plugin installed. See [01-install](01-install.md).
-- Python 3.9 or later on your PATH. The checker uses the standard library only.
+## Examples
 
-## The tutorials
+The folder [`examples/`](examples/) has the real outputs that the tutorials
+show:
 
-1. [Install the plugin](01-install.md)
-2. [Get clear answers in the dialogue](02-dialogue-mode.md)
-3. [Check a document](03-check-a-document.md)
-4. [Rewrite a document](04-rewrite-a-document.md)
-5. [Set up a repo, and use Clear Answer on Desktop](05-init-and-desktop.md)
-6. [Add your own words with a project dictionary](06-custom-dictionary.md)
-
-Other agents (untested, see the note in each page):
-
-7. [Codex CLI](07-codex.md)
-8. [Cursor](08-cursor.md)
-9. [Gemini CLI](09-gemini-cli.md)
-10. [VS Code with GitHub Copilot](10-vscode-copilot.md)
-
-For a chat tool or an API call that cannot run Python, use
-[`prompts/system-prompt.md`](../../prompts/system-prompt.md). It has the rules
-but no gate.
-
-## Example file
-
-[`examples/sample-procedure.md`](examples/sample-procedure.md) is a short, unclear
-draft. Tutorials 3 and 4 use it.
-
-## The commands, at a glance
-
-All commands live under the `/clear-answer:` namespace.
-
-- `/clear-answer:on`, `/clear-answer:off`: turn Clear Answer dialogue mode on or off.
-- `/clear-answer:mode off|prose|strict`: set the strictness.
-- `/clear-answer:check`: check a file or text and report the violations.
-- `/clear-answer:rewrite`: rewrite text into plain English with a before and after.
-- `/clear-answer:init`: add the rules to the project's CLAUDE.md.
-- `/clear-answer:explain`: explain a topic as one plain-English reply.
+- `explain-cdn.md`: `/clear-answer:explain How does a CDN work?`
+- `dialogue-502-off.md` and `dialogue-502-on.md`: the same question with Clear
+  Answer off and on
+- `sample-procedure.md` and `sample-procedure-rewrite.md`: a draft, and its
+  rewrite

@@ -1,95 +1,16 @@
 # Stayux Clear Answer for Claude Desktop and the API
 
-The same writing guard as the Claude Code plugin, packaged so it runs in Claude
-Desktop and through the API. It suits the whole technical-documentation process,
-not only engineers: technical writers, designers, and project managers who want
-compact, clear output from Claude.
+This folder holds the skill text for Claude Desktop, claude.ai, and the API. It
+is the same writing check as the Claude Code plugin, packed as one uploaded
+skill. You turn it on and off with words, because there are no slash commands.
 
-## What it does
+- To install and use it, see
+  [tutorial 6](../docs/tutorials/06-desktop.md).
+- To build the zip, see
+  [tutorial 9](../docs/tutorials/09-build-and-update.md).
 
-It makes Claude write in short, plain English, based on Simplified Technical
-English (STE), a controlled-English standard for exact, unambiguous text. Claude
-drafts a reply, checks it against a bundled Python linter (the pass/fail gate),
-and rewrites until it passes. See the [main README](../README.md) for the token
-economy and the rule set.
-
-## How it differs from the Claude Code version
-
-- **Activation.** Claude Code uses the plugin commands (`/clear-answer:on`, `/clear-answer:off`, `/clear-answer:check`, `/clear-answer:rewrite`, `/clear-answer:init`, `/clear-answer:mode`).
-  Here you turn it on by asking: "reply in plain English", "reply in STE", or
-  "clear answer on". It is off until you ask.
-- **Packaging.** Claude Code loads the skill from a local folder. Desktop and the
-  API load an uploaded skill that runs in a code-execution container, so the
-  files are bundled flat and the linter runs inside that sandbox.
-- **No install on the machine.** The linter is zero-dependency stdlib Python, so
-  the sandbox runs it with no setup.
-
-## Install it (end users, no build)
-
-You do not build anything. You only need the finished `stayux-clear-answer.zip`.
-
-1. Download `stayux-clear-answer.zip` from the repository
-   [Releases](https://github.com/stayukasabov/Stayux-Clear-Answer/releases).
-2. In Claude Desktop or claude.ai, open **Settings > Capabilities > Skills**
-   (also shown as Settings > Features).
-3. **Upload** the zip, then enable the skill.
-4. In a chat, ask Claude for a clear answer. Ask for the "full" profile when you
-   want strict document style (sentences of 20 words or fewer).
-5. Continue as normal. Claude keeps replies short and plain until you turn it off.
-6. Turn it off with words, the same way you turned it on. Say "clear answer off",
-   "reply in normal prose", or "stop the plain English". Claude then returns to
-   its normal voice.
-
-Custom skills need code execution enabled. They are available on the Pro, Max,
-Team, and Enterprise plans.
-
-## Build the zip (maintainers)
-
-End users do not need this. It rebuilds the release asset. From the repository
-root:
-
-```bash
-bash build-desktop-skill.sh
-# writes dist/stayux-clear-answer/ and dist/stayux-clear-answer.zip
-```
-
-The bundle is flat, as the container expects:
-
-```
-stayux-clear-answer/
-├── SKILL.md
-├── ste_lint.py
-├── ste_dictionary.py
-└── writing-rules.md
-```
-
-Upload `dist/stayux-clear-answer.zip` as a custom skill (via the API `/v1/skills` endpoint,
-or attach it to a GitHub Release for end users), as documented in the
-[Skills guide](https://platform.claude.com/docs/en/build-with-claude/skills-guide).
-Skills require the code execution tool.
-
-## Before and after
-
-The same question, answered with the skill off (normal prose) and on.
-
-**You:** The API returns 502 sometimes right after a deploy. What should I check?
-
-**Clear Answer off (default):**
-
-> Intermittent 502s just after a deploy usually mean traffic reaches new
-> instances before they are ready to serve it, so the first thing I would look
-> at is your readiness checks and whether they genuinely reflect when the app
-> can handle requests. Beyond that, it is worth confirming that the load balancer
-> drains connections from the old instances gracefully during the rollout.
-
-**Clear Answer on:**
-
-> Check three things.
-> 1. Readiness probes. Confirm they pass only when the app can serve requests.
-> 2. Connection draining. Make sure the load balancer removes old pods before it stops them.
-> 3. Deploy timing. Look at the logs from the first 30 seconds after each rollout.
-
-Same information. The Clear Answer reply is shorter, scannable, and faster to act on.
+The skill text is [`SKILL.md`](SKILL.md). The build script copies it, with the
+linter files, into `dist/stayux-clear-answer.zip`.
 
 ## License
 

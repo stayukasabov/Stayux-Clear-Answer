@@ -1,43 +1,72 @@
-# Clear Answer rules: condensed (v1 machine-checkable subset of STE)
+# Clear Answer rules
 
-Source: ASD-STE100 Simplified Technical English (2025 edition, 53 rules +
-~900-word dictionary). This file lists only the rules the v1 linter enforces.
+The rules that the linter (`scripts/ste_lint.py`) checks. They are a
+machine-checkable part of ASD-STE100 Simplified Technical English, plus some chat
+style rules.
 
-| Rule | Profile chat | Profile full | Severity | Notes |
-|------|--------------|--------------|----------|-------|
-| sentence-length | ≤ 25 words | ≤ 20 words | error | STE: procedures ≤20, descriptions ≤25 |
-| paragraph-length | ≤ 6 sentences | ≤ 6 sentences | error | one topic per paragraph |
-| semicolon | banned | banned | error | use separate sentences |
-| contraction | banned | banned | error | expand ("don't" to "do not") |
-| progressive-tense | banned | banned | error | be + -ing (e.g. "is running") |
-| perfect-tense | banned | banned | error | have/has/had + participle |
-| passive-voice | discouraged | discouraged | warning | be + participle; banned in procedures |
-| phrasal-verb | discouraged | discouraged | warning | prefer one verb ("remove" not "take off") |
-| one-instruction | discouraged | discouraged | warning | do not join imperatives with "and"/"then" |
-| unapproved-word | suggest swap | suggest swap | warning | seed map in `scripts/ste_dictionary.py`, plus any `.ste-dict.txt` and official cache |
-| removed-word | flag | flag | warning | term removed from the Issue 9 word list |
+`passed` is true when there is no **error**. Warnings do not stop the answer, but
+fix them when you can.
 
-`passed` is true when there are zero **error** violations. Warnings do not fail
-the gate but should still be fixed when practical.
+## Errors
 
-Bullet and numbered lists are parsed as separate items, not as one paragraph,
-so `paragraph-length` applies to prose paragraphs only.
+| Rule | Prose (chat) | Strict (full) | Notes |
+|---|---|---|---|
+| sentence-length | 25 words or fewer | 20 words or fewer | STE: procedures 20, descriptions 25 |
+| paragraph-length | 6 sentences or fewer | 6 sentences or fewer | one topic for each paragraph |
+| semicolon | not allowed | not allowed | write two sentences |
+| contraction | not allowed | not allowed | write "do not", not "don't" |
+| progressive-tense | not allowed | not allowed | "is running" |
+| perfect-tense | not allowed | not allowed | "has done" |
+| unclosed-code-fence | not allowed | not allowed | the text after it is not checked |
 
-## Deferred to v2
-- **noun-cluster** (≤ 3 nouns): needs POS tagging to tell nouns from verbs and
-  adjectives. The v1 content-word heuristic produced false positives on normal
-  prose, so the rule is removed until the dictionary/POS layer exists.
-- Full approved-word and meaning conformance against the ~900-word official
-  dictionary. The repo ships a curated substitution seed only (see
-  `scripts/ste_dictionary.py`). To widen coverage, run `scripts/ste_import.py` on
-  your own official copy. It writes a git-ignored `cache/official.json`, and each
-  entry keeps its part of speech. `scripts/ste_pos.py` tags each word from its
-  context, but meanings are not checked. A `.ste-dict.txt` in the working
-  directory is merged over the seed and the cache.
-- Procedure-vs-description auto-detection (v1 uses profile choice instead).
-- One-topic-per-paragraph semantic check (LLM judgment, not deterministic).
+## Warnings
+
+| Rule | Notes |
+|---|---|
+| passive-voice | do not use it in instructions |
+| phrasal-verb | use one verb: "remove", not "take off" |
+| one-instruction | do not join two commands with "and" or "then" |
+| unapproved-word | a word that STE does not approve for this part of speech, with the approved options |
+| wordiness | a wordy phrase, such as "in order to" |
+| removed-word | a word that Issue 9 removed from the word list |
+
+Chat style warnings, in prose mode only. They are not STE rules:
+
+| Rule | Check |
+|---|---|
+| bold-overuse | more than 2 bold spans in a reply |
+| header-in-short-reply | a header in a reply of fewer than 150 words |
+| bullet-overuse | a bullet list of 1 item, or of more than 7 items |
+| filler-opener | an opener such as "Great question" |
+| filler-closer | a closer such as "I hope this helps" |
+
+## How the linter reads text
+
+- Code blocks, inline code, HTML tags, and quote markers are not checked as
+  text.
+- Each list item and each table cell is checked on its own.
+- A sentence ends at ".", "!", or "?" followed by a space, so "example.com" stays
+  inside its sentence.
+- Words are checked by their part of speech in the sentence. "file (v)" warns on
+  "file the edge" but not on "open the file".
+
+## Word lists
+
+The linter merges three layers, and a later layer wins:
+
+1. the built-in list in `scripts/ste_dictionary.py`,
+2. your imported official dictionary in `cache/official.json`,
+3. a `.ste-dict.txt` file in the working folder.
+
+## Not checked
+
+- The meaning of a word. STE gives each approved word one meaning.
+- Groups of more than three nouns.
+- Whether a text is a procedure or a description. Choose the profile yourself.
+- One topic for each paragraph.
 
 ## References
+
 - ASD-Europe (official): https://www.asd-europe.org/standards-specifications/simplified-technical-english/
 - ASD-STE100 home: https://www.asd-ste100.org/
 - Wikipedia overview: https://en.wikipedia.org/wiki/Simplified_Technical_English
