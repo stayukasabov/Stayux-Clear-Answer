@@ -92,3 +92,20 @@ steps are a real loss.
 - `claude -p` has no temperature option. Runs on a subscription plan are not exactly repeatable. The raw outputs are saved so that anyone can check the numbers.
 - The results apply to these three Claude models, not to all models.
 - The lint metrics use the same linter that the skill uses as its gate, so they favour the on condition by design. The judge score is the independent check.
+
+## Gate cost cut (0.9.1, 2026-10-13)
+
+Changes: brief lint output (`--brief`), rechecks with only the changed
+sentences, and no extra rule files to read. Real runs with Claude Sonnet, one
+run each, before and after the change:
+
+| Task | Output tokens before | Output tokens after | Cost before | Cost after |
+|---|---:|---:|---:|---:|
+| 502 question, Clear Answer on | 1,640 | 1,558 | $0.246 | $0.238 |
+| `/clear-answer:explain` (CDN) | 1,033 | 954 | $0.197 | $0.198 |
+
+The saving is small, about 5 to 8% of output tokens. In both runs, the first
+check passed, so the smaller rechecks did not apply. Most of the cost is the
+Claude Code context (about 45,000 to 96,000 cached input tokens for each run),
+and the second copy of the answer. The check before the reply needs that copy.
+These are single runs, so treat them as an indication.
