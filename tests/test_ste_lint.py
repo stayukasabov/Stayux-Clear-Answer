@@ -648,5 +648,21 @@ class CommandGateTests(unittest.TestCase):
                 self.assertIn('${CLAUDE_PLUGIN_ROOT}/scripts/ste_lint.py', f.read(), name)
 
 
+class BlockquoteTests(unittest.TestCase):
+    def test_empty_quote_line_splits_paragraphs(self):
+        quote = "\n>\n".join(["> " + " ".join(["Open the valve."] * 4)] * 2)
+        r = ste_lint.lint(quote, cache={}, custom={})
+        self.assertNotIn("paragraph-length", rules(r))
+
+    def test_list_inside_a_quote_is_a_list(self):
+        quote = "\n".join("> - Open the valve." for _ in range(7))
+        r = ste_lint.lint(quote, cache={}, custom={})
+        self.assertNotIn("paragraph-length", rules(r))
+
+    def test_quoted_text_is_still_checked(self):
+        r = ste_lint.lint("> The pump is running.", cache={}, custom={})
+        self.assertIn("progressive-tense", errors(r))
+
+
 if __name__ == "__main__":
     unittest.main()

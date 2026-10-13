@@ -256,6 +256,7 @@ INLINE_CODE_RE = re.compile(r"`[^`\n]+`")
 # An HTML tag in markdown, such as <a href="..." target="_blank">. Only the text
 # between tags is prose; the tag and its attributes are not.
 HTML_TAG_RE = re.compile(r"</?[A-Za-z][A-Za-z0-9-]*(?:\s[^<>\n]*)?/?>")
+QUOTE_RE = re.compile(r"^\s*(?:>\s?)+")
 
 
 def _unclosed_fence(text):
@@ -289,6 +290,9 @@ def _strip_code(text):
             fence = m.group(1)
             out.append("")
         else:
+            # A quote marker is not text: "> - item" is a list item, and ">"
+            # alone is a blank line that ends a paragraph.
+            line = QUOTE_RE.sub("", line)
             out.append(HTML_TAG_RE.sub(" ", INLINE_CODE_RE.sub("code", line)))
     return "\n".join(out)
 
