@@ -2,7 +2,7 @@
 """STE linter: deterministic ASD-STE100 checks (v1, dictionary deferred).
 
 Usage:
-    echo "text" | python3 ste_lint.py [--profile chat|full] [--pretty]
+    echo "text" | python3 ste_lint.py [--profile chat|full] [--pretty | --brief]
 
 Reads text on stdin, prints a JSON result, exits 1 if any *error* violation.
 `passed` is true when there are no error-severity violations (warnings allowed).
@@ -563,12 +563,21 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="STE deterministic linter")
     ap.add_argument("--profile", choices=sorted(PROFILES), default="chat")
     ap.add_argument("--pretty", action="store_true")
+    ap.add_argument("--brief", action="store_true",
+                    help="print PASS, or FAIL and one line for each error (no warnings)")
     ap.add_argument("--text", help="lint this string instead of stdin")
     args = ap.parse_args(argv)
 
     text = args.text if args.text is not None else sys.stdin.read()
     result = lint(text, profile=args.profile)
-    print(json.dumps(result, indent=2 if args.pretty else None))
+    if args.brief:
+        # The short form for the gate: only what Claude must fix, few tokens.
+        print("PASS" if result["passed"] else "FAIL")
+        for v in result["violations"]:
+            if v["severity"] == "error":
+                print(f"{v['line']} {v['rule']} {v['detail']} | {v['text']}")
+    else:
+        print(json.dumps(result, indent=2 if args.pretty else None))
     return 0 if result["passed"] else 1
 
 

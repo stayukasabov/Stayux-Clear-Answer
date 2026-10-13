@@ -664,5 +664,62 @@ class BlockquoteTests(unittest.TestCase):
         self.assertIn("progressive-tense", errors(r))
 
 
+class BriefOutputTests(unittest.TestCase):
+    def run_cli(self, text, *args):
+        return subprocess.run([sys.executable, os.path.join(SKILL_ROOT, "scripts", "ste_lint.py"),
+                               "--brief", *args], input=text, capture_output=True, text=True)
+
+    def test_pass_prints_pass(self):
+        p = self.run_cli("Open the valve.")
+        self.assertEqual(p.stdout.strip(), "PASS")
+        self.assertEqual(p.returncode, 0)
+
+    def test_errors_one_line_each_and_no_warnings(self):
+        p = self.run_cli("Open the valve.\n\nThe pump is running. We utilize it; then stop.")
+        lines = p.stdout.strip().split("\n")
+        self.assertEqual(lines[0], "FAIL")
+        self.assertEqual(p.returncode, 1)
+        body = "\n".join(lines[1:])
+        self.assertIn("3 progressive-tense", body)
+        self.assertIn("3 semicolon", body)
+        self.assertNotIn("utilize", body.split("|")[0])  # the warning rule is not listed
+        self.assertNotIn("unapproved-word", body)
+
+    def test_error_line_names_the_sentence(self):
+        p = self.run_cli("The pump is running.")
+        self.assertIn("| The pump is running.", p.stdout)
+
+    def test_warnings_only_is_a_pass(self):
+        p = self.run_cli("Utilize the tool.")
+        self.assertEqual(p.stdout.strip(), "PASS")
+
+
+class GateCostTests(unittest.TestCase):
+    GATED = ("on", "mode", "explain")
+
+    def read(self, name):
+        with open(os.path.join(SKILL_ROOT, "commands", f"{name}.md")) as f:
+            return f.read()
+
+    def test_gated_commands_use_brief_output(self):
+        for name in self.GATED + ("rewrite",):
+            self.assertIn("--brief", self.read(name), name)
+
+    def test_gated_commands_do_not_read_rule_files(self):
+        for name in self.GATED:
+            text = self.read(name)
+            self.assertNotIn("SKILL.md", text, name)
+            self.assertNotIn("writing-rules.md", text, name)
+
+    def test_gated_commands_share_one_gate_block(self):
+        import re
+        blocks = {name: re.search(r"<!-- gate:start -->.*<!-- gate:end -->", self.read(name), re.S).group(0)
+                  for name in self.GATED}
+        self.assertEqual(len(set(blocks.values())), 1)
+
+    def test_gate_block_rechecks_only_changed_sentences(self):
+        self.assertIn("only the changed sentences", self.read("on"))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -14,7 +14,7 @@ rewrite it into short, plain English (Simplified Technical English).
    delete content.
 2. Lint the rewrite until it passes:
    ```bash
-   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/ste_lint.py" --profile full --pretty <<'EOF'
+   python3 "${CLAUDE_PLUGIN_ROOT}/scripts/ste_lint.py" --profile full --brief <<'EOF'
    <your rewrite>
    EOF
    ```

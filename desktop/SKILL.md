@@ -41,22 +41,20 @@ in a code-execution container. All files sit at the skill root: `SKILL.md`,
 2. Run the draft through the bundled linter with the code execution tool. The
    files are at the skill root, so run:
    ```bash
-   python3 ste_lint.py --profile chat --pretty <<'EOF'
+   python3 ste_lint.py --profile chat --brief <<'EOF'
    <your draft>
    EOF
    ```
    Use `--profile full` for document work. If the working directory differs,
    locate `ste_lint.py` in the skill files and run it from there.
-3. If `passed` is false, fix only the flagged sentences. Split a long sentence
-   into two or more sentences, or rephrase it. Keep every sentence that passed.
-   Do not delete a fact to pass the gate. Run it again. Repeat until `passed` is
-   true. Then check that every fact of the draft is still in the text.
+3. If it prints `FAIL`, each line names an error and its sentence. Fix only
+   those sentences. Split or rephrase them, and do not delete a fact. Run it
+   again with only the changed sentences, or with the whole paragraph after a
+   `paragraph-length` error. Repeat until it prints `PASS`. Then make sure that
+   every fact of the draft is still in the text.
 4. Send only the final compliant text. Do not show the user the linter output or
    the list of violations. This is a rewrite-only guard.
 
-Warnings (passive-voice, phrasal-verb, unapproved-word, removed-word, and the
-chat format warnings) do not fail the gate, but prefer to fix them too. They usually make the text clearer.
-The unapproved-word warning suggests an approved replacement. Apply it.
 
 ## The rules you write by
 
