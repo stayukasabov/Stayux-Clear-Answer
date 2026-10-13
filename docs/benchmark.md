@@ -109,3 +109,28 @@ check passed, so the smaller rechecks did not apply. Most of the cost is the
 Claude Code context (about 45,000 to 96,000 cached input tokens for each run),
 and the second copy of the answer. The check before the reply needs that copy.
 These are single runs, so treat them as an indication.
+
+## Old version against 1.0.0 (2026-10-14)
+
+The live directory version (commit `6691ccd`, 0.1.0) against 1.0.0. Both ran as
+users get them: a clean copy, with no imported official dictionary. Claude
+Sonnet, 2 runs for each task and version, mean values.
+
+| Task | Version | Answer output tokens | Session cost | Words | Lint errors |
+|---|---|---:|---:|---:|---:|
+| Dialogue: 502 question | old | 882 | $0.246 | 192 | 0 |
+| | 1.0.0 | 1,164 | $0.250 | 209 | 0 |
+| Dialogue: API key rotation | old | 692 | $0.178 | 133 | 0 |
+| | 1.0.0 | 1,032 | $0.259 | 186 | 0 |
+| Rewrite the sample procedure | old | 934 | $0.227 | 269 | 4.5 |
+| | 1.0.0 | 966 | $0.151 | 238 | 3.5 |
+| All three tasks | old | 2,690 | $0.650 | | |
+| | 1.0.0 | 3,460 | $0.659 | | |
+
+1.0.0 writes about 29% more output tokens, and the session cost stays about the
+same (+1%). The dialogue answers are longer, because 1.0.0 keeps every fact
+("translation, not summary"). The earlier pilot showed that the old wording
+dropped facts. The rewrite is cheaper in 1.0.0. The lint errors in the rewrite
+rows come from the original text, which the reply quotes in its before-and-after
+view. Two runs for each cell are a small sample, so treat small differences as
+noise.
