@@ -223,5 +223,22 @@ class LayoutTests(unittest.TestCase):
         self.assertIn("'zink' as a noun: use 'different' or 'agree'", details(r, "unapproved-word"))
 
 
+class NoSubprocessTests(unittest.TestCase):
+    # The directory scan holds plugins whose code could run a file. The importer
+    # reads text only; the user runs pdftotext once, by hand.
+    def test_importer_starts_no_program(self):
+        with open(os.path.join(SKILL_ROOT, "scripts", "ste_import.py")) as f:
+            source = f.read()
+        self.assertNotIn("subprocess", source)
+
+    def test_pdf_input_gives_a_clear_message(self):
+        with tempfile.TemporaryDirectory() as d:
+            src = os.path.join(d, "ste.pdf")
+            open(src, "w").close()
+            with self.assertRaises(SystemExit) as cm:
+                ste_import.main([src, "--out", os.path.join(d, "o.json")])
+            self.assertIn("pdftotext -layout", str(cm.exception.code))
+
+
 if __name__ == "__main__":
     unittest.main()

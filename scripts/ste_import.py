@@ -4,8 +4,11 @@
 The official dictionary is copyrighted (all rights reserved) and is never
 committed or downloaded. A user who has their own copy runs this once:
 
-    python3 ste_import.py my-ste.pdf        # writes cache/official.json
-    python3 ste_import.py my-ste.txt        # already-extracted text
+    pdftotext -layout my-ste.pdf my-ste.txt   # Poppler, run by you
+    python3 ste_import.py my-ste.txt          # writes cache/official.json
+
+The importer reads text only and starts no other program, so the plugin's code
+never runs a file.
 
 `ste_lint.py` loads cache/official.json if it is present. The cache stays on
 the user's machine; `.gitignore` covers `cache/` and `*.official.*`.
@@ -20,7 +23,6 @@ import argparse
 import json
 import os
 import re
-import subprocess
 import sys
 
 POS = r"(?:n|v|adj|adv|pron|prep|conj|art|abbr|TN|IV)"
@@ -153,22 +155,19 @@ def write_cache(path, data):
 
 
 def _read_source(src):
-    """Return text from a .txt directly, or a .pdf via pdftotext."""
+    """Return the text of an extracted dictionary. A PDF must be converted first."""
     if src.lower().endswith(".pdf"):
-        try:
-            out = subprocess.run(
-                ["pdftotext", "-layout", src, "-"],
-                check=True, capture_output=True, text=True)
-        except FileNotFoundError:
-            raise SystemExit("pdftotext not found; install poppler or pass a .txt")
-        return out.stdout
+        raise SystemExit(
+            "Convert the PDF to text first, then import the text file:\n"
+            f"  pdftotext -layout \"{src}\" ste.txt\n"
+            "  python3 ste_import.py ste.txt")
     with open(src) as f:
         return f.read()
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Import a local STE dictionary")
-    ap.add_argument("source", help="path to your local .pdf or extracted .txt")
+    ap.add_argument("source", help="path to your extracted text (pdftotext -layout output)")
     ap.add_argument("--out", default=os.path.join("cache", "official.json"),
                     help="cache path (default cache/official.json)")
     args = ap.parse_args(argv)

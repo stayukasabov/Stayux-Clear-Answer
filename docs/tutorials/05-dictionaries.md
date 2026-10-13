@@ -37,12 +37,14 @@ The official ASD-STE100 dictionary is copyrighted, so the plugin does not ship
 it. If you have your own copy as a PDF, import it once:
 
 ```bash
-python3 scripts/ste_import.py path/to/your-ste100.pdf
+pdftotext -layout path/to/your-ste100.pdf ste100.txt
+python3 scripts/ste_import.py ste100.txt
 ```
 
-This writes `cache/official.json` on your computer. Git ignores it, so it is
-never shared. The import needs `pdftotext` (from Poppler) for a PDF. You can
-also give it a text file.
+The first command converts the PDF to text. It needs `pdftotext`, from Poppler.
+The importer reads only the text file, and it starts no other program. It
+writes `cache/official.json` on your computer. Git ignores it, so it is never
+shared.
 
 The import keeps each entry's part of speech and every approved alternative.
 For example, "check" as a verb gets this advice:

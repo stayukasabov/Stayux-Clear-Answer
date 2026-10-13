@@ -36,7 +36,8 @@ Upload the zip as a custom skill to test it (see [tutorial 6](06-desktop.md)).
 After a change to the importer, import your copy again:
 
 ```bash
-python3 scripts/ste_import.py path/to/your-ste100.pdf
+pdftotext -layout path/to/your-ste100.pdf ste100.txt
+python3 scripts/ste_import.py ste100.txt
 ```
 
 ## Release a version
