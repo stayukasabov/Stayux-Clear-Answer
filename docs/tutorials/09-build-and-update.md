@@ -48,9 +48,12 @@ python3 scripts/ste_import.py ste100.txt
 3. Commit, and push to GitHub. Users of the GitHub marketplace get the update
    with `/plugin update clear-answer`.
 4. Attach `dist/stayux-clear-answer.zip` to a GitHub release.
-5. To update the listing in the Anthropic Directory, submit the new version at
-   [platform.claude.com/plugins/submissions](https://platform.claude.com/plugins/submissions).
-   The listing changes after review.
+5. The Anthropic Directory picks up the new version from GitHub. Open the
+   listing in the developer portal at
+   [claude.ai/directory/manage](https://claude.ai/directory/manage), select
+   **Check for new commits**, and select **Publish update** on the new version
+   when it passes. Do not use **Submit new** for an update. The listing changes
+   after an Anthropic reviewer publishes it.
 
 ## Measure the effect
 
